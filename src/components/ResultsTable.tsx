@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowUp, ArrowDown, Youtube } from "lucide-react";
 
 interface ResultsTableProps {
   results: VideoResult[];
@@ -108,6 +108,7 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
                   )}
                 </TableHead>
               ))}
+              <TableHead>Links</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -116,7 +117,15 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
                 <TableCell className="max-w-[200px] truncate" title={result.title}>
                   {result.title}
                 </TableCell>
-                <TableCell>{result.channel}</TableCell>
+                <TableCell>
+                  {result.channelUrl ? (
+                    <a href={result.channelUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                      {result.channel}
+                    </a>
+                  ) : (
+                    result.channel
+                  )}
+                </TableCell>
                 <TableCell>{formatNumber(result.views)}</TableCell>
                 <TableCell>{result.engagement}%</TableCell>
                 <TableCell>{result.viralScore}</TableCell>
@@ -126,6 +135,19 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
                 <TableCell>{formatNumber(result.subscribers)}</TableCell>
                 <TableCell>{result.videoAge}</TableCell>
                 <TableCell>{result.language}</TableCell>
+                <TableCell>
+                  {result.videoUrl && (
+                    <a 
+                      href={result.videoUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="inline-flex items-center text-youtube-red hover:text-red-700"
+                      title="Assistir no YouTube"
+                    >
+                      <Youtube className="h-4 w-4" />
+                    </a>
+                  )}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

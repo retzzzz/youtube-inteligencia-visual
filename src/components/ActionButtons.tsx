@@ -6,6 +6,7 @@ import { Download } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import 'jspdf-autotable';
 import { useState } from "react";
 
 interface ActionButtonsProps {
@@ -44,7 +45,7 @@ const ActionButtons = ({ results }: ActionButtonsProps) => {
     });
     
     try {
-      // Primeiro, capturar os KPIs e gráficos
+      // First, capture the KPIs and graphs
       const dashboardElement = document.getElementById("dashboard-section");
       if (!dashboardElement) {
         throw new Error("Elemento do dashboard não encontrado");
@@ -57,13 +58,13 @@ const ActionButtons = ({ results }: ActionButtonsProps) => {
         logging: false
       });
       
-      // Criar novo PDF
+      // Create new PDF
       const pdf = new jsPDF('l', 'mm', 'a4');
       const imgData = canvas.toDataURL('image/png');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
       
-      // Adicionar imagem do dashboard ao PDF
+      // Add dashboard image to PDF
       pdf.text("Relatório de Análise YouTube", 14, 10);
       pdf.setFontSize(10);
       pdf.text("Data do relatório: " + new Date().toLocaleDateString('pt-BR'), 14, 16);
@@ -71,7 +72,7 @@ const ActionButtons = ({ results }: ActionButtonsProps) => {
       
       pdf.addImage(imgData, 'PNG', 10, 25, pdfWidth - 20, pdfHeight - 20);
       
-      // Adicionar tabela de resultados resumidos
+      // Add summary results table
       pdf.addPage();
       pdf.setFontSize(14);
       pdf.text("Dados Detalhados", 14, 10);
@@ -88,6 +89,7 @@ const ActionButtons = ({ results }: ActionButtonsProps) => {
       pdf.setFontSize(8);
       pdf.text("* Exibindo até 15 resultados", 14, 16);
       
+      // @ts-ignore
       pdf.autoTable({
         startY: 20,
         head: [tableCol],
@@ -100,7 +102,7 @@ const ActionButtons = ({ results }: ActionButtonsProps) => {
         }
       });
       
-      // Salvar PDF
+      // Save PDF
       pdf.save(`youtube-analise-${new Date().toLocaleDateString('pt-BR')}.pdf`);
       
       toast({
@@ -139,3 +141,4 @@ const ActionButtons = ({ results }: ActionButtonsProps) => {
 };
 
 export default ActionButtons;
+

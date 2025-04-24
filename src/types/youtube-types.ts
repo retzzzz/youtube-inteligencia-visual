@@ -1,4 +1,3 @@
-
 export interface YoutubeSearchParams {
   keywords: string;
   searchType: "videos" | "channels" | "playlists";
@@ -9,6 +8,7 @@ export interface YoutubeSearchParams {
   maxSubscribers: number | null;
   period: "7d" | "30d" | "1y" | "all";
   maxResults: number;
+  apiKey?: string;
 }
 
 export interface VideoResult {
@@ -17,6 +17,8 @@ export interface VideoResult {
   thumbnail: string;
   channel: string;
   channelId: string;
+  channelUrl?: string;
+  videoUrl?: string;
   views: number;
   engagement: number;
   viralScore: number;

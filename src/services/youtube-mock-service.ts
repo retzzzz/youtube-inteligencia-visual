@@ -64,8 +64,121 @@ const estimateCPM = (language: string, views: number, engagement: number): numbe
   return Number((baseCPM * engagementMultiplier * viewsAdjustment).toFixed(2));
 };
 
-// Função principal que simula uma busca na API do YouTube
+// Função para buscar dados reais da API do YouTube
+const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<VideoResult[]> => {
+  if (!params.apiKey) {
+    throw new Error("Chave de API do YouTube não fornecida");
+  }
+  
+  // Construir parâmetros de busca
+  const searchParams = new URLSearchParams({
+    part: "snippet",
+    maxResults: params.maxResults.toString(),
+    q: params.keywords,
+    type: params.searchType,
+    key: params.apiKey
+  });
+  
+  // Adicionar filtro de idioma se especificado
+  if (params.language && params.language !== "any") {
+    searchParams.append("relevanceLanguage", params.language);
+  }
+  
+  try {
+    // Fazer solicitação para a API de pesquisa do YouTube
+    const searchResponse = await fetch(
+      `https://www.googleapis.com/youtube/v3/search?${searchParams.toString()}`
+    );
+    
+    if (!searchResponse.ok) {
+      throw new Error(`Erro na API do YouTube: ${searchResponse.status}`);
+    }
+    
+    const searchData = await searchResponse.json();
+    const items = searchData.items || [];
+    
+    // Mapear resultados para o formato esperado
+    const results = await Promise.all(items.map(async (item: any) => {
+      const videoId = item.id.videoId;
+      const channelId = item.snippet.channelId;
+      
+      // Valores padrão
+      let views = randomBetween(params.minViews || 1000, params.maxViews || 10000000);
+      let engagement = randomBetween(1, 15);
+      let subscribers = randomBetween(params.minSubscribers || 100, params.maxSubscribers || 5000000);
+      let videoAge = randomBetween(1, 365);
+      
+      // Tentar obter estatísticas reais para vídeos
+      if (params.searchType === "videos" && videoId) {
+        try {
+          const videoResponse = await fetch(
+            `https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${videoId}&key=${params.apiKey}`
+          );
+          
+          if (videoResponse.ok) {
+            const videoData = await videoResponse.json();
+            const statistics = videoData.items[0]?.statistics;
+            
+            if (statistics) {
+              views = parseInt(statistics.viewCount) || views;
+              engagement = Math.round((parseInt(statistics.likeCount || 0) / Math.max(1, views)) * 100) || engagement;
+            }
+          }
+        } catch (error) {
+          console.warn("Erro ao obter estatísticas do vídeo", error);
+        }
+      }
+      
+      // Calcular métricas
+      const viralScore = calculateViralScore(views, engagement, videoAge);
+      const estimatedCPM = estimateCPM(item.snippet.defaultLanguage || params.language || "en", views, engagement);
+      const estimatedRPM = Number((estimatedCPM * 0.68).toFixed(2));
+      const estimatedEarnings = Number(((views / 1000) * estimatedRPM).toFixed(2));
+      
+      // Construir URLs
+      const videoUrl = videoId ? `https://www.youtube.com/watch?v=${videoId}` : undefined;
+      const channelUrl = channelId ? `https://www.youtube.com/channel/${channelId}` : undefined;
+      
+      return {
+        id: videoId || item.id.channelId || item.id.playlistId || Math.random().toString(36).substring(2, 15),
+        title: item.snippet.title || generateVideoTitle(params.keywords),
+        thumbnail: item.snippet.thumbnails?.high?.url || item.snippet.thumbnails?.default?.url,
+        channel: item.snippet.channelTitle,
+        channelId,
+        channelUrl,
+        videoUrl,
+        views,
+        engagement,
+        viralScore,
+        estimatedCPM,
+        estimatedRPM,
+        estimatedEarnings,
+        subscribers,
+        videoAge,
+        channelDate: new Date(item.snippet.publishedAt).toISOString(),
+        language: item.snippet.defaultLanguage || params.language || "en"
+      };
+    }));
+    
+    return results;
+  } catch (error) {
+    console.error("Erro ao buscar dados do YouTube:", error);
+    throw error;
+  }
+};
+
+// Função principal que simula ou busca dados reais do YouTube
 export const searchYouTubeVideos = async (params: YoutubeSearchParams): Promise<VideoResult[]> => {
+  // Se uma chave de API foi fornecida, tente usar a API real
+  if (params.apiKey && params.apiKey.trim()) {
+    try {
+      return await fetchYouTubeData(params);
+    } catch (error) {
+      console.error("Erro na API do YouTube. Retornando dados simulados:", error);
+      // Se houver erro, retorna para dados simulados
+    }
+  }
+  
   // Simulação de tempo de carregamento da API
   await new Promise(resolve => setTimeout(resolve, 1500));
   
@@ -73,7 +186,7 @@ export const searchYouTubeVideos = async (params: YoutubeSearchParams): Promise<
   const resultCount = params.maxResults || 25;
   
   // Filtrar por idioma se especificado
-  const availableLanguages = params.language ? [params.language] : languages;
+  const availableLanguages = params.language && params.language !== "any" ? [params.language] : languages;
   
   for (let i = 0; i < resultCount; i++) {
     const views = randomBetween(
@@ -104,12 +217,18 @@ export const searchYouTubeVideos = async (params: YoutubeSearchParams): Promise<
     const videoId = Math.random().toString(36).substring(2, 15);
     const channelId = Math.random().toString(36).substring(2, 15);
     
+    // URLs
+    const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+    const channelUrl = `https://www.youtube.com/channel/${channelId}`;
+    
     results.push({
       id: videoId,
       title: generateVideoTitle(params.keywords),
       thumbnail: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
       channel,
       channelId,
+      channelUrl,
+      videoUrl,
       views,
       engagement,
       viralScore,
