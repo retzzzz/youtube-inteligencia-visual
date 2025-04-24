@@ -33,8 +33,9 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
     { id: "estimatedRPM", label: "RPM Est.", sortable: true },
     { id: "estimatedEarnings", label: "Ganhos Est.", sortable: true },
     { id: "subscribers", label: "Inscritos", sortable: true },
-    { id: "videoAge", label: "Idade do Vídeo", sortable: true },
+    { id: "videoAge", label: "Idade", sortable: true },
     { id: "language", label: "Idioma", sortable: true },
+    { id: "id", label: "Vídeo", sortable: false },
   ];
 
   const handleSort = (column: keyof VideoResult) => {
@@ -78,15 +79,15 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
   const formatVideoAge = (days: number) => {
     if (days < 1) {
       const hours = Math.round(days * 24);
-      return `${hours} hora${hours !== 1 ? 's' : ''}`;
+      return `${hours} h`;
     } else if (days < 30) {
-      return `${Math.round(days)} dia${days !== 1 ? 's' : ''}`;
+      return `${Math.round(days)} d`;
     } else if (days < 365) {
       const months = Math.round(days / 30);
-      return `${months} mês${months !== 1 ? 'es' : ''}`;
+      return `${months} m`;
     } else {
       const years = Math.round(days / 365);
-      return `${years} ano${years !== 1 ? 's' : ''}`;
+      return `${years} a`;
     }
   };
 
@@ -104,7 +105,7 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
               {columns.map((column) => (
                 <TableHead 
                   key={column.id} 
-                  className={`whitespace-nowrap ${column.id === 'videoAge' ? 'w-[100px]' : ''}`}
+                  className={`whitespace-nowrap ${column.id === 'videoAge' ? 'w-[60px]' : ''} ${column.id === 'id' ? 'w-[60px] text-center' : ''}`}
                 >
                   {column.sortable ? (
                     <Button
@@ -129,7 +130,6 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
                   )}
                 </TableHead>
               ))}
-              <TableHead className="w-[60px] text-center">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -165,7 +165,7 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
                       className="inline-flex items-center text-youtube-red hover:text-red-700"
                       title="Assistir no YouTube"
                     >
-                      <Youtube className="h-4 w-4" />
+                      <Youtube className="h-5 w-5" />
                     </a>
                   )}
                 </TableCell>

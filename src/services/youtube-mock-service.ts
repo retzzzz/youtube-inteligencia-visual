@@ -1,3 +1,4 @@
+
 import { VideoResult, YoutubeSearchParams } from "@/types/youtube-types";
 
 // Função para gerar um valor aleatório dentro de um intervalo
@@ -49,16 +50,24 @@ const calculateViralScore = (views: number, engagement: number, ageInDays: numbe
 const estimateCPM = (language: string, views: number, engagement: number): number => {
   let baseCPM = 0;
   
-  if (language.startsWith("en")) baseCPM = 4.50;
-  else if (language.startsWith("pt")) baseCPM = 2.20;
-  else if (["de", "fr", "jp"].some(lang => language.startsWith(lang))) baseCPM = 3.80;
-  else baseCPM = 2.00;
+  // CPM base por idioma (valores mais realistas baseados em dados de mercado)
+  if (language.startsWith("en")) baseCPM = 6.50;
+  else if (language.startsWith("pt")) baseCPM = 3.20;
+  else if (language.startsWith("de")) baseCPM = 5.80;
+  else if (language.startsWith("fr")) baseCPM = 5.20;
+  else if (language.startsWith("ja")) baseCPM = 4.80;
+  else if (language.startsWith("es")) baseCPM = 3.80;
+  else baseCPM = 3.00;
   
-  // Ajustar com base no engajamento
-  const engagementMultiplier = 1 + (engagement / 100);
+  // Ajustar com base no engajamento (engajamento maior = maior CPM)
+  const engagementMultiplier = 1 + (engagement / 50);
   
-  // Ajustar com base nas visualizações (canais maiores têm CPMs menores)
-  const viewsAdjustment = views > 1000000 ? 0.85 : views > 100000 ? 0.95 : 1;
+  // Ajustar com base nas visualizações (canais maiores geralmente têm CPMs melhores devido à demanda dos anunciantes)
+  let viewsAdjustment = 1.0;
+  if (views > 1000000) viewsAdjustment = 1.15;
+  else if (views > 500000) viewsAdjustment = 1.1;
+  else if (views > 100000) viewsAdjustment = 1.05;
+  else if (views < 10000) viewsAdjustment = 0.9;
   
   return Number((baseCPM * engagementMultiplier * viewsAdjustment).toFixed(2));
 };
@@ -66,15 +75,15 @@ const estimateCPM = (language: string, views: number, engagement: number): numbe
 // Função para calcular a idade do vídeo baseado no período selecionado
 const calculateVideoAge = (period: YoutubeSearchParams["period"]): number => {
   switch (period) {
-    case "24h": return Math.random(); // Fraction of a day (less than 24 hours)
-    case "48h": return 1 + Math.random(); // Between 1 and 2 days
-    case "72h": return 2 + Math.random(); // Between 2 and 3 days
-    case "7d": return Math.random() * 7; // Up to 7 days
-    case "30d": return Math.random() * 30; // Up to 30 days
-    case "90d": return Math.random() * 90; // Up to 90 days
-    case "180d": return Math.random() * 180; // Up to 180 days
+    case "24h": return randomBetween(1, 24) / 24; // Entre 1 e 24 horas (fração de dia)
+    case "48h": return randomBetween(24, 48) / 24; // Entre 24 e 48 horas
+    case "72h": return randomBetween(48, 72) / 24; // Entre 48 e 72 horas
+    case "7d": return randomBetween(3, 7); // Entre 3 e 7 dias
+    case "30d": return randomBetween(7, 30); // Entre 7 e 30 dias
+    case "90d": return randomBetween(30, 90); // Entre 30 e 90 dias
+    case "180d": return randomBetween(90, 180); // Entre 90 e 180 dias
     case "all":
-    default: return Math.random() * 365 * 3; // Up to 3 years
+    default: return randomBetween(1, 1095); // Até 3 anos
   }
 };
 
@@ -84,75 +93,131 @@ const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<VideoResul
     throw new Error("Chave de API do YouTube não fornecida");
   }
   
-  // Construir parâmetros de busca
-  const searchParams = new URLSearchParams({
-    part: "snippet",
-    maxResults: Math.min(params.maxResults, 100).toString(), // Ensure max is 100
-    q: params.keywords,
-    type: params.searchType === "shorts" ? "video" : params.searchType, // Handle shorts type
-    key: params.apiKey
-  });
-  
-  // Para shorts, adicionar filtro específico
-  if (params.searchType === "shorts") {
-    searchParams.append("videoDuration", "short");
-    searchParams.append("videoType", "any");
-  }
-  
-  // Adicionar filtro de idioma se especificado
-  if (params.language && params.language !== "any") {
-    searchParams.append("relevanceLanguage", params.language);
-  }
-  
   try {
+    // Construir parâmetros de busca
+    const searchParams = new URLSearchParams({
+      part: "snippet",
+      maxResults: params.maxResults.toString(),
+      q: params.keywords,
+      type: params.searchType === "shorts" ? "video" : params.searchType,
+      key: params.apiKey,
+      videoDuration: params.searchType === "shorts" ? "short" : "any",
+    });
+    
+    // Para shorts, adicionar filtro específico
+    if (params.searchType === "shorts") {
+      searchParams.append("videoDuration", "short");
+      searchParams.append("videoType", "any");
+    }
+    
+    // Adicionar filtro de idioma se especificado
+    if (params.language && params.language !== "any") {
+      searchParams.append("relevanceLanguage", params.language);
+    }
+    
     // Fazer solicitação para a API de pesquisa do YouTube
     const searchResponse = await fetch(
       `https://www.googleapis.com/youtube/v3/search?${searchParams.toString()}`
     );
     
     if (!searchResponse.ok) {
-      throw new Error(`Erro na API do YouTube: ${searchResponse.status}`);
+      const errorData = await searchResponse.json();
+      throw new Error(`Erro na API do YouTube: ${errorData.error?.message || searchResponse.status}`);
     }
     
     const searchData = await searchResponse.json();
     const items = searchData.items || [];
     
+    if (items.length === 0) {
+      return [];
+    }
+    
+    // Coletar IDs de vídeos e canais para buscar informações adicionais
+    const videoIds = items
+      .filter((item: any) => item.id.kind === "youtube#video")
+      .map((item: any) => item.id.videoId);
+      
+    const channelIds = items.map((item: any) => item.snippet.channelId);
+    
+    // Buscar estatísticas de vídeos se tivermos IDs de vídeo
+    let videoStatsMap: Record<string, any> = {};
+    if (videoIds.length > 0) {
+      const videoStatsResponse = await fetch(
+        `https://www.googleapis.com/youtube/v3/videos?part=statistics,contentDetails&id=${videoIds.join(",")}&key=${params.apiKey}`
+      );
+      
+      if (videoStatsResponse.ok) {
+        const videoStatsData = await videoStatsResponse.json();
+        videoStatsMap = (videoStatsData.items || []).reduce((acc: Record<string, any>, item: any) => {
+          acc[item.id] = {
+            views: parseInt(item.statistics.viewCount) || 0,
+            likes: parseInt(item.statistics.likeCount) || 0,
+            comments: parseInt(item.statistics.commentCount) || 0,
+            duration: item.contentDetails.duration
+          };
+          return acc;
+        }, {});
+      }
+    }
+    
+    // Buscar estatísticas de canais
+    let channelStatsMap: Record<string, any> = {};
+    if (channelIds.length > 0) {
+      const channelStatsResponse = await fetch(
+        `https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet&id=${channelIds.join(",")}&key=${params.apiKey}`
+      );
+      
+      if (channelStatsResponse.ok) {
+        const channelStatsData = await channelStatsResponse.json();
+        channelStatsMap = (channelStatsData.items || []).reduce((acc: Record<string, any>, item: any) => {
+          acc[item.id] = {
+            subscribers: parseInt(item.statistics.subscriberCount) || 0,
+            videoCount: parseInt(item.statistics.videoCount) || 0,
+            publishedAt: item.snippet.publishedAt
+          };
+          return acc;
+        }, {});
+      }
+    }
+    
     // Mapear resultados para o formato esperado
-    const results = await Promise.all(items.map(async (item: any) => {
-      const videoId = item.id.videoId;
+    const results = items.map((item: any) => {
+      const videoId = item.id.videoId || null;
       const channelId = item.snippet.channelId;
       
-      // Valores padrão
-      let views = randomBetween(params.minViews || 1000, params.maxViews || 10000000);
-      let engagement = randomBetween(1, 15);
-      let subscribers = randomBetween(params.minSubscribers || 100, params.maxSubscribers || 5000000);
-      let videoAge = calculateVideoAge(params.period);
+      // Obter estatísticas do vídeo e canal dos mapas criados
+      const videoStats = videoId ? videoStatsMap[videoId] || {} : {};
+      const channelStats = channelStatsMap[channelId] || {};
       
-      // Tentar obter estatísticas reais para vídeos
-      if ((params.searchType === "videos" || params.searchType === "shorts") && videoId) {
-        try {
-          const videoResponse = await fetch(
-            `https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${videoId}&key=${params.apiKey}`
-          );
-          
-          if (videoResponse.ok) {
-            const videoData = await videoResponse.json();
-            const statistics = videoData.items[0]?.statistics;
-            
-            if (statistics) {
-              views = parseInt(statistics.viewCount) || views;
-              engagement = Math.round((parseInt(statistics.likeCount || 0) / Math.max(1, views)) * 100) || engagement;
-            }
-          }
-        } catch (error) {
-          console.warn("Erro ao obter estatísticas do vídeo", error);
-        }
+      // Calcular valores
+      const views = videoStats.views || randomBetween(params.minViews || 1000, 1000000);
+      const likes = videoStats.likes || Math.floor(views * randomBetween(2, 10) / 100);
+      const engagement = Math.round((likes / Math.max(1, views)) * 100);
+      
+      // Calcular idade do vídeo baseado na data de publicação ou no período selecionado
+      let videoAge;
+      if (item.snippet.publishedAt) {
+        const publishDate = new Date(item.snippet.publishedAt);
+        const now = new Date();
+        videoAge = (now.getTime() - publishDate.getTime()) / (1000 * 60 * 60 * 24);
+      } else {
+        videoAge = calculateVideoAge(params.period);
       }
+      
+      // Obter inscritos ou gerar valor aleatório
+      const subscribers = channelStats.subscribers || randomBetween(
+        params.minSubscribers || 100,
+        params.maxSubscribers || 5000000
+      );
       
       // Calcular métricas
       const viralScore = calculateViralScore(views, engagement, videoAge);
-      const estimatedCPM = estimateCPM(item.snippet.defaultLanguage || params.language || "en", views, engagement);
-      const estimatedRPM = Number((estimatedCPM * 0.68).toFixed(2));
+      const estimatedCPM = estimateCPM(
+        item.snippet.defaultLanguage || params.language || "en", 
+        views, 
+        engagement
+      );
+      const estimatedRPM = Number((estimatedCPM * 0.55).toFixed(2)); // YouTubers geralmente recebem 55% do CPM
       const estimatedEarnings = Number(((views / 1000) * estimatedRPM).toFixed(2));
       
       // Construir URLs
@@ -175,10 +240,10 @@ const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<VideoResul
         estimatedEarnings,
         subscribers,
         videoAge,
-        channelDate: new Date(item.snippet.publishedAt).toISOString(),
+        channelDate: channelStats.publishedAt || new Date(new Date().setFullYear(new Date().getFullYear() - randomBetween(1, 10))).toISOString(),
         language: item.snippet.defaultLanguage || params.language || "en"
       };
-    }));
+    });
     
     return results;
   } catch (error) {
@@ -226,7 +291,7 @@ export const searchYouTubeVideos = async (params: YoutubeSearchParams): Promise<
     
     const viralScore = calculateViralScore(views, engagement, videoAge);
     const estimatedCPM = estimateCPM(language, views, engagement);
-    const estimatedRPM = Number((estimatedCPM * 0.68).toFixed(2));
+    const estimatedRPM = Number((estimatedCPM * 0.55).toFixed(2));
     const estimatedEarnings = Number(((views / 1000) * estimatedRPM).toFixed(2));
     
     // Data de criação do canal (entre 1 e 10 anos atrás)
