@@ -1,4 +1,3 @@
-
 import { VideoResult, YoutubeSearchParams } from "@/types/youtube-types";
 
 // Função para gerar um valor aleatório dentro de um intervalo
@@ -42,8 +41,17 @@ const generateVideoTitle = (keyword: string): string => {
 
 // Calcula o Viral Score com base em visualizações, engajamento e idade do vídeo
 const calculateViralScore = (views: number, engagement: number, ageInDays: number): number => {
-  const freshnessMultiplier = Math.max(1, 30 / Math.max(1, ageInDays));
-  return Math.round((views * engagement * freshnessMultiplier) / 10000);
+  // Videos mais recentes têm maior peso
+  const freshnessMultiplier = Math.max(1, 30 / Math.max(0.1, ageInDays));
+  
+  // Taxa de crescimento: mais visualizações em menos tempo = maior pontuação
+  const growthRate = views / Math.max(0.1, ageInDays);
+  
+  // Engajamento tem peso importante para viralização
+  const engagementScore = engagement * 2;
+  
+  // Combinar os fatores com pesos específicos
+  return Math.round((growthRate * 0.4 + engagementScore * 0.4 + freshnessMultiplier * 0.2) * 100);
 };
 
 // Estimar CPM com base em idioma, visualizações e engajamento
@@ -254,80 +262,73 @@ const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<VideoResul
 
 // Função principal que simula ou busca dados reais do YouTube
 export const searchYouTubeVideos = async (params: YoutubeSearchParams): Promise<VideoResult[]> => {
-  // Se uma chave de API foi fornecida, tente usar a API real
+  // Se uma chave de API foi fornecida, use a API real
   if (params.apiKey && params.apiKey.trim()) {
     try {
-      return await fetchYouTubeData(params);
+      const data = await fetchYouTubeData(params);
+      
+      // Filtrar por idioma se especificado
+      if (params.language && params.language !== "any") {
+        return data.filter(video => video.language === params.language);
+      }
+      
+      return data;
     } catch (error) {
       console.error("Erro na API do YouTube. Retornando dados simulados:", error);
-      // Se houver erro, retorna para dados simulados
     }
   }
-  
+
   // Simulação de tempo de carregamento da API
   await new Promise(resolve => setTimeout(resolve, 1500));
   
   const results: VideoResult[] = [];
-  const resultCount = Math.min(params.maxResults || 50, 100); // Ensure max is 100
-  
+  const resultCount = params.maxResults || 100; // Default para 100 resultados
+
   // Filtrar por idioma se especificado
-  const availableLanguages = params.language && params.language !== "any" ? [params.language] : languages;
-  
+  const availableLanguages = params.language && params.language !== "any" 
+    ? [params.language] 
+    : ["pt-BR", "en-US", "es-ES", "fr-FR", "de-DE", "it-IT", "ja-JP", "ko-KR", "ru-RU", "zh-CN"];
+
   for (let i = 0; i < resultCount; i++) {
-    const views = randomBetween(
-      params.minViews || 1000, 
-      params.maxViews || 10000000
-    );
-    
-    const subscribers = randomBetween(
-      params.minSubscribers || 100,
-      params.maxSubscribers || 5000000
-    );
-    
-    const engagement = randomBetween(1, 15);
-    const videoAge = calculateVideoAge(params.period);
     const language = availableLanguages[Math.floor(Math.random() * availableLanguages.length)];
-    const channel = channelNames[Math.floor(Math.random() * channelNames.length)];
+    const videoAge = calculateVideoAge(params.period);
+    
+    // Gerar views com base na idade do vídeo para simular crescimento viral
+    const baseViews = randomBetween(100, 10000);
+    const growthMultiplier = Math.max(1, 30 / Math.max(0.1, videoAge));
+    const views = Math.round(baseViews * growthMultiplier);
+    
+    const engagement = randomBetween(5, 25); // Aumentado para refletir melhor engagement viral
     
     const viralScore = calculateViralScore(views, engagement, videoAge);
-    const estimatedCPM = estimateCPM(language, views, engagement);
-    const estimatedRPM = Number((estimatedCPM * 0.55).toFixed(2));
-    const estimatedEarnings = Number(((views / 1000) * estimatedRPM).toFixed(2));
-    
-    // Data de criação do canal (entre 1 e 10 anos atrás)
-    const channelCreationDate = new Date();
-    channelCreationDate.setFullYear(channelCreationDate.getFullYear() - randomBetween(1, 10));
-    
-    // Gerar ID aleatório para o vídeo
-    const videoId = Math.random().toString(36).substring(2, 15);
-    const channelId = Math.random().toString(36).substring(2, 15);
-    
-    // URLs
-    const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
-    const channelUrl = `https://www.youtube.com/channel/${channelId}`;
     
     results.push({
-      id: videoId,
+      id: Math.random().toString(36).substring(2, 15),
       title: generateVideoTitle(params.keywords),
-      thumbnail: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
-      channel,
-      channelId,
-      channelUrl,
-      videoUrl,
+      thumbnail: `https://i.ytimg.com/vi/${Math.random().toString(36).substring(2, 15)}/hqdefault.jpg`,
+      channel: channelNames[Math.floor(Math.random() * channelNames.length)],
+      channelId: Math.random().toString(36).substring(2, 15),
+      channelUrl: `https://www.youtube.com/channel/${Math.random().toString(36).substring(2, 15)}`,
+      videoUrl: `https://www.youtube.com/watch?v=${Math.random().toString(36).substring(2, 15)}`,
       views,
       engagement,
       viralScore,
-      estimatedCPM,
-      estimatedRPM,
-      estimatedEarnings,
-      subscribers,
+      language,
+      estimatedCPM: estimateCPM(language, views, engagement),
+      estimatedRPM: Number((estimateCPM(language, views, engagement) * 0.55).toFixed(2)),
+      estimatedEarnings: Number(((views / 1000) * estimateCPM(language, views, engagement)).toFixed(2)),
+      subscribers: randomBetween(
+        params.minSubscribers || 100,
+        params.maxSubscribers || 5000000
+      ),
       videoAge,
-      channelDate: channelCreationDate.toISOString(),
+      channelDate: new Date(new Date().setFullYear(new Date().getFullYear() - randomBetween(1, 10))).toISOString(),
       language
     });
   }
-  
-  return results;
+
+  // Ordenar por potencial viral (considerando views recentes e engagement)
+  return results.sort((a, b) => b.viralScore - a.viralScore);
 };
 
 // Função para salvar uma busca no armazenamento local
@@ -366,19 +367,30 @@ export const deleteSavedSearch = (id: string) => {
 // Dados para gráficos
 export const getLanguageDistributionData = (results: VideoResult[]) => {
   const distribution: Record<string, number> = {};
-  
+  const languageNames: Record<string, string> = {
+    "pt-BR": "Português (BR)",
+    "en-US": "Inglês (EUA)",
+    "es-ES": "Espanhol",
+    "fr-FR": "Francês",
+    "de-DE": "Alemão",
+    "it-IT": "Italiano",
+    "ja-JP": "Japonês",
+    "ko-KR": "Coreano",
+    "ru-RU": "Russo",
+    "zh-CN": "Chinês"
+  };
+
   results.forEach(video => {
-    if (distribution[video.language]) {
-      distribution[video.language]++;
-    } else {
-      distribution[video.language] = 1;
-    }
+    const languageName = languageNames[video.language] || video.language;
+    distribution[languageName] = (distribution[languageName] || 0) + 1;
   });
-  
-  return Object.entries(distribution).map(([language, count]) => ({
-    language,
-    count
-  })).sort((a, b) => b.count - a.count);
+
+  return Object.entries(distribution)
+    .map(([language, count]) => ({
+      language,
+      count
+    }))
+    .sort((a, b) => b.count - a.count);
 };
 
 export const getViewRangeData = (results: VideoResult[]) => {

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { VideoResult, ColumnDefinition } from "@/types/youtube-types";
 import { Button } from "@/components/ui/button";
@@ -13,6 +12,14 @@ import {
 import { ArrowUp, ArrowDown, Youtube } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface ResultsTableProps {
   results: VideoResult[];
@@ -21,6 +28,8 @@ interface ResultsTableProps {
 const ResultsTable = ({ results }: ResultsTableProps) => {
   const [sortColumn, setSortColumn] = useState<keyof VideoResult>("views");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const resultsPerPage = 50;
 
   // Definição das colunas da tabela
   const columns: ColumnDefinition[] = [
@@ -91,89 +100,128 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
     }
   };
 
-  // Se não houver resultados, mostrar mensagem
-  if (!results.length) {
-    return null;
-  }
+  // Calcular total de páginas
+  const totalPages = Math.ceil(results.length / resultsPerPage);
+  
+  // Preparar resultados para a página atual
+  const startIndex = (currentPage - 1) * resultsPerPage;
+  const endIndex = startIndex + resultsPerPage;
+  const currentPageResults = sortedResults.slice(startIndex, endIndex);
+
+  // Navegação entre páginas
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   return (
-    <div className="rounded-md border overflow-hidden">
-      <div className="overflow-x-auto">
-        <Table className="w-full">
-          <TableHeader>
-            <TableRow>
-              {columns.map((column) => (
-                <TableHead 
-                  key={column.id} 
-                  className={`whitespace-nowrap ${column.id === 'videoAge' ? 'w-[60px]' : ''} ${column.id === 'id' ? 'w-[60px] text-center' : ''}`}
-                >
-                  {column.sortable ? (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 px-2 -ml-2 font-medium"
-                      onClick={() => handleSort(column.id)}
-                    >
-                      {column.label}
-                      {sortColumn === column.id && (
-                        <span className="ml-1">
-                          {sortDirection === "asc" ? (
-                            <ArrowUp className="h-4 w-4" />
-                          ) : (
-                            <ArrowDown className="h-4 w-4" />
-                          )}
-                        </span>
-                      )}
-                    </Button>
-                  ) : (
-                    column.label
-                  )}
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sortedResults.map((result) => (
-              <TableRow key={result.id}>
-                <TableCell className="max-w-[200px] truncate" title={result.title}>
-                  {result.title}
-                </TableCell>
-                <TableCell>
-                  {result.channelUrl ? (
-                    <a href={result.channelUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">
-                      {result.channel}
-                    </a>
-                  ) : (
-                    result.channel
-                  )}
-                </TableCell>
-                <TableCell>{formatNumber(result.views)}</TableCell>
-                <TableCell>{result.engagement}%</TableCell>
-                <TableCell>{result.viralScore}</TableCell>
-                <TableCell>{formatCurrency(result.estimatedCPM)}</TableCell>
-                <TableCell>{formatCurrency(result.estimatedRPM)}</TableCell>
-                <TableCell>{formatCurrency(result.estimatedEarnings)}</TableCell>
-                <TableCell>{formatNumber(result.subscribers)}</TableCell>
-                <TableCell>{formatVideoAge(result.videoAge)}</TableCell>
-                <TableCell>{result.language}</TableCell>
-                <TableCell className="text-center">
-                  {result.videoUrl && (
-                    <a 
-                      href={result.videoUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="inline-flex items-center text-youtube-red hover:text-red-700"
-                      title="Assistir no YouTube"
-                    >
-                      <Youtube className="h-5 w-5" />
-                    </a>
-                  )}
-                </TableCell>
+    <div className="space-y-4">
+      <div className="rounded-md border overflow-hidden">
+        <div className="overflow-x-auto">
+          <Table className="w-full">
+            <TableHeader>
+              <TableRow>
+                {columns.map((column) => (
+                  <TableHead 
+                    key={column.id} 
+                    className={`whitespace-nowrap ${column.id === 'title' ? 'w-[300px]' : ''} ${column.id === 'videoAge' ? 'w-[60px]' : ''} ${column.id === 'id' ? 'w-[60px] text-center' : ''}`}
+                  >
+                    {column.sortable ? (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 px-2 -ml-2 font-medium"
+                        onClick={() => handleSort(column.id)}
+                      >
+                        {column.label}
+                        {sortColumn === column.id && (
+                          <span className="ml-1">
+                            {sortDirection === "asc" ? (
+                              <ArrowUp className="h-4 w-4" />
+                            ) : (
+                              <ArrowDown className="h-4 w-4" />
+                            )}
+                          </span>
+                        )}
+                      </Button>
+                    ) : (
+                      column.label
+                    )}
+                  </TableHead>
+                ))}
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {currentPageResults.map((result) => (
+                <TableRow key={result.id}>
+                  <TableCell className="max-w-[300px] truncate" title={result.title}>
+                    {result.title}
+                  </TableCell>
+                  <TableCell>
+                    {result.channelUrl ? (
+                      <a href={result.channelUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                        {result.channel}
+                      </a>
+                    ) : (
+                      result.channel
+                    )}
+                  </TableCell>
+                  <TableCell>{formatNumber(result.views)}</TableCell>
+                  <TableCell>{result.engagement}%</TableCell>
+                  <TableCell>{result.viralScore}</TableCell>
+                  <TableCell>{formatCurrency(result.estimatedCPM)}</TableCell>
+                  <TableCell>{formatCurrency(result.estimatedRPM)}</TableCell>
+                  <TableCell>{formatCurrency(result.estimatedEarnings)}</TableCell>
+                  <TableCell>{formatNumber(result.subscribers)}</TableCell>
+                  <TableCell>{formatVideoAge(result.videoAge)}</TableCell>
+                  <TableCell>{result.language}</TableCell>
+                  <TableCell className="text-center">
+                    {result.videoUrl && (
+                      <a 
+                        href={result.videoUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="inline-flex items-center text-youtube-red hover:text-red-700 justify-center w-full"
+                        title="Assistir no YouTube"
+                      >
+                        <Youtube className="h-5 w-5" />
+                      </a>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
+
+      {totalPages > 1 && (
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious 
+                onClick={() => handlePageChange(currentPage - 1)}
+                className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+              />
+            </PaginationItem>
+            {Array.from({length: totalPages}, (_, i) => i + 1).map(page => (
+              <PaginationItem key={page}>
+                <PaginationLink
+                  isActive={currentPage === page}
+                  onClick={() => handlePageChange(page)}
+                >
+                  {page}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            <PaginationItem>
+              <PaginationNext 
+                onClick={() => handlePageChange(currentPage + 1)}
+                className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
     </div>
   );
 };
