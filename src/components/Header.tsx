@@ -1,5 +1,6 @@
 
 import { Button } from "@/components/ui/button";
+import { Globe } from "lucide-react";
 
 const Header = () => {
   return (
@@ -12,7 +13,7 @@ const Header = () => {
 
         <div className="flex gap-4">
           <Button variant="outline" className="text-white border-white hover:bg-white hover:text-youtube-red">
-            Documentação
+            <Globe className="mr-2 h-4 w-4" /> Documentação
           </Button>
           <Button variant="secondary" className="bg-white text-youtube-red hover:bg-gray-100">
             Suporte

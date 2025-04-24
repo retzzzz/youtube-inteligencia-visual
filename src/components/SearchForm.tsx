@@ -17,7 +17,7 @@ const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
   const [params, setParams] = useState<YoutubeSearchParams>({
     keywords: "",
     searchType: "videos",
-    language: "",
+    language: "any",
     minViews: 1000,
     maxViews: null,
     minSubscribers: null,
@@ -81,7 +81,7 @@ const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
               <SelectValue placeholder="Todos os idiomas" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos os idiomas</SelectItem>
+              <SelectItem value="any">Todos os idiomas</SelectItem>
               <SelectItem value="pt-BR">Português (Brasil)</SelectItem>
               <SelectItem value="en-US">Inglês (EUA)</SelectItem>
               <SelectItem value="es-ES">Espanhol</SelectItem>
