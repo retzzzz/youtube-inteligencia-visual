@@ -11,6 +11,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ArrowUp, ArrowDown, Youtube } from "lucide-react";
+import { format, formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 interface ResultsTableProps {
   results: VideoResult[];
@@ -31,7 +33,7 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
     { id: "estimatedRPM", label: "RPM Est.", sortable: true },
     { id: "estimatedEarnings", label: "Ganhos Est.", sortable: true },
     { id: "subscribers", label: "Inscritos", sortable: true },
-    { id: "videoAge", label: "Idade do Vídeo (dias)", sortable: true },
+    { id: "videoAge", label: "Idade do Vídeo", sortable: true },
     { id: "language", label: "Idioma", sortable: true },
   ];
 
@@ -72,6 +74,22 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
     return `$${num.toFixed(2)}`;
   };
 
+  // Formatar idade do vídeo
+  const formatVideoAge = (days: number) => {
+    if (days < 1) {
+      const hours = Math.round(days * 24);
+      return `${hours} hora${hours !== 1 ? 's' : ''}`;
+    } else if (days < 30) {
+      return `${Math.round(days)} dia${days !== 1 ? 's' : ''}`;
+    } else if (days < 365) {
+      const months = Math.round(days / 30);
+      return `${months} mês${months !== 1 ? 'es' : ''}`;
+    } else {
+      const years = Math.round(days / 365);
+      return `${years} ano${years !== 1 ? 's' : ''}`;
+    }
+  };
+
   // Se não houver resultados, mostrar mensagem
   if (!results.length) {
     return null;
@@ -84,7 +102,10 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
           <TableHeader>
             <TableRow>
               {columns.map((column) => (
-                <TableHead key={column.id} className="whitespace-nowrap">
+                <TableHead 
+                  key={column.id} 
+                  className={`whitespace-nowrap ${column.id === 'videoAge' ? 'w-[100px]' : ''}`}
+                >
                   {column.sortable ? (
                     <Button
                       variant="ghost"
@@ -108,7 +129,7 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
                   )}
                 </TableHead>
               ))}
-              <TableHead>Links</TableHead>
+              <TableHead className="w-[60px] text-center">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -133,9 +154,9 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
                 <TableCell>{formatCurrency(result.estimatedRPM)}</TableCell>
                 <TableCell>{formatCurrency(result.estimatedEarnings)}</TableCell>
                 <TableCell>{formatNumber(result.subscribers)}</TableCell>
-                <TableCell>{result.videoAge}</TableCell>
+                <TableCell>{formatVideoAge(result.videoAge)}</TableCell>
                 <TableCell>{result.language}</TableCell>
-                <TableCell>
+                <TableCell className="text-center">
                   {result.videoUrl && (
                     <a 
                       href={result.videoUrl} 

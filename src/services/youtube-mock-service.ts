@@ -1,4 +1,3 @@
-
 import { VideoResult, YoutubeSearchParams } from "@/types/youtube-types";
 
 // Função para gerar um valor aleatório dentro de um intervalo
@@ -64,6 +63,21 @@ const estimateCPM = (language: string, views: number, engagement: number): numbe
   return Number((baseCPM * engagementMultiplier * viewsAdjustment).toFixed(2));
 };
 
+// Função para calcular a idade do vídeo baseado no período selecionado
+const calculateVideoAge = (period: YoutubeSearchParams["period"]): number => {
+  switch (period) {
+    case "24h": return Math.random(); // Fraction of a day (less than 24 hours)
+    case "48h": return 1 + Math.random(); // Between 1 and 2 days
+    case "72h": return 2 + Math.random(); // Between 2 and 3 days
+    case "7d": return Math.random() * 7; // Up to 7 days
+    case "30d": return Math.random() * 30; // Up to 30 days
+    case "90d": return Math.random() * 90; // Up to 90 days
+    case "180d": return Math.random() * 180; // Up to 180 days
+    case "all":
+    default: return Math.random() * 365 * 3; // Up to 3 years
+  }
+};
+
 // Função para buscar dados reais da API do YouTube
 const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<VideoResult[]> => {
   if (!params.apiKey) {
@@ -73,11 +87,17 @@ const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<VideoResul
   // Construir parâmetros de busca
   const searchParams = new URLSearchParams({
     part: "snippet",
-    maxResults: params.maxResults.toString(),
+    maxResults: Math.min(params.maxResults, 100).toString(), // Ensure max is 100
     q: params.keywords,
-    type: params.searchType,
+    type: params.searchType === "shorts" ? "video" : params.searchType, // Handle shorts type
     key: params.apiKey
   });
+  
+  // Para shorts, adicionar filtro específico
+  if (params.searchType === "shorts") {
+    searchParams.append("videoDuration", "short");
+    searchParams.append("videoType", "any");
+  }
   
   // Adicionar filtro de idioma se especificado
   if (params.language && params.language !== "any") {
@@ -106,10 +126,10 @@ const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<VideoResul
       let views = randomBetween(params.minViews || 1000, params.maxViews || 10000000);
       let engagement = randomBetween(1, 15);
       let subscribers = randomBetween(params.minSubscribers || 100, params.maxSubscribers || 5000000);
-      let videoAge = randomBetween(1, 365);
+      let videoAge = calculateVideoAge(params.period);
       
       // Tentar obter estatísticas reais para vídeos
-      if (params.searchType === "videos" && videoId) {
+      if ((params.searchType === "videos" || params.searchType === "shorts") && videoId) {
         try {
           const videoResponse = await fetch(
             `https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${videoId}&key=${params.apiKey}`
@@ -183,7 +203,7 @@ export const searchYouTubeVideos = async (params: YoutubeSearchParams): Promise<
   await new Promise(resolve => setTimeout(resolve, 1500));
   
   const results: VideoResult[] = [];
-  const resultCount = params.maxResults || 25;
+  const resultCount = Math.min(params.maxResults || 50, 100); // Ensure max is 100
   
   // Filtrar por idioma se especificado
   const availableLanguages = params.language && params.language !== "any" ? [params.language] : languages;
@@ -200,7 +220,7 @@ export const searchYouTubeVideos = async (params: YoutubeSearchParams): Promise<
     );
     
     const engagement = randomBetween(1, 15);
-    const videoAge = randomBetween(1, 365);
+    const videoAge = calculateVideoAge(params.period);
     const language = availableLanguages[Math.floor(Math.random() * availableLanguages.length)];
     const channel = channelNames[Math.floor(Math.random() * channelNames.length)];
     

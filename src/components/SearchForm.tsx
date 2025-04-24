@@ -71,6 +71,7 @@ const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="videos">Vídeos</SelectItem>
+              <SelectItem value="shorts">Shorts</SelectItem>
               <SelectItem value="channels">Canais</SelectItem>
               <SelectItem value="playlists">Playlists</SelectItem>
             </SelectContent>
@@ -126,9 +127,13 @@ const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
               <SelectValue placeholder="Selecione o período" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="24h">Últimas 24 horas</SelectItem>
+              <SelectItem value="48h">Últimas 48 horas</SelectItem>
+              <SelectItem value="72h">Últimas 72 horas</SelectItem>
               <SelectItem value="7d">Últimos 7 dias</SelectItem>
               <SelectItem value="30d">Últimos 30 dias</SelectItem>
-              <SelectItem value="1y">Último ano</SelectItem>
+              <SelectItem value="90d">Últimos 90 dias</SelectItem>
+              <SelectItem value="180d">Últimos 180 dias</SelectItem>
               <SelectItem value="all">Todo o período</SelectItem>
             </SelectContent>
           </Select>

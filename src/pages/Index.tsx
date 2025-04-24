@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Header from "@/components/Header";
 import SearchForm from "@/components/SearchForm";
 import KPISection from "@/components/KPISection";
