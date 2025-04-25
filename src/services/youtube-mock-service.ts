@@ -1,4 +1,7 @@
+
 import { VideoResult, YoutubeSearchParams } from "@/types/youtube-types";
+import { format, formatDistanceToNow, isValid } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 // Função para gerar um valor aleatório dentro de um intervalo
 const randomBetween = (min: number, max: number): number => {
@@ -232,6 +235,9 @@ const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<VideoResul
       const videoUrl = videoId ? `https://www.youtube.com/watch?v=${videoId}` : undefined;
       const channelUrl = channelId ? `https://www.youtube.com/channel/${channelId}` : undefined;
       
+      // Obter o idioma do vídeo do snippet ou usar o parâmetro language
+      const videoLanguage = item.snippet.defaultLanguage || params.language || "unknown";
+      
       return {
         id: videoId || item.id.channelId || item.id.playlistId || Math.random().toString(36).substring(2, 15),
         title: item.snippet.title || generateVideoTitle(params.keywords),
@@ -249,7 +255,7 @@ const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<VideoResul
         subscribers,
         videoAge,
         channelDate: channelStats.publishedAt || new Date(new Date().setFullYear(new Date().getFullYear() - randomBetween(1, 10))).toISOString(),
-        language: item.snippet.defaultLanguage || params.language || "en"
+        language: videoLanguage
       };
     });
     
@@ -287,7 +293,7 @@ export const searchYouTubeVideos = async (params: YoutubeSearchParams): Promise<
   // Filtrar por idioma se especificado
   const availableLanguages = params.language && params.language !== "any" 
     ? [params.language] 
-    : ["pt-BR", "en-US", "es-ES", "fr-FR", "de-DE", "it-IT", "ja-JP", "ko-KR", "ru-RU", "zh-CN"];
+    : languages;
 
   for (let i = 0; i < resultCount; i++) {
     const language = availableLanguages[Math.floor(Math.random() * availableLanguages.length)];
@@ -301,6 +307,9 @@ export const searchYouTubeVideos = async (params: YoutubeSearchParams): Promise<
     const engagement = randomBetween(5, 25); // Aumentado para refletir melhor engagement viral
     
     const viralScore = calculateViralScore(views, engagement, videoAge);
+    const estimatedCPM = estimateCPM(language, views, engagement);
+    const estimatedRPM = Number((estimatedCPM * 0.55).toFixed(2));
+    const estimatedEarnings = Number(((views / 1000) * estimatedRPM).toFixed(2));
     
     results.push({
       id: Math.random().toString(36).substring(2, 15),
@@ -313,10 +322,9 @@ export const searchYouTubeVideos = async (params: YoutubeSearchParams): Promise<
       views,
       engagement,
       viralScore,
-      language,
-      estimatedCPM: estimateCPM(language, views, engagement),
-      estimatedRPM: Number((estimateCPM(language, views, engagement) * 0.55).toFixed(2)),
-      estimatedEarnings: Number(((views / 1000) * estimateCPM(language, views, engagement)).toFixed(2)),
+      estimatedCPM,
+      estimatedRPM,
+      estimatedEarnings,
       subscribers: randomBetween(
         params.minSubscribers || 100,
         params.maxSubscribers || 5000000
