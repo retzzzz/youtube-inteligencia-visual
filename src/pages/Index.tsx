@@ -1,9 +1,5 @@
 
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Youtube, Edit } from "lucide-react";
 import Header from "@/components/Header";
 import SearchForm from "@/components/SearchForm";
 import ResultsSection from "@/components/ResultsSection";
@@ -40,41 +36,6 @@ const Index = () => {
             onSelectVideo={setSelectedVideo}
             searchParams={searchParams}
           />
-        )}
-        
-        {!results.length && !isLoading && (
-          <Card className="p-6 text-center">
-            <h2 className="text-xl font-medium mb-4">Bem-vindo ao YT Analyzer</h2>
-            <p className="text-muted-foreground mb-6">
-              Use o formulário acima para pesquisar conteúdo no YouTube ou explore nossas outras ferramentas:
-            </p>
-            
-            <div className="grid gap-4 sm:grid-cols-2 max-w-md mx-auto">
-              <Link to="/video-analyzer">
-                <Button variant="outline" className="w-full h-auto py-4 px-6">
-                  <Youtube className="mr-2 h-5 w-5" />
-                  <div className="text-left">
-                    <div className="font-semibold">Analisar Vídeo</div>
-                    <div className="text-sm text-muted-foreground">
-                      Analise um vídeo específico
-                    </div>
-                  </div>
-                </Button>
-              </Link>
-              
-              <Link to="/title-generator">
-                <Button variant="outline" className="w-full h-auto py-4 px-6">
-                  <Edit className="mr-2 h-5 w-5" />
-                  <div className="text-left">
-                    <div className="font-semibold">Gerador de Títulos</div>
-                    <div className="text-sm text-muted-foreground">
-                      Crie títulos criativos
-                    </div>
-                  </div>
-                </Button>
-              </Link>
-            </div>
-          </Card>
         )}
       </div>
     </div>
