@@ -30,8 +30,35 @@ const Index = () => {
     try {
       const data = await searchYouTubeVideos(params);
       
+      // Filtrar resultados pelo idioma selecionado (se não for "any")
+      let filteredData = params.language !== "any" 
+        ? data.filter(video => video.language === params.language)
+        : data;
+      
+      // Filtrar por período selecionado
+      if (params.period !== "all") {
+        const now = new Date();
+        const periodDays = getPeriodInDays(params.period);
+        filteredData = filteredData.filter(video => video.videoAge <= periodDays);
+      }
+      
+      // Filtrar vídeos musicais se a opção estiver ativada
+      if (params.excludeMusic) {
+        filteredData = filteredData.filter(video => video.category !== "Music" && 
+          !isLikelyMusic(video.title));
+      }
+      
+      // Filtrar por palavras-chave excluídas
+      if (params.excludeKeywords) {
+        const keywords = params.excludeKeywords.toLowerCase().split(',').map(k => k.trim());
+        filteredData = filteredData.filter(video => {
+          const videoTitle = video.title.toLowerCase();
+          return !keywords.some(keyword => videoTitle.includes(keyword));
+        });
+      }
+      
       // Enriquecer os dados com propriedades adicionais
-      const enrichedData = data.map(video => {
+      const enrichedData = filteredData.map(video => {
         // Calcular visualizações por hora
         const viewsPerHour = video.videoAge > 0 ? Math.round(video.views / (video.videoAge * 24)) : 0;
         
@@ -57,12 +84,28 @@ const Index = () => {
           viralityReason = "métricas de engajamento e crescimento moderadas";
         }
         
+        // Determinar tipo de crescimento
+        let growthType: "explosive" | "emerging" | "latent" | undefined;
+        
+        if (viewsPerHour > 500 && video.videoAge < 2) {
+          growthType = "explosive";
+        } else if (viewsPerHour > 100 || (video.engagement > 8 && video.videoAge < 7)) {
+          growthType = "emerging";
+        } else if (video.subscribers < 50000 && video.engagement > 5) {
+          growthType = "latent";
+        }
+        
+        // Dados simulados de crescimento
+        const growthData = generateGrowthData(video.views, video.videoAge);
+        
         return {
           ...video,
           viewsPerHour,
           channelSize,
           viralityPotential,
-          viralityReason
+          viralityReason,
+          growthType,
+          growthData
         };
       });
       
@@ -99,6 +142,55 @@ const Index = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Função auxiliar para converter período em dias
+  const getPeriodInDays = (period: string): number => {
+    switch (period) {
+      case "24h": return 1;
+      case "48h": return 2;
+      case "72h": return 3;
+      case "7d": return 7;
+      case "30d": return 30;
+      case "90d": return 90;
+      case "180d": return 180;
+      default: return 9999; // "all"
+    }
+  };
+  
+  // Verificar se um vídeo é provavelmente musical
+  const isLikelyMusic = (title: string): boolean => {
+    const musicKeywords = ["official video", "lyrics", "music video", "official music", "official audio", 
+      "videoclip", "video clip", "ft.", "feat", "official lyric", "audio oficial", "clipe oficial"];
+    
+    title = title.toLowerCase();
+    return musicKeywords.some(keyword => title.includes(keyword));
+  };
+  
+  // Gerar dados fictícios para o gráfico de crescimento
+  const generateGrowthData = (totalViews: number, ageInDays: number) => {
+    const data = [];
+    const now = new Date();
+    const viewsPerDay = totalViews / Math.max(1, ageInDays);
+    
+    // Gerar até 7 pontos de dados (ou menos se o vídeo for mais recente)
+    const dataPoints = Math.min(7, Math.ceil(ageInDays));
+    
+    for (let i = 0; i < dataPoints; i++) {
+      const date = new Date(now);
+      date.setDate(date.getDate() - i);
+      
+      // Adicionar alguma variabilidade aos dados
+      const variability = 0.2 * Math.random() - 0.1; // -10% a +10%
+      const dailyViews = Math.round(viewsPerDay * (1 + variability) * (dataPoints - i) / dataPoints);
+      
+      data.unshift({
+        timestamp: date.toISOString(),
+        views: dailyViews
+      });
+    }
+    
+    return data;
   };
 
   const handleLoadSearch = (params: YoutubeSearchParams) => {

@@ -26,7 +26,8 @@ const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
     period: "30d",
     maxResults: 50,
     apiKey: localStorage.getItem("youtubeApiKey") || "",
-    excludeMusic: true
+    excludeMusic: true,
+    excludeKeywords: ""
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -45,7 +46,7 @@ const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-card rounded-lg border border-border">
+    <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-card rounded-lg border border-border backdrop-blur-sm bg-opacity-90">
       <h2 className="text-xl font-bold mb-4">Pesquisar Conteúdo</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -205,8 +206,20 @@ const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
           </div>
         </div>
 
-        {/* Máximo de resultados */}
+        {/* Excluir palavras-chave */}
         <div className="space-y-2">
+          <Label htmlFor="excludeKeywords">Excluir palavras-chave</Label>
+          <Input
+            id="excludeKeywords"
+            placeholder="Ex: tutorial, lyrics, official video"
+            value={params.excludeKeywords || ""}
+            onChange={(e) => handleChange("excludeKeywords", e.target.value)}
+          />
+          <p className="text-xs text-muted-foreground">Separe múltiplas palavras-chave por vírgulas</p>
+        </div>
+
+        {/* Máximo de resultados */}
+        <div className="space-y-2 md:col-span-2">
           <div className="flex justify-between">
             <Label htmlFor="maxResults">Máximo de resultados: {params.maxResults}</Label>
           </div>

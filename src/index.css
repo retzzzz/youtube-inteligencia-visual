@@ -1,5 +1,4 @@
 
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -44,6 +43,11 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 0 80% 50%; /* YouTube red */
+    
+    /* Growth types */
+    --explosive: 0 90% 60%;
+    --emerging: 142 70% 45%;
+    --latent: 217 91% 60%;
   }
 
   .dark {
@@ -83,6 +87,11 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 0 80% 50%; /* YouTube red */
+    
+    /* Growth types */
+    --explosive: 0 90% 65%;
+    --emerging: 142 76% 45%;
+    --latent: 217 91% 65%;
   }
 }
 
@@ -121,5 +130,26 @@
   .stat-label {
     @apply text-sm text-muted-foreground;
   }
+  
+  /* Glassmorphism effects */
+  .glass-panel {
+    @apply backdrop-blur-sm bg-white/75 dark:bg-black/50 border border-white/20 dark:border-white/10;
+  }
+  
+  /* Growth types */
+  .growth-explosive {
+    @apply text-[hsl(var(--explosive))];
+  }
+  
+  .growth-emerging {
+    @apply text-[hsl(var(--emerging))];
+  }
+  
+  .growth-latent {
+    @apply text-[hsl(var(--latent))];
+  }
+  
+  .bg-glass {
+    @apply backdrop-blur-sm bg-opacity-90;
+  }
 }
-

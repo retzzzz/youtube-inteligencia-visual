@@ -11,6 +11,7 @@ export interface YoutubeSearchParams {
   maxResults: number;
   apiKey?: string;
   excludeMusic?: boolean;
+  excludeKeywords?: string;
 }
 
 export interface VideoResult {
@@ -44,6 +45,11 @@ export interface VideoResult {
   viralityReason?: string;
   likes?: number;
   comments?: number;
+  growthType?: "explosive" | "emerging" | "latent";
+  growthData?: {
+    timestamp: string; // ISO date string
+    views: number;
+  }[];
 }
 
 export interface SavedSearch {

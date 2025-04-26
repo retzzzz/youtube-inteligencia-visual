@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowUp, ArrowDown, Youtube, ExternalLink } from "lucide-react";
+import { ArrowUp, ArrowDown, Youtube, ExternalLink, TrendingUp, Zap, Rocket } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -19,6 +19,8 @@ import {
   PaginationPrevious,
   PaginationEllipsis,
 } from "@/components/ui/pagination";
+import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ResultsTableProps {
   results: VideoResult[];
@@ -38,9 +40,9 @@ const ResultsTable = ({ results, onSelectVideo }: ResultsTableProps) => {
     { id: "engagement", label: "Engajamento (%)", sortable: true },
     { id: "viralScore", label: "Pontuação Viral", sortable: true },
     { id: "mainNiche", label: "Nicho", sortable: true },
+    { id: "growthType", label: "Crescimento", sortable: true },
+    { id: "viewsPerHour", label: "Views/Hora", sortable: true },
     { id: "estimatedCPM", label: "CPM Est.", sortable: true },
-    { id: "estimatedRPM", label: "RPM Est.", sortable: true },
-    { id: "estimatedEarnings", label: "Ganhos Est.", sortable: true },
     { id: "subscribers", label: "Inscritos", sortable: true },
     { id: "videoAge", label: "Idade", sortable: true },
     { id: "language", label: "Idioma", sortable: true },
@@ -202,157 +204,227 @@ const ResultsTable = ({ results, onSelectVideo }: ResultsTableProps) => {
     
     return languageMap[languageCode] || languageCode;
   };
+  
+  const getGrowthIcon = (type?: string) => {
+    switch (type) {
+      case "explosive":
+        return <Zap className="h-4 w-4 text-red-500" />;
+      case "emerging":
+        return <TrendingUp className="h-4 w-4 text-green-500" />;
+      case "latent":
+        return <Rocket className="h-4 w-4 text-blue-500" />;
+      default:
+        return null;
+    }
+  };
+
+  const getGrowthLabel = (type?: string) => {
+    switch (type) {
+      case "explosive":
+        return "Explosivo";
+      case "emerging":
+        return "Emergente";
+      case "latent":
+        return "Latente";
+      default:
+        return "—";
+    }
+  };
 
   return (
-    <div className="space-y-4">
-      <div className="rounded-md border overflow-hidden">
-        <div className="overflow-x-auto">
-          <Table className="w-full">
-            <TableHeader>
-              <TableRow>
-                {columns.map((column) => (
-                  <TableHead 
-                    key={column.id} 
-                    className={`whitespace-nowrap 
-                      ${column.id === 'title' ? 'w-[500px] min-w-[300px]' : ''} 
-                      ${column.id === 'videoAge' ? 'w-[60px]' : ''} 
-                      ${column.id === 'id' ? 'w-[80px] text-center' : ''}
-                      ${column.id === 'language' ? 'w-[120px]' : ''}
-                    `}
+    <TooltipProvider>
+      <div className="space-y-4">
+        <div className="rounded-md border overflow-hidden">
+          <div className="overflow-x-auto">
+            <Table className="w-full">
+              <TableHeader>
+                <TableRow>
+                  {columns.map((column) => (
+                    <TableHead 
+                      key={column.id} 
+                      className={`whitespace-nowrap 
+                        ${column.id === 'title' ? 'w-[500px] min-w-[400px]' : ''} 
+                        ${column.id === 'videoAge' ? 'w-[60px]' : ''} 
+                        ${column.id === 'id' ? 'w-[80px] text-center' : ''}
+                        ${column.id === 'language' ? 'w-[120px]' : ''}
+                      `}
+                    >
+                      {column.sortable ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 px-2 -ml-2 font-medium"
+                          onClick={() => handleSort(column.id)}
+                        >
+                          {column.label}
+                          {sortColumn === column.id && (
+                            <span className="ml-1">
+                              {sortDirection === "asc" ? (
+                                <ArrowUp className="h-4 w-4" />
+                              ) : (
+                                <ArrowDown className="h-4 w-4" />
+                              )}
+                            </span>
+                          )}
+                        </Button>
+                      ) : (
+                        column.label
+                      )}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {currentPageResults.map((result) => (
+                  <TableRow 
+                    key={result.id} 
+                    className={onSelectVideo ? "cursor-pointer hover:bg-muted" : ""}
+                    onClick={() => onSelectVideo && onSelectVideo(result)}
                   >
-                    {column.sortable ? (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 px-2 -ml-2 font-medium"
-                        onClick={() => handleSort(column.id)}
-                      >
-                        {column.label}
-                        {sortColumn === column.id && (
-                          <span className="ml-1">
-                            {sortDirection === "asc" ? (
-                              <ArrowUp className="h-4 w-4" />
-                            ) : (
-                              <ArrowDown className="h-4 w-4" />
-                            )}
-                          </span>
+                    <TableCell className="max-w-[500px] min-w-[400px] pr-4" title={result.title}>
+                      <div className="flex items-center gap-3 w-full">
+                        {result.thumbnail && (
+                          <div className="w-12 h-8 flex-shrink-0">
+                            <img 
+                              src={result.thumbnail} 
+                              alt={result.title}
+                              className="w-full h-full object-cover rounded-sm"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).style.display = 'none';
+                              }}
+                            />
+                          </div>
                         )}
-                      </Button>
-                    ) : (
-                      column.label
-                    )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {currentPageResults.map((result) => (
-                <TableRow 
-                  key={result.id} 
-                  className={onSelectVideo ? "cursor-pointer hover:bg-muted" : ""}
-                  onClick={() => onSelectVideo && onSelectVideo(result)}
-                >
-                  <TableCell className="max-w-[500px] min-w-[300px] pr-4" title={result.title}>
-                    <div className="truncate">
-                      {result.videoUrl ? (
+                        <div className="truncate w-full">
+                          {result.videoUrl ? (
+                            <a 
+                              href={result.videoUrl} 
+                              target="_blank" 
+                              rel="noopener noreferrer" 
+                              className="hover:underline text-blue-600 hover:text-blue-800 truncate"
+                              onClick={(e) => e.stopPropagation()}
+                              title={result.title}
+                            >
+                              {result.title}
+                            </a>
+                          ) : result.title}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {result.channelUrl ? (
                         <a 
-                          href={result.videoUrl} 
+                          href={result.channelUrl} 
                           target="_blank" 
                           rel="noopener noreferrer" 
                           className="hover:underline text-blue-600 hover:text-blue-800"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          {result.title}
+                          {result.channel}
                         </a>
-                      ) : result.title}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {result.channelUrl ? (
-                      <a 
-                        href={result.channelUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="hover:underline text-blue-600 hover:text-blue-800"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {result.channel}
-                      </a>
-                    ) : (
-                      result.channel
-                    )}
-                  </TableCell>
-                  <TableCell>{formatNumber(result.views)}</TableCell>
-                  <TableCell>{result.engagement}%</TableCell>
-                  <TableCell className="font-medium">{result.viralScore}</TableCell>
-                  <TableCell>{result.mainNiche || "Diversos"}</TableCell>
-                  <TableCell>{formatCurrency(result.estimatedCPM)}</TableCell>
-                  <TableCell>{formatCurrency(result.estimatedRPM)}</TableCell>
-                  <TableCell>{formatCurrency(result.estimatedEarnings)}</TableCell>
-                  <TableCell>{formatNumber(result.subscribers)}</TableCell>
-                  <TableCell>{formatVideoAge(result.videoAge)}</TableCell>
-                  <TableCell>{formatLanguage(result.language)}</TableCell>
-                  <TableCell className="text-center">
-                    <div className="flex items-center justify-center space-x-2">
-                      {result.videoUrl && (
-                        <a 
-                          href={result.videoUrl} 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          className="inline-flex items-center text-youtube-red hover:text-red-700"
-                          title="Assistir no YouTube"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <Youtube className="h-5 w-5" />
-                        </a>
+                      ) : (
+                        result.channel
                       )}
-                      {result.channelUrl && (
-                        <a 
-                          href={result.channelUrl} 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          className="inline-flex items-center text-gray-500 hover:text-gray-700"
-                          title="Visitar Canal"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                        </a>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                    </TableCell>
+                    <TableCell>{formatNumber(result.views)}</TableCell>
+                    <TableCell>{result.engagement}%</TableCell>
+                    <TableCell className="font-medium">{result.viralScore}</TableCell>
+                    <TableCell>{result.mainNiche || "Diversos"}</TableCell>
+                    <TableCell>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center gap-1.5">
+                            {getGrowthIcon(result.growthType)}
+                            <span className="text-sm">{getGrowthLabel(result.growthType)}</span>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {result.growthType === "explosive" ? "Crescimento explosivo - viral rápido" : 
+                           result.growthType === "emerging" ? "Crescimento consistente e promissor" : 
+                           result.growthType === "latent" ? "Potencial ainda não explorado" : 
+                           "Padrão de crescimento não classificado"}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell>
+                      {result.viewsPerHour ? formatNumber(result.viewsPerHour) : "—"}
+                    </TableCell>
+                    <TableCell>{formatCurrency(result.estimatedCPM)}</TableCell>
+                    <TableCell>{formatNumber(result.subscribers)}</TableCell>
+                    <TableCell>{formatVideoAge(result.videoAge)}</TableCell>
+                    <TableCell>{formatLanguage(result.language)}</TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex items-center justify-center space-x-2">
+                        {result.videoUrl && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <a 
+                                href={result.videoUrl} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="inline-flex items-center text-youtube-red hover:text-red-700 p-1.5"
+                                title="Assistir no YouTube"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <Youtube className="h-5 w-5" />
+                              </a>
+                            </TooltipTrigger>
+                            <TooltipContent>Assistir no YouTube</TooltipContent>
+                          </Tooltip>
+                        )}
+                        {result.channelUrl && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <a 
+                                href={result.channelUrl} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="inline-flex items-center text-gray-500 hover:text-gray-700 p-1.5"
+                                title="Visitar Canal"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                              </a>
+                            </TooltipTrigger>
+                            <TooltipContent>Visitar Canal</TooltipContent>
+                          </Tooltip>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+
+        {totalPages > 1 && (
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                  className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
+                />
+              </PaginationItem>
+              
+              {renderPaginationNumbers()}
+              
+              <PaginationItem>
+                <PaginationNext 
+                  onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                  className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        )}
+        
+        <div className="text-sm text-muted-foreground text-right">
+          Exibindo {startIndex + 1}-{Math.min(endIndex, results.length)} de {results.length} resultados
         </div>
       </div>
-
-      {totalPages > 1 && (
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious 
-                onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
-              />
-            </PaginationItem>
-            
-            {renderPaginationNumbers()}
-            
-            <PaginationItem>
-              <PaginationNext 
-                onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-                className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      )}
-      
-      <div className="text-sm text-muted-foreground text-right">
-        Exibindo {startIndex + 1}-{Math.min(endIndex, results.length)} de {results.length} resultados
-      </div>
-    </div>
+    </TooltipProvider>
   );
 };
 
