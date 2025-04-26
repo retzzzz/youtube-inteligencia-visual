@@ -38,7 +38,7 @@ const Header = () => {
         </NavLink>
       </nav>
 
-      <div className="absolute top-[-30px] right-0 flex items-center space-x-4">
+      <div className="absolute top-[-50px] right-0 flex items-center space-x-4">
         <span className="text-muted-foreground">
           Bem vindo, {user?.name || 'Usuário'}
         </span>
