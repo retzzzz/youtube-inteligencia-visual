@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { VideoResult } from "@/types/youtube-types";
 import { exportToCSV } from "@/services/youtube-mock-service";
-import { Download, FileSpreadsheet, FilePdf } from "lucide-react";
+import { Download, FileSpreadsheet, File } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -141,7 +141,7 @@ const ActionButtons = ({ results }: ActionButtonsProps) => {
       <Button variant="default" onClick={handleExportPdf} disabled={isExporting}>
         {isExporting ? "Gerando PDF..." : (
           <>
-            <FilePdf className="w-4 h-4 mr-2" />
+            <File className="w-4 h-4 mr-2" />
             Exportar PDF
           </>
         )}
