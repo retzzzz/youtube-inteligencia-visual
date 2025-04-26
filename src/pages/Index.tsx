@@ -242,7 +242,7 @@ const Index = () => {
             {selectedVideo ? (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-1">
-                  <Card className="p-4">
+                  <Card className="p-4 glass-panel">
                     <h3 className="text-lg font-bold mb-3">Vídeo Selecionado</h3>
                     <div className="space-y-2">
                       <p className="font-medium">{selectedVideo.title}</p>
@@ -255,7 +255,7 @@ const Index = () => {
                             href={selectedVideo.videoUrl} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline text-sm"
+                            className="text-blue-600 hover:underline text-sm flex items-center"
                           >
                             Ver no YouTube →
                           </a>
