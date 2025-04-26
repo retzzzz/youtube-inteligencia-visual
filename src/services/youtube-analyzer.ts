@@ -2,9 +2,6 @@
 import { VideoAnalysis } from "@/types/youtube-types";
 import { analyzeSaturation } from "@/utils/formatters";
 
-// API Key para o YouTube Data API - Em uma aplicação real, isso deveria vir de variáveis de ambiente
-const YOUTUBE_API_KEY = "YOUR_YOUTUBE_API_KEY"; // Substitua pelo seu API Key
-
 // Função auxiliar para extrair o ID do vídeo de uma URL do YouTube
 function extractVideoId(url: string): string | null {
   const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
@@ -12,7 +9,7 @@ function extractVideoId(url: string): string | null {
   return match ? match[1] : null;
 }
 
-export const analyzeYoutubeVideo = async (videoUrl: string): Promise<VideoAnalysis> => {
+export const analyzeYoutubeVideo = async (videoUrl: string, apiKey: string): Promise<VideoAnalysis> => {
   const videoId = extractVideoId(videoUrl);
   if (!videoId) {
     throw new Error("URL de vídeo inválido");
@@ -21,7 +18,7 @@ export const analyzeYoutubeVideo = async (videoUrl: string): Promise<VideoAnalys
   try {
     // Obter dados básicos do vídeo da API do YouTube
     const videoResponse = await fetch(
-      `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=snippet,statistics,contentDetails&key=${YOUTUBE_API_KEY}`
+      `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=snippet,statistics,contentDetails&key=${apiKey}`
     );
     
     if (!videoResponse.ok) {
@@ -69,7 +66,7 @@ export const analyzeYoutubeVideo = async (videoUrl: string): Promise<VideoAnalys
     
     // Simular análise de saturação
     const saturationResponse = await fetch(
-      `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(basicInfo.title)}&type=video&publishedAfter=${encodeURIComponent(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())}&key=${YOUTUBE_API_KEY}`
+      `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(basicInfo.title)}&type=video&publishedAfter=${encodeURIComponent(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())}&key=${apiKey}`
     );
     
     const saturationData = await saturationResponse.json();
