@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from './ui/button';
@@ -38,7 +37,7 @@ const Header = () => {
         </NavLink>
       </nav>
 
-      <div className="absolute top-[-50px] right-0 flex items-center space-x-4">
+      <div className="absolute top-[-100px] right-0 flex items-center space-x-4">
         <span className="text-muted-foreground text-sm">
           Bem vindo, {user?.name || 'Usuário'}
         </span>
