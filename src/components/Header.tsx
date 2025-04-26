@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from './ui/button';
@@ -10,8 +11,8 @@ const Header = () => {
   const { logout, user } = useAuth();
   
   return (
-    <header className="flex flex-col sm:flex-row justify-between items-center mb-16 relative">
-      <div className="mb-4 sm:mb-0">
+    <header className="flex flex-col mb-16 relative">
+      <div className="mb-4">
         <h1 className="text-3xl font-bold tracking-tight">
           <Link to="/">
             YT<span className="text-primary">Analyzer</span>
@@ -20,6 +21,21 @@ const Header = () => {
         <p className="text-muted-foreground mt-1">
           Ferramenta de pesquisa e análise de YouTube
         </p>
+        
+        <div className="flex items-center justify-end space-x-4 mt-2">
+          <span className="text-muted-foreground text-sm">
+            Bem vindo, {user?.name || 'Usuário'}
+          </span>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={logout}
+            className="flex items-center gap-2"
+          >
+            <LogOut className="h-4 w-4" />
+            Sair
+          </Button>
+        </div>
       </div>
       
       <nav className="flex gap-3 flex-wrap">
@@ -36,21 +52,6 @@ const Header = () => {
           Roteirizador Automático
         </NavLink>
       </nav>
-
-      <div className="absolute top-[-100px] right-0 flex items-center space-x-4">
-        <span className="text-muted-foreground text-sm">
-          Bem vindo, {user?.name || 'Usuário'}
-        </span>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={logout}
-          className="flex items-center gap-2"
-        >
-          <LogOut className="h-4 w-4" />
-          Sair
-        </Button>
-      </div>
     </header>
   );
 };
