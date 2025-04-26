@@ -22,7 +22,7 @@ const Header = () => {
       
       <nav className="flex gap-3 flex-wrap">
         <NavLink to="/" currentPath={location.pathname}>
-          Início
+          Pesquisar
         </NavLink>
         <NavLink to="/video-analyzer" currentPath={location.pathname}>
           Analisar Vídeo
