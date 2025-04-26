@@ -1,4 +1,3 @@
-
 export const formatNumber = (num: number) => {
   return new Intl.NumberFormat("pt-BR").format(num);
 };
@@ -37,4 +36,38 @@ export const formatLanguage = (languageCode: string): string => {
   };
   
   return languageMap[languageCode] || languageCode;
+};
+
+export const analyzeSaturation = (results: any[], keyword: string) => {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  
+  const recentVideos = results.filter(video => {
+    const videoAge = video.videoAge; // already in days
+    return videoAge <= 30;
+  });
+
+  const keywordVideos = recentVideos.filter(video => 
+    video.title.toLowerCase().includes(keyword.toLowerCase())
+  );
+
+  if (keywordVideos.length > 20) {
+    return {
+      status: 'high',
+      message: 'Alta saturação: mais de 20 vídeos nos últimos 30 dias',
+      count: keywordVideos.length
+    };
+  } else if (keywordVideos.length > 10) {
+    return {
+      status: 'medium',
+      message: 'Saturação média: entre 10-20 vídeos nos últimos 30 dias',
+      count: keywordVideos.length
+    };
+  } else {
+    return {
+      status: 'low',
+      message: 'Espaço aberto: menos de 10 vídeos nos últimos 30 dias',
+      count: keywordVideos.length
+    };
+  }
 };
