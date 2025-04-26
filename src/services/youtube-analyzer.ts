@@ -2,33 +2,10 @@
 import { VideoAnalysis } from "@/types/youtube-types";
 import { analyzeSaturation } from "@/utils/formatters";
 
-const MOCK_VIDEO_DATABASE = [
-  {
-    title: "Como Meditar em 5 Minutos por Dia",
-    description: "Neste vídeo, ensino uma técnica simples de meditação que você pode fazer em apenas 5 minutos por dia. Ideal para iniciantes e para quem tem uma rotina agitada.",
-    views: 45000,
-    videoAge: 15,
-    channel: "Equilíbrio Mental",
-    language: "pt-BR",
-  },
-  {
-    title: "5 Técnicas de Meditação para Iniciantes",
-    description: "Aprenda cinco técnicas simples de meditação para quem está começando agora. Resultados rápidos e sem complicação!",
-    views: 32000,
-    videoAge: 22,
-    channel: "Vida Consciente",
-    language: "pt-BR",
-  },
-  {
-    title: "Meditação Guiada para Iniciantes - 10 minutos",
-    description: "Uma meditação guiada simples e eficaz para quem está começando. Apenas 10 minutos por dia para transformar sua mente.",
-    views: 78000,
-    videoAge: 8,
-    channel: "Paz Interior",
-    language: "pt-BR",
-  },
-];
+// API Key para o YouTube Data API - Em uma aplicação real, isso deveria vir de variáveis de ambiente
+const YOUTUBE_API_KEY = "YOUR_YOUTUBE_API_KEY"; // Substitua pelo seu API Key
 
+// Função auxiliar para extrair o ID do vídeo de uma URL do YouTube
 function extractVideoId(url: string): string | null {
   const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
   const match = url.match(regex);
@@ -36,144 +13,186 @@ function extractVideoId(url: string): string | null {
 }
 
 export const analyzeYoutubeVideo = async (videoUrl: string): Promise<VideoAnalysis> => {
-  // Simulando tempo de processamento
-  await new Promise(resolve => setTimeout(resolve, 2000));
-  
   const videoId = extractVideoId(videoUrl);
   if (!videoId) {
     throw new Error("URL de vídeo inválido");
   }
-  
-  // Em uma implementação real, aqui faríamos chamadas à API do YouTube
-  // Para fins de demonstração, vamos usar dados simulados
-  
-  // Pegamos o segundo vídeo da nossa base fictícia como exemplo
-  const videoData = MOCK_VIDEO_DATABASE[1];
-  
-  // Analisar saturação (usando a função existente)
-  const saturationAnalysis = analyzeSaturation(MOCK_VIDEO_DATABASE, videoData.title);
-  
-  return {
-    basicInfo: {
-      title: videoData.title,
-      description: videoData.description,
-      views: videoData.views,
-      publishDate: "2023-09-15", // Data fictícia
-      language: videoData.language,
-      duration: "8:24", // Duração fictícia
-      category: "Saúde e Bem-estar",
-      tags: ["meditação", "bem-estar", "saúde mental", "iniciantes", "técnicas"]
-    },
+
+  try {
+    // Obter dados básicos do vídeo da API do YouTube
+    const videoResponse = await fetch(
+      `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=snippet,statistics,contentDetails&key=${YOUTUBE_API_KEY}`
+    );
     
-    translations: {
-      english: {
-        title: "5 Meditation Techniques for Beginners",
-        description: "Learn five simple meditation techniques for those who are just starting out. Quick results without complications!"
-      },
-      spanish: {
-        title: "5 Técnicas de Meditación para Principiantes",
-        description: "Aprenda cinco técnicas simples de meditación para quienes recién están comenzando. ¡Resultados rápidos y sin complicaciones!"
-      },
-      french: {
-        title: "5 Techniques de Méditation pour Débutants",
-        description: "Apprenez cinq techniques simples de méditation pour ceux qui débutent. Des résultats rapides sans complications!"
-      },
-      italian: {
-        title: "5 Tecniche di Meditazione per Principianti",
-        description: "Impara cinque semplici tecniche di meditazione per chi sta iniziando. Risultati rapidi e senza complicazioni!"
-      }
-    },
+    if (!videoResponse.ok) {
+      const errorData = await videoResponse.json();
+      throw new Error(`Erro na API do YouTube: ${errorData.error?.message || 'Erro desconhecido'}`);
+    }
     
-    titleVariations: {
-      emotional: [
-        "5 Técnicas de Meditação que Transformaram Minha Ansiedade",
-        "O Segredo da Meditação que Ninguém te Conta",
-        "Como Meditar Mesmo Quando Você Acha Que Não Consegue",
-        "Meditação para Quem Está Sofrendo com Estresse",
-        "A Prática de 5 Minutos que me Salvou da Depressão"
+    const videoData = await videoResponse.json();
+    
+    if (!videoData.items || videoData.items.length === 0) {
+      throw new Error("Vídeo não encontrado ou indisponível");
+    }
+    
+    const video = videoData.items[0];
+    const snippet = video.snippet;
+    const statistics = video.statistics;
+    const contentDetails = video.contentDetails;
+    
+    // Formatar a duração do vídeo (do formato ISO 8601 para um formato mais legível)
+    let duration = contentDetails.duration;
+    duration = duration.replace('PT', '');
+    duration = duration.replace('H', ':').replace('M', ':').replace('S', '');
+    if (duration.endsWith(':')) duration = duration.slice(0, -1);
+    
+    // Detectar idioma do vídeo
+    const language = snippet.defaultLanguage || snippet.defaultAudioLanguage || 'und'; // und = undefined
+    
+    // Extrair tags (se disponíveis)
+    const tags = snippet.tags || [];
+    
+    // Dados básicos do vídeo
+    const basicInfo = {
+      title: snippet.title,
+      description: snippet.description,
+      views: parseInt(statistics.viewCount, 10),
+      publishDate: new Date(snippet.publishedAt).toLocaleDateString(),
+      language: language,
+      duration: duration,
+      category: snippet.categoryId, // Idealmente, converteríamos o ID da categoria para o nome
+      tags: tags
+    };
+    
+    // Para fins de demonstração, usamos dados simulados para o resto da análise
+    // Em uma implementação real, poderíamos usar serviços de AI como ChatGPT para gerar essas sugestões
+    
+    // Simular análise de saturação
+    const saturationResponse = await fetch(
+      `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(basicInfo.title)}&type=video&publishedAfter=${encodeURIComponent(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())}&key=${YOUTUBE_API_KEY}`
+    );
+    
+    const saturationData = await saturationResponse.json();
+    const videoCount = saturationData.pageInfo?.totalResults || 0;
+    
+    let saturationStatus: "high" | "medium" | "low";
+    let saturationMessage = "";
+    
+    if (videoCount > 20) {
+      saturationStatus = "high";
+      saturationMessage = "Alta saturação detectada";
+    } else if (videoCount > 10) {
+      saturationStatus = "medium";
+      saturationMessage = "Saturação média detectada";
+    } else {
+      saturationStatus = "low";
+      saturationMessage = "Baixa saturação, boa oportunidade";
+    }
+    
+    const saturation = {
+      status: saturationStatus,
+      message: saturationMessage,
+      count: videoCount
+    };
+    
+    return {
+      basicInfo,
+      translations: {
+        english: {
+          title: `[English] ${basicInfo.title}`,
+          description: `This is a simulated translation of the description to English.`
+        },
+        spanish: {
+          title: `[Español] ${basicInfo.title}`,
+          description: `Esta es una traducción simulada de la descripción al español.`
+        },
+        french: {
+          title: `[Français] ${basicInfo.title}`,
+          description: `Ceci est une traduction simulée de la description en français.`
+        },
+        italian: {
+          title: `[Italiano] ${basicInfo.title}`,
+          description: `Questa è una traduzione simulata della descrizione in italiano.`
+        }
+      },
+      titleVariations: {
+        emotional: [
+          `[Emoção] Como ${basicInfo.title} mudou minha vida`,
+          `O incrível segredo por trás de ${basicInfo.title}`,
+          `A verdade chocante sobre ${basicInfo.title} que ninguém conta`,
+          `Por que ${basicInfo.title} me fez chorar`,
+          `A jornada inspiradora para descobrir ${basicInfo.title}`
+        ],
+        structural: [
+          `7 maneiras de dominar ${basicInfo.title} em 30 dias`,
+          `${basicInfo.title}: o guia definitivo para iniciantes`,
+          `Você está fazendo ${basicInfo.title} errado? 5 erros comuns`,
+          `Antes e depois: como ${basicInfo.title} transformou meus resultados`,
+          `${basicInfo.title} explicado em apenas 5 minutos`
+        ],
+        multilingual: [
+          `[English] The ultimate guide to ${basicInfo.title}`,
+          `[Español] Todo lo que necesitas saber sobre ${basicInfo.title}`,
+          `[Français] Les secrets de ${basicInfo.title} révélés`,
+          `[Italiano] Come padroneggiare ${basicInfo.title} in 30 giorni`,
+          `[Deutsch] ${basicInfo.title} leicht gemacht`
+        ]
+      },
+      scriptIdeas: [
+        `História pessoal: Minha jornada com ${basicInfo.title} e como isso mudou minha perspectiva.`,
+        `Análise aprofundada: Os 5 princípios fundamentais de ${basicInfo.title} que ninguém explica.`,
+        `Guia passo a passo: Como implementar ${basicInfo.title} em sua rotina diária.`,
+        `Debate: Prós e contras de diferentes abordagens para ${basicInfo.title}.`,
+        `Entrevista com especialista: Conversando com um profissional sobre ${basicInfo.title}.`
       ],
-      structural: [
-        "7 Técnicas de Meditação que Funcionam em Apenas 3 Minutos",
-        "Técnica #1 de Meditação: O Método que Ninguém Conhece",
-        "Você Medita Errado? 3 Erros que Impedem seu Progresso",
-        "Meditação 101: O Guia Definitivo para Iniciantes",
-        "10 Dias de Meditação: O Desafio que Vai Mudar sua Vida"
+      thumbnailPrompts: [
+        `Imagem de uma pessoa com expressão surpresa olhando para texto grande '${basicInfo.title}' com fundo gradiente azul para vermelho`,
+        `Close-up em olhos expressivos com reflexo mostrando '${basicInfo.title}', fundo escuro contrastante`,
+        `Colagem antes/depois demonstrando o impacto de '${basicInfo.title}', texto em negrito no centro`,
+        `Silhueta de pessoa contra pôr do sol com texto inspirador sobre '${basicInfo.title}' em fontes modernas`,
+        `Estilo minimalista com apenas um elemento visual forte relacionado a '${basicInfo.title}' e texto grande na lateral`
       ],
-      multilingual: [
-        "Meditation Techniques That Changed My Life (Inglês)",
-        "Las 5 Mejores Técnicas de Meditación para Principiantes (Espanhol)",
-        "Comment Méditer en 5 Minutes par Jour (Francês)",
-        "5 Tecniche di Meditazione per Principianti (Italiano)",
-        "Медитация для Начинающих: 5 Простых Техник (Russo)"
-      ]
-    },
+      supportImagePrompts: [
+        `Infográfico explicando os 5 elementos principais de '${basicInfo.title}'`,
+        `Tabela comparativa mostrando diferentes abordagens para '${basicInfo.title}'`,
+        `Linha do tempo visual mostrando a evolução e marcos importantes de '${basicInfo.title}'`,
+        `Diagrama de fluxo ilustrando o processo de dominar '${basicInfo.title}' passo a passo`,
+        `Conjunto de ícones personalizados representando os conceitos-chave de '${basicInfo.title}'`
+      ],
+      subNicheIdeas: [
+        {
+          name: `${basicInfo.title} para iniciantes`,
+          description: "Conteúdo focado especificamente em pessoas que estão começando do zero.",
+          examples: [
+            `Guia do absoluto iniciante para ${basicInfo.title}`,
+            `Os erros mais comuns de iniciantes em ${basicInfo.title}`,
+            `${basicInfo.title} simplificado: aprenda em 7 dias`
+          ]
+        },
+        {
+          name: `${basicInfo.title} avançado`,
+          description: "Conteúdo para quem já domina o básico e quer técnicas mais sofisticadas.",
+          examples: [
+            `Técnicas avançadas de ${basicInfo.title} que 98% das pessoas desconhecem`,
+            `Domine ${basicInfo.title} como um profissional`,
+            `Os segredos dos especialistas em ${basicInfo.title}`
+          ]
+        },
+        {
+          name: `${basicInfo.title} para negócios`,
+          description: "Como aplicar este conhecimento especificamente no contexto empresarial.",
+          examples: [
+            `Como ${basicInfo.title} pode revolucionar seu negócio`,
+            `Estudo de caso: empresa aumenta receita em 240% com ${basicInfo.title}`,
+            `Estratégias de ${basicInfo.title} para pequenas empresas`
+          ]
+        }
+      ],
+      saturation
+    };
     
-    scriptIdeas: [
-      "História pessoal: Como a meditação me ajudou a superar um burnout severo e como essas 5 técnicas foram fundamentais para minha recuperação.",
-      
-      "Contexto histórico: Explorar a origem de cada uma das 5 técnicas em diferentes culturas (zen budismo, yoga, mindfulness ocidental) e como elas evoluíram para se adaptar ao mundo moderno.",
-      
-      "Desafio de 21 dias: Estruturar o vídeo como um desafio, mostrando o progresso dia após dia de uma pessoa iniciando na meditação, com depoimentos reais.",
-      
-      "Abordagem científica: Apresentar estudos neurocientíficos que comprovam os benefícios de cada técnica de meditação, com visualizações de scans cerebrais antes e depois da prática.",
-      
-      "Meditação em situações extremas: Mostrar como pessoas em situações de alto estresse (cirurgiões, bombeiros, atletas) utilizam técnicas rápidas de meditação para manter o foco e a calma."
-    ],
-    
-    thumbnailPrompts: [
-      "Fotografia minimalista em tons de azul e branco mostrando uma pessoa serena de perfil com leve sorriso, com efeito de ondas cerebrais azuis iluminadas saindo de sua cabeça, texto em negrito '5 TÉCNICAS QUE FUNCIONAM'",
-      
-      "Contraste visual entre um lado da imagem mostrando uma pessoa estressada com cores caóticas (vermelho/laranja) e outro lado mostrando a mesma pessoa meditando em paz com cores suaves (azul/verde), split design, texto 'DO CAOS À PAZ'",
-      
-      "Close-up dramático de um olho humano fechado com uma lágrima de alívio, iluminação suave azulada, reflexo de padrões de ondas cerebrais na lágrima, texto impactante '5 MIN = TRANSFORMAÇÃO'",
-      
-      "Silhueta de pessoa meditando ao pôr do sol com cinco raios de luz diferentes cores saindo de seu corpo, representando as 5 técnicas, design gráfico minimalista, texto 'MEDITAÇÃO PARA INICIANTES'",
-      
-      "Composição tipo 'antes e depois' com rosto dividido ao meio: lado esquerdo com expressão de estresse e cores tensas, lado direito com expressão serena e cores suaves, texto 'A CIÊNCIA DA MEDITAÇÃO'"
-    ],
-    
-    supportImagePrompts: [
-      "Ilustração anatômica estilo infográfico do cérebro humano com áreas ativadas durante a meditação destacadas em azul brilhante, fundo branco limpo, estilo médico mas acessível",
-      
-      "Time-lapse da passagem do dia através de uma janela com uma almofada de meditação em primeiro plano, luz mudando gradualmente do amanhecer ao anoitecer, estilo fotográfico sereno",
-      
-      "Visualização de dados tipo ondas de áudio representando ondas cerebrais, comparando padrões antes da meditação (irregulares, vermelhos) e durante/após (regulares, azuis), design minimalista",
-      
-      "Ilustração isométrica 3D do interior de uma casa moderna com cinco espaços diferentes dedicados à meditação, cada um representando uma técnica diferente, estilo limpo e acolhedor",
-      
-      "Sequência de poses corporais simples para meditação iniciante, ilustrada em estilo flat design com linhas de fluxo de energia visíveis, fundo gradiente suave, aparência acessível e não intimidadora"
-    ],
-    
-    subNicheIdeas: [
-      {
-        name: "Meditação para Produtividade",
-        description: "Foco em técnicas específicas de meditação para aumentar foco, produtividade e criatividade no trabalho e estudos.",
-        examples: [
-          "Meditação de 3 minutos para fazer antes de reuniões importantes",
-          "Como usar micromeditações para evitar procrastinação",
-          "Técnica pomodoro + meditação: o combo perfeito para estudantes"
-        ]
-      },
-      {
-        name: "Meditação para Relacionamentos",
-        description: "Técnicas meditativas para melhorar conexão interpessoal, comunicação e inteligência emocional nos relacionamentos.",
-        examples: [
-          "Meditação para casais: exercícios para fazer juntos",
-          "Como a meditação me ajudou a ter mais empatia com meus filhos",
-          "Técnica de escuta consciente para resolver conflitos"
-        ]
-      },
-      {
-        name: "Meditação para Atletas",
-        description: "Práticas de meditação adaptadas para melhorar performance esportiva, foco em competições e recuperação física.",
-        examples: [
-          "A técnica de visualização usada por atletas olímpicos",
-          "Meditação pré-treino: 5 minutos para máxima performance",
-          "Como meditar durante a corrida: mindfulness em movimento"
-        ]
-      }
-    ],
-    
-    saturation: saturationAnalysis
-  };
+  } catch (error) {
+    console.error("Erro ao analisar vídeo:", error);
+    throw new Error(`Falha ao analisar o vídeo: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+  }
 };
