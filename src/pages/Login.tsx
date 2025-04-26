@@ -18,6 +18,7 @@ const Login = () => {
     
     if (username === "admin" && password === "admin") {
       localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("userName", username); // Save the username
       toast({
         title: "Login bem-sucedido",
         description: "Bem-vindo ao YTAnalyzer!",
@@ -74,4 +75,3 @@ const Login = () => {
 };
 
 export default Login;
-
