@@ -1,4 +1,3 @@
-
 import { VideoResult, YoutubeSearchParams } from "@/types/youtube-types";
 import { format, formatDistanceToNow, isValid } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -44,8 +43,17 @@ const generateVideoTitle = (keyword: string): string => {
 
 // Calcula o Viral Score com base em visualizações, engajamento e idade do vídeo
 const calculateViralScore = (views: number, engagement: number, ageInDays: number): number => {
-  // Videos mais recentes têm maior peso
-  const freshnessMultiplier = Math.max(1, 30 / Math.max(0.1, ageInDays));
+  // Maior peso para vídeos muito recentes (24/48/72h)
+  let freshnessMultiplier = 1;
+  if (ageInDays <= 1) { // 24h
+    freshnessMultiplier = 5; 
+  } else if (ageInDays <= 2) { // 48h
+    freshnessMultiplier = 4;
+  } else if (ageInDays <= 3) { // 72h
+    freshnessMultiplier = 3;
+  } else if (ageInDays <= 7) {
+    freshnessMultiplier = 2;
+  }
   
   // Taxa de crescimento: mais visualizações em menos tempo = maior pontuação
   const growthRate = views / Math.max(0.1, ageInDays);
@@ -53,8 +61,16 @@ const calculateViralScore = (views: number, engagement: number, ageInDays: numbe
   // Engajamento tem peso importante para viralização
   const engagementScore = engagement * 2;
   
+  // Penalizar vídeos muito grandes (já virais)
+  let penaltyFactor = 1;
+  if (views > 1000000) {
+    penaltyFactor = 0.5; // Reduz pela metade a pontuação de vídeos já grandes
+  } else if (views > 500000) {
+    penaltyFactor = 0.7;
+  }
+  
   // Combinar os fatores com pesos específicos
-  return Math.round((growthRate * 0.4 + engagementScore * 0.4 + freshnessMultiplier * 0.2) * 100);
+  return Math.round((growthRate * 0.3 + engagementScore * 0.3 + freshnessMultiplier * 0.4) * penaltyFactor * 100);
 };
 
 // Estimar CPM com base em idioma, visualizações e engajamento
@@ -62,23 +78,23 @@ const estimateCPM = (language: string, views: number, engagement: number): numbe
   let baseCPM = 0;
   
   // CPM base por idioma (valores mais realistas baseados em dados de mercado)
-  if (language.startsWith("en")) baseCPM = 6.50;
-  else if (language.startsWith("pt")) baseCPM = 3.20;
-  else if (language.startsWith("de")) baseCPM = 5.80;
-  else if (language.startsWith("fr")) baseCPM = 5.20;
-  else if (language.startsWith("ja")) baseCPM = 4.80;
-  else if (language.startsWith("es")) baseCPM = 3.80;
-  else baseCPM = 3.00;
+  if (language.startsWith("en")) baseCPM = 5.50;
+  else if (language.startsWith("pt")) baseCPM = 2.80;
+  else if (language.startsWith("de")) baseCPM = 4.70;
+  else if (language.startsWith("fr")) baseCPM = 4.20;
+  else if (language.startsWith("ja")) baseCPM = 3.80;
+  else if (language.startsWith("es")) baseCPM = 3.20;
+  else baseCPM = 2.80;
   
   // Ajustar com base no engajamento (engajamento maior = maior CPM)
-  const engagementMultiplier = 1 + (engagement / 50);
+  const engagementMultiplier = 1 + (engagement / 100);
   
-  // Ajustar com base nas visualizações (canais maiores geralmente têm CPMs melhores devido à demanda dos anunciantes)
+  // Ajustar com base nas visualizações (valores mais realistas)
   let viewsAdjustment = 1.0;
-  if (views > 1000000) viewsAdjustment = 1.15;
-  else if (views > 500000) viewsAdjustment = 1.1;
-  else if (views > 100000) viewsAdjustment = 1.05;
-  else if (views < 10000) viewsAdjustment = 0.9;
+  if (views > 1000000) viewsAdjustment = 1.1;
+  else if (views > 500000) viewsAdjustment = 1.05;
+  else if (views > 100000) viewsAdjustment = 1.02;
+  else if (views < 10000) viewsAdjustment = 0.95;
   
   return Number((baseCPM * engagementMultiplier * viewsAdjustment).toFixed(2));
 };
@@ -86,16 +102,58 @@ const estimateCPM = (language: string, views: number, engagement: number): numbe
 // Função para calcular a idade do vídeo baseado no período selecionado
 const calculateVideoAge = (period: YoutubeSearchParams["period"]): number => {
   switch (period) {
-    case "24h": return randomBetween(1, 24) / 24; // Entre 1 e 24 horas (fração de dia)
-    case "48h": return randomBetween(24, 48) / 24; // Entre 24 e 48 horas
-    case "72h": return randomBetween(48, 72) / 24; // Entre 48 e 72 horas
+    case "24h": 
+      // Entre 1 e 24 horas (Valores precisos em fração de dia)
+      return randomBetween(1, 24) / 24; 
+    case "48h": 
+      // Entre 24 e 48 horas (Valores precisos em fração de dia)
+      return randomBetween(24, 48) / 24; 
+    case "72h": 
+      // Entre 48 e 72 horas (Valores precisos em fração de dia)
+      return randomBetween(48, 72) / 24;
     case "7d": return randomBetween(3, 7); // Entre 3 e 7 dias
     case "30d": return randomBetween(7, 30); // Entre 7 e 30 dias
     case "90d": return randomBetween(30, 90); // Entre 30 e 90 dias
     case "180d": return randomBetween(90, 180); // Entre 90 e 180 dias
     case "all":
-    default: return randomBetween(1, 1095); // Até 3 anos
+    default: return randomBetween(1, 365); // Até 1 ano
   }
+};
+
+// Função para detectar principais palavras-chave e possíveis nichos
+const detectNiche = (title: string, keywords: string): { mainNiche: string, subNiche: string } => {
+  const allText = (title + " " + keywords).toLowerCase();
+  
+  // Nichos principais comuns no YouTube
+  const mainNiches = [
+    "tecnologia", "tech", "games", "jogos", "beleza", "beauty", 
+    "moda", "fashion", "culinária", "cooking", "fitness", "saúde",
+    "health", "música", "music", "educação", "education", "finanças",
+    "finance", "viagem", "travel", "espiritualidade", "spirituality"
+  ];
+  
+  // Encontrar nicho principal
+  let mainNiche = "Diversos";
+  for (const niche of mainNiches) {
+    if (allText.includes(niche)) {
+      mainNiche = niche.charAt(0).toUpperCase() + niche.slice(1);
+      break;
+    }
+  }
+  
+  // Gerar subnicho com base em combinações de palavras frequentes
+  const words = allText.split(/\s+/).filter(w => w.length > 3);
+  let subNiche = "";
+  
+  if (words.length >= 3) {
+    const randomIndex = Math.floor(Math.random() * (words.length - 2));
+    subNiche = words[randomIndex].charAt(0).toUpperCase() + words[randomIndex].slice(1) + " " + 
+               words[randomIndex + 1] + " " + words[randomIndex + 2];
+  } else {
+    subNiche = mainNiche + " Específico";
+  }
+  
+  return { mainNiche, subNiche };
 };
 
 // Função para buscar dados reais da API do YouTube
@@ -154,7 +212,7 @@ const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<VideoResul
     let videoStatsMap: Record<string, any> = {};
     if (videoIds.length > 0) {
       const videoStatsResponse = await fetch(
-        `https://www.googleapis.com/youtube/v3/videos?part=statistics,contentDetails&id=${videoIds.join(",")}&key=${params.apiKey}`
+        `https://www.googleapis.com/youtube/v3/videos?part=statistics,contentDetails,snippet&id=${videoIds.join(",")}&key=${params.apiKey}`
       );
       
       if (videoStatsResponse.ok) {
@@ -164,7 +222,10 @@ const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<VideoResul
             views: parseInt(item.statistics.viewCount) || 0,
             likes: parseInt(item.statistics.likeCount) || 0,
             comments: parseInt(item.statistics.commentCount) || 0,
-            duration: item.contentDetails.duration
+            duration: item.contentDetails.duration,
+            publishedAt: item.snippet.publishedAt,
+            tags: item.snippet.tags || [],
+            description: item.snippet.description || ""
           };
           return acc;
         }, {});
@@ -203,12 +264,13 @@ const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<VideoResul
       // Calcular valores
       const views = videoStats.views || randomBetween(params.minViews || 1000, 1000000);
       const likes = videoStats.likes || Math.floor(views * randomBetween(2, 10) / 100);
-      const engagement = Math.round((likes / Math.max(1, views)) * 100);
+      const comments = videoStats.comments || Math.floor(likes * randomBetween(1, 5) / 10);
+      const engagement = Math.round(((likes + comments) / Math.max(1, views)) * 100);
       
       // Calcular idade do vídeo baseado na data de publicação ou no período selecionado
       let videoAge;
-      if (item.snippet.publishedAt) {
-        const publishDate = new Date(item.snippet.publishedAt);
+      if (videoStats.publishedAt) {
+        const publishDate = new Date(videoStats.publishedAt);
         const now = new Date();
         videoAge = (now.getTime() - publishDate.getTime()) / (1000 * 60 * 60 * 24);
       } else {
@@ -231,12 +293,16 @@ const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<VideoResul
       const estimatedRPM = Number((estimatedCPM * 0.55).toFixed(2)); // YouTubers geralmente recebem 55% do CPM
       const estimatedEarnings = Number(((views / 1000) * estimatedRPM).toFixed(2));
       
+      // Detectar nicho com base no título e palavras-chave
+      const tagsString = (videoStats.tags || []).join(" ");
+      const nicheInfo = detectNiche(item.snippet.title, tagsString + " " + (videoStats.description || ""));
+      
       // Construir URLs
       const videoUrl = videoId ? `https://www.youtube.com/watch?v=${videoId}` : undefined;
       const channelUrl = channelId ? `https://www.youtube.com/channel/${channelId}` : undefined;
       
       // Obter o idioma do vídeo do snippet ou usar o parâmetro language
-      const videoLanguage = item.snippet.defaultLanguage || params.language || "unknown";
+      const videoLanguage = item.snippet.defaultLanguage || item.snippet.defaultAudioLanguage || params.language || "unknown";
       
       return {
         id: videoId || item.id.channelId || item.id.playlistId || Math.random().toString(36).substring(2, 15),
@@ -255,9 +321,18 @@ const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<VideoResul
         subscribers,
         videoAge,
         channelDate: channelStats.publishedAt || new Date(new Date().setFullYear(new Date().getFullYear() - randomBetween(1, 10))).toISOString(),
-        language: videoLanguage
+        language: videoLanguage,
+        mainNiche: nicheInfo.mainNiche,
+        subNiche: nicheInfo.subNiche
       };
     });
+    
+    // Filtrar por idioma se especificado
+    if (params.language && params.language !== "any") {
+      return results.filter(video => 
+        video.language.toLowerCase().includes(params.language.toLowerCase())
+      );
+    }
     
     return results;
   } catch (error) {
@@ -272,12 +347,6 @@ export const searchYouTubeVideos = async (params: YoutubeSearchParams): Promise<
   if (params.apiKey && params.apiKey.trim()) {
     try {
       const data = await fetchYouTubeData(params);
-      
-      // Filtrar por idioma se especificado
-      if (params.language && params.language !== "any") {
-        return data.filter(video => video.language === params.language);
-      }
-      
       return data;
     } catch (error) {
       console.error("Erro na API do YouTube. Retornando dados simulados:", error);
@@ -304,16 +373,23 @@ export const searchYouTubeVideos = async (params: YoutubeSearchParams): Promise<
     const growthMultiplier = Math.max(1, 30 / Math.max(0.1, videoAge));
     const views = Math.round(baseViews * growthMultiplier);
     
-    const engagement = randomBetween(5, 25); // Aumentado para refletir melhor engagement viral
+    // Aumentar engajamento para vídeos mais recentes
+    const baseEngagement = randomBetween(5, 15);
+    const engagementBoost = videoAge <= 3 ? randomBetween(5, 15) : 0; // Boost para vídeos recentes (72h)
+    const engagement = baseEngagement + engagementBoost;
     
     const viralScore = calculateViralScore(views, engagement, videoAge);
     const estimatedCPM = estimateCPM(language, views, engagement);
     const estimatedRPM = Number((estimatedCPM * 0.55).toFixed(2));
     const estimatedEarnings = Number(((views / 1000) * estimatedRPM).toFixed(2));
     
+    // Gerar título e detectar nicho
+    const title = generateVideoTitle(params.keywords);
+    const nicheInfo = detectNiche(title, params.keywords);
+    
     results.push({
       id: Math.random().toString(36).substring(2, 15),
-      title: generateVideoTitle(params.keywords),
+      title,
       thumbnail: `https://i.ytimg.com/vi/${Math.random().toString(36).substring(2, 15)}/hqdefault.jpg`,
       channel: channelNames[Math.floor(Math.random() * channelNames.length)],
       channelId: Math.random().toString(36).substring(2, 15),
@@ -331,7 +407,9 @@ export const searchYouTubeVideos = async (params: YoutubeSearchParams): Promise<
       ),
       videoAge,
       channelDate: new Date(new Date().setFullYear(new Date().getFullYear() - randomBetween(1, 10))).toISOString(),
-      language
+      language,
+      mainNiche: nicheInfo.mainNiche,
+      subNiche: nicheInfo.subNiche
     });
   }
 
@@ -389,7 +467,14 @@ export const getLanguageDistributionData = (results: VideoResult[]) => {
   };
 
   results.forEach(video => {
-    const languageName = languageNames[video.language] || video.language;
+    // Melhorar identificação de idiomas
+    let languageKey = video.language;
+    if (languageKey === "unknown" || languageKey === "any") {
+      // Tentar inferir idioma pelo canal ou usar código genérico
+      languageKey = video.channel.includes("BR") ? "pt-BR" : "en-US";
+    }
+    
+    const languageName = languageNames[languageKey] || languageKey;
     distribution[languageName] = (distribution[languageName] || 0) + 1;
   });
 
@@ -442,7 +527,7 @@ export const exportToCSV = (data: VideoResult[]) => {
     "Título", "Canal", "Visualizações", "Engajamento (%)", 
     "Pontuação Viral", "CPM Estimado", "RPM Estimado", 
     "Ganhos Estimados", "Inscritos", "Idade do Vídeo (dias)", 
-    "Data do Canal", "Idioma"
+    "Data do Canal", "Idioma", "Nicho Principal", "Subnicho"
   ];
   
   // Preparar dados das linhas
@@ -458,7 +543,9 @@ export const exportToCSV = (data: VideoResult[]) => {
     item.subscribers,
     item.videoAge,
     new Date(item.channelDate).toLocaleDateString('pt-BR'),
-    item.language
+    item.language,
+    item.mainNiche,
+    item.subNiche
   ]);
   
   // Combinar cabeçalhos e linhas
@@ -475,4 +562,49 @@ export const exportToCSV = (data: VideoResult[]) => {
   link.setAttribute('download', `youtube-dados-${new Date().toISOString().slice(0, 10)}.csv`);
   link.click();
   URL.revokeObjectURL(url);
+};
+
+// Análise de tendências e nichos
+export const getTrendAnalysis = (results: VideoResult[]) => {
+  // Agrupa vídeos por nicho principal e calcula métricas
+  const nicheData = results.reduce((acc, video) => {
+    const niche = video.mainNiche || "Diversos";
+    
+    if (!acc[niche]) {
+      acc[niche] = {
+        count: 0,
+        avgViralScore: 0,
+        totalViews: 0,
+        totalEngagement: 0,
+        subniches: new Set()
+      };
+    }
+    
+    acc[niche].count++;
+    acc[niche].avgViralScore += video.viralScore;
+    acc[niche].totalViews += video.views;
+    acc[niche].totalEngagement += video.engagement;
+    
+    if (video.subNiche) {
+      acc[niche].subniches.add(video.subNiche);
+    }
+    
+    return acc;
+  }, {} as Record<string, {
+    count: number, 
+    avgViralScore: number, 
+    totalViews: number, 
+    totalEngagement: number,
+    subniches: Set<string>
+  }>);
+  
+  // Calcular médias e formatar dados para visualização
+  return Object.entries(nicheData).map(([niche, data]) => ({
+    niche,
+    videoCount: data.count,
+    avgViralScore: Math.round(data.avgViralScore / data.count),
+    avgViews: Math.round(data.totalViews / data.count),
+    avgEngagement: Math.round(data.totalEngagement / data.count),
+    subniches: Array.from(data.subniches).slice(0, 3) // Top 3 subnichos
+  })).sort((a, b) => b.avgViralScore - a.avgViralScore);
 };

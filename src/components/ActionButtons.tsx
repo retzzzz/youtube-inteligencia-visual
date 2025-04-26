@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { VideoResult } from "@/types/youtube-types";
 import { exportToCSV } from "@/services/youtube-mock-service";
-import { Download } from "lucide-react";
+import { Download, FileSpreadsheet, FilePdf } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -65,7 +65,7 @@ const ActionButtons = ({ results }: ActionButtonsProps) => {
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
       
       // Add dashboard image to PDF
-      pdf.text("Relatório de Análise YouTube", 14, 10);
+      pdf.text("Relatório de Análise YouTube - Detetive de Tendências", 14, 10);
       pdf.setFontSize(10);
       pdf.text("Data do relatório: " + new Date().toLocaleDateString('pt-BR'), 14, 16);
       pdf.text(`Total de vídeos analisados: ${results.length}`, 14, 22);
@@ -75,19 +75,29 @@ const ActionButtons = ({ results }: ActionButtonsProps) => {
       // Add summary results table
       pdf.addPage();
       pdf.setFontSize(14);
-      pdf.text("Dados Detalhados", 14, 10);
+      pdf.text("Vídeos Emergentes e Nichos Promissores", 14, 10);
       
-      const tableCol = ["Título", "Canal", "Visualizações", "Pontuação Viral", "CPM Est."];
-      const tableRows = results.slice(0, 15).map(item => [
-        item.title.substring(0, 30) + (item.title.length > 30 ? "..." : ""),
+      // Sort by viral score for the PDF
+      const sortedResults = [...results].sort((a, b) => b.viralScore - a.viralScore);
+      
+      const tableCol = [
+        "Título", "Canal", "Visualizações", "Pontuação Viral", 
+        "Nicho", "Idioma", "Idade", "CPM Est."
+      ];
+      
+      const tableRows = sortedResults.slice(0, 20).map(item => [
+        item.title.substring(0, 40) + (item.title.length > 40 ? "..." : ""),
         item.channel,
         item.views.toLocaleString('pt-BR'),
         item.viralScore.toString(),
+        item.mainNiche || "Diversos",
+        item.language,
+        item.videoAge < 1 ? `${Math.round(item.videoAge * 24)}h` : `${Math.round(item.videoAge)}d`,
         "$" + item.estimatedCPM.toFixed(2)
       ]);
       
       pdf.setFontSize(8);
-      pdf.text("* Exibindo até 15 resultados", 14, 16);
+      pdf.text("* Exibindo até 20 resultados dos vídeos mais promissores", 14, 16);
       
       // @ts-ignore
       pdf.autoTable({
@@ -103,7 +113,7 @@ const ActionButtons = ({ results }: ActionButtonsProps) => {
       });
       
       // Save PDF
-      pdf.save(`youtube-analise-${new Date().toLocaleDateString('pt-BR')}.pdf`);
+      pdf.save(`youtube-detetive-${new Date().toLocaleDateString('pt-BR')}.pdf`);
       
       toast({
         title: "PDF gerado com sucesso",
@@ -124,14 +134,14 @@ const ActionButtons = ({ results }: ActionButtonsProps) => {
   return (
     <div className="flex flex-wrap justify-end gap-2 my-4">
       <Button variant="outline" onClick={handleExportCsv}>
-        <Download className="w-4 h-4 mr-2" />
+        <FileSpreadsheet className="w-4 h-4 mr-2" />
         Exportar CSV
       </Button>
       
       <Button variant="default" onClick={handleExportPdf} disabled={isExporting}>
         {isExporting ? "Gerando PDF..." : (
           <>
-            <Download className="w-4 h-4 mr-2" />
+            <FilePdf className="w-4 h-4 mr-2" />
             Exportar PDF
           </>
         )}
@@ -141,4 +151,3 @@ const ActionButtons = ({ results }: ActionButtonsProps) => {
 };
 
 export default ActionButtons;
-

@@ -1,20 +1,15 @@
 
 import { VideoResult } from "@/types/youtube-types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, PieChart, Tooltip } from "recharts";
-import {
-  getLanguageDistributionData,
-  getViewRangeData,
-  getEarningsData
-} from "@/services/youtube-mock-service";
-import { Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Pie, Cell } from "recharts";
+import { getLanguageDistributionData, getViewRangeData, getEarningsData, getTrendAnalysis } from "@/services/youtube-mock-service";
+import { Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Pie, Cell, BarChart, PieChart, Tooltip } from "recharts";
 
 interface ChartSectionProps {
   results: VideoResult[];
 }
 
 // Paleta de cores personalizada
-const COLORS = ["#FF0000", "#CC0000", "#990000", "#660000", "#330000", "#000000"];
+const COLORS = ["#FF0000", "#CC0000", "#990000", "#660000", "#330000", "#000000", "#111111", "#222222", "#444444", "#666666"];
 
 const ChartSection = ({ results }: ChartSectionProps) => {
   // Se não houver resultados, não renderizar nada
@@ -24,24 +19,7 @@ const ChartSection = ({ results }: ChartSectionProps) => {
   const languageData = getLanguageDistributionData(results);
   const viewsData = getViewRangeData(results);
   const earningsData = getEarningsData(results);
-
-  // Traduzir códigos de idioma para nomes mais amigáveis
-  const translateLanguageCode = (code: string) => {
-    const languages: Record<string, string> = {
-      "pt-BR": "Português (BR)",
-      "en-US": "Inglês (EUA)",
-      "es-ES": "Espanhol",
-      "fr-FR": "Francês",
-      "de-DE": "Alemão",
-      "it-IT": "Italiano",
-      "ja-JP": "Japonês",
-      "ko-KR": "Coreano",
-      "ru-RU": "Russo",
-      "zh-CN": "Chinês"
-    };
-    
-    return languages[code] || code;
-  };
+  const trendData = getTrendAnalysis(results);
 
   // Custom tooltip para o gráfico de pizza
   const CustomTooltip = ({ active, payload }: any) => {
@@ -53,7 +31,6 @@ const ChartSection = ({ results }: ChartSectionProps) => {
         </div>
       );
     }
-
     return null;
   };
 
@@ -76,7 +53,7 @@ const ChartSection = ({ results }: ChartSectionProps) => {
                   fill="#FF0000"
                   dataKey="count"
                   nameKey="language"
-                  label={({ language }) => translateLanguageCode(language)}
+                  label={({ language }) => language}
                 >
                   {languageData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -109,20 +86,29 @@ const ChartSection = ({ results }: ChartSectionProps) => {
         </CardContent>
       </Card>
 
-      {/* Gráfico de faixa de ganhos estimados */}
+      {/* Gráfico de nichos emergentes */}
       <Card className="dashboard-card col-span-1 lg:col-span-2">
         <CardHeader>
-          <CardTitle className="text-lg font-medium">Faixa de Ganhos Estimados</CardTitle>
+          <CardTitle className="text-lg font-medium">Nichos Emergentes</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={earningsData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="label" />
-                <YAxis allowDecimals={false} />
+              <BarChart 
+                data={trendData.slice(0, 8)} 
+                layout="vertical"
+                margin={{ top: 5, right: 30, left: 100, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
+                <XAxis type="number" />
+                <YAxis 
+                  type="category" 
+                  dataKey="niche" 
+                  tick={{ fontSize: 12 }} 
+                  width={100} 
+                />
                 <Tooltip />
-                <Bar dataKey="count" name="Vídeos" fill="#FF0000" />
+                <Bar dataKey="avgViralScore" name="Score Médio" fill="#FF0000" />
               </BarChart>
             </ResponsiveContainer>
           </div>

@@ -30,6 +30,8 @@ export interface VideoResult {
   videoAge: number; // in days
   channelDate: string; // ISO date string
   language: string;
+  mainNiche?: string;
+  subNiche?: string;
 }
 
 export interface SavedSearch {

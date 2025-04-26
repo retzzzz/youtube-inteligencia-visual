@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { VideoResult, ColumnDefinition } from "@/types/youtube-types";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowUp, ArrowDown, Youtube } from "lucide-react";
+import { ArrowUp, ArrowDown, Youtube, ExternalLink } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
@@ -19,6 +20,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
+  PaginationEllipsis,
 } from "@/components/ui/pagination";
 
 interface ResultsTableProps {
@@ -26,7 +28,7 @@ interface ResultsTableProps {
 }
 
 const ResultsTable = ({ results }: ResultsTableProps) => {
-  const [sortColumn, setSortColumn] = useState<keyof VideoResult>("views");
+  const [sortColumn, setSortColumn] = useState<keyof VideoResult>("viralScore"); // Modificado para ordenar por viral score por padrão
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [currentPage, setCurrentPage] = useState(1);
   const resultsPerPage = 50;
@@ -38,13 +40,14 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
     { id: "views", label: "Visualizações", sortable: true },
     { id: "engagement", label: "Engajamento (%)", sortable: true },
     { id: "viralScore", label: "Pontuação Viral", sortable: true },
+    { id: "mainNiche", label: "Nicho", sortable: true },
     { id: "estimatedCPM", label: "CPM Est.", sortable: true },
     { id: "estimatedRPM", label: "RPM Est.", sortable: true },
     { id: "estimatedEarnings", label: "Ganhos Est.", sortable: true },
     { id: "subscribers", label: "Inscritos", sortable: true },
     { id: "videoAge", label: "Idade", sortable: true },
     { id: "language", label: "Idioma", sortable: true },
-    { id: "id", label: "Vídeo", sortable: false },
+    { id: "id", label: "Links", sortable: false },
   ];
 
   const handleSort = (column: keyof VideoResult) => {
@@ -113,6 +116,113 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
     setCurrentPage(page);
   };
 
+  // Melhorar a exibição dos números de página da paginação
+  const renderPaginationNumbers = () => {
+    const pageItems = [];
+    const maxVisiblePages = 5; // Número máximo de páginas visíveis
+    
+    if (totalPages <= maxVisiblePages) {
+      // Mostrar todas as páginas se o total for pequeno
+      for (let i = 1; i <= totalPages; i++) {
+        pageItems.push(
+          <PaginationItem key={i}>
+            <PaginationLink
+              isActive={currentPage === i}
+              onClick={() => handlePageChange(i)}
+            >
+              {i}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      }
+    } else {
+      // Sempre mostrar a primeira página
+      pageItems.push(
+        <PaginationItem key={1}>
+          <PaginationLink
+            isActive={currentPage === 1}
+            onClick={() => handlePageChange(1)}
+          >
+            1
+          </PaginationLink>
+        </PaginationItem>
+      );
+      
+      // Determinar o intervalo de páginas a exibir
+      let startPage = Math.max(2, currentPage - 2);
+      let endPage = Math.min(totalPages - 1, startPage + 3);
+      
+      // Ajustar o startPage se estiver no final
+      if (endPage === totalPages - 1) {
+        startPage = Math.max(2, endPage - 3);
+      }
+      
+      // Mostrar elipsis após a primeira página se necessário
+      if (startPage > 2) {
+        pageItems.push(
+          <PaginationItem key="ellipsis-start">
+            <PaginationEllipsis />
+          </PaginationItem>
+        );
+      }
+      
+      // Mostrar páginas do intervalo
+      for (let i = startPage; i <= endPage; i++) {
+        pageItems.push(
+          <PaginationItem key={i}>
+            <PaginationLink
+              isActive={currentPage === i}
+              onClick={() => handlePageChange(i)}
+            >
+              {i}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      }
+      
+      // Mostrar elipsis antes da última página se necessário
+      if (endPage < totalPages - 1) {
+        pageItems.push(
+          <PaginationItem key="ellipsis-end">
+            <PaginationEllipsis />
+          </PaginationItem>
+        );
+      }
+      
+      // Sempre mostrar a última página
+      pageItems.push(
+        <PaginationItem key={totalPages}>
+          <PaginationLink
+            isActive={currentPage === totalPages}
+            onClick={() => handlePageChange(totalPages)}
+          >
+            {totalPages}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+    
+    return pageItems;
+  };
+
+  // Traduzir códigos de idioma para nomes mais amigáveis
+  const formatLanguage = (languageCode: string): string => {
+    const languageMap: Record<string, string> = {
+      "pt-BR": "Português (BR)",
+      "en-US": "Inglês (EUA)",
+      "es-ES": "Espanhol",
+      "fr-FR": "Francês",
+      "de-DE": "Alemão",
+      "it-IT": "Italiano",
+      "ja-JP": "Japonês",
+      "ko-KR": "Coreano",
+      "ru-RU": "Russo",
+      "zh-CN": "Chinês"
+    };
+    
+    return languageMap[languageCode] || languageCode;
+  };
+
   return (
     <div className="space-y-4">
       <div className="rounded-md border overflow-hidden">
@@ -123,7 +233,7 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
                 {columns.map((column) => (
                   <TableHead 
                     key={column.id} 
-                    className={`whitespace-nowrap ${column.id === 'title' ? 'w-[300px]' : ''} ${column.id === 'videoAge' ? 'w-[60px]' : ''} ${column.id === 'id' ? 'w-[60px] text-center' : ''}`}
+                    className={`whitespace-nowrap ${column.id === 'title' ? 'w-[400px]' : ''} ${column.id === 'videoAge' ? 'w-[60px]' : ''} ${column.id === 'id' ? 'w-[80px] text-center' : ''}`}
                   >
                     {column.sortable ? (
                       <Button
@@ -153,7 +263,7 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
             <TableBody>
               {currentPageResults.map((result) => (
                 <TableRow key={result.id}>
-                  <TableCell className="max-w-[300px] truncate" title={result.title}>
+                  <TableCell className="max-w-[400px] truncate" title={result.title}>
                     {result.title}
                   </TableCell>
                   <TableCell>
@@ -167,25 +277,39 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
                   </TableCell>
                   <TableCell>{formatNumber(result.views)}</TableCell>
                   <TableCell>{result.engagement}%</TableCell>
-                  <TableCell>{result.viralScore}</TableCell>
+                  <TableCell className="font-medium">{result.viralScore}</TableCell>
+                  <TableCell>{result.mainNiche || "Diversos"}</TableCell>
                   <TableCell>{formatCurrency(result.estimatedCPM)}</TableCell>
                   <TableCell>{formatCurrency(result.estimatedRPM)}</TableCell>
                   <TableCell>{formatCurrency(result.estimatedEarnings)}</TableCell>
                   <TableCell>{formatNumber(result.subscribers)}</TableCell>
                   <TableCell>{formatVideoAge(result.videoAge)}</TableCell>
-                  <TableCell>{result.language}</TableCell>
+                  <TableCell>{formatLanguage(result.language)}</TableCell>
                   <TableCell className="text-center">
-                    {result.videoUrl && (
-                      <a 
-                        href={result.videoUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="inline-flex items-center text-youtube-red hover:text-red-700 justify-center w-full"
-                        title="Assistir no YouTube"
-                      >
-                        <Youtube className="h-5 w-5" />
-                      </a>
-                    )}
+                    <div className="flex items-center justify-center space-x-2">
+                      {result.videoUrl && (
+                        <a 
+                          href={result.videoUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="inline-flex items-center text-youtube-red hover:text-red-700"
+                          title="Assistir no YouTube"
+                        >
+                          <Youtube className="h-5 w-5" />
+                        </a>
+                      )}
+                      {result.channelUrl && (
+                        <a 
+                          href={result.channelUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="inline-flex items-center text-gray-500 hover:text-gray-700"
+                          title="Visitar Canal"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </a>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -199,29 +323,26 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious 
-                onClick={() => handlePageChange(currentPage - 1)}
+                onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                 className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
               />
             </PaginationItem>
-            {Array.from({length: totalPages}, (_, i) => i + 1).map(page => (
-              <PaginationItem key={page}>
-                <PaginationLink
-                  isActive={currentPage === page}
-                  onClick={() => handlePageChange(page)}
-                >
-                  {page}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
+            
+            {renderPaginationNumbers()}
+            
             <PaginationItem>
               <PaginationNext 
-                onClick={() => handlePageChange(currentPage + 1)}
+                onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
                 className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
               />
             </PaginationItem>
           </PaginationContent>
         </Pagination>
       )}
+      
+      <div className="text-sm text-muted-foreground text-right">
+        Exibindo {startIndex + 1}-{Math.min(endIndex, results.length)} de {results.length} resultados
+      </div>
     </div>
   );
 };

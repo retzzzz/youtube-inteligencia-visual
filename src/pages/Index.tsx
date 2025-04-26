@@ -33,9 +33,12 @@ const Index = () => {
           description: "Sua pesquisa não retornou resultados. Tente outros parâmetros.",
         });
       } else {
+        // Destacar vídeos emergentes (últimos 3 dias) com alto potencial viral
+        const emergingVideos = data.filter(video => video.videoAge <= 3 && video.viralScore > 700);
+        
         toast({
           title: "Pesquisa concluída",
-          description: `Encontrados ${data.length} resultados para sua busca.`,
+          description: `Encontrados ${data.length} resultados para sua busca${emergingVideos.length > 0 ? `, incluindo ${emergingVideos.length} vídeos emergentes` : ""}.`,
         });
       }
     } catch (error) {
@@ -99,9 +102,9 @@ const Index = () => {
 
       {!results.length && !isLoading && (
         <div className="text-center py-16">
-          <h2 className="text-2xl font-bold mb-2">Bem-vindo ao YouTube Inteligência Visual</h2>
+          <h2 className="text-2xl font-bold mb-2">Detetive de Tendências YouTube</h2>
           <p className="text-muted-foreground mb-6">
-            Use o formulário acima para pesquisar conteúdo no YouTube e obter análises detalhadas.
+            Use o formulário acima para pesquisar conteúdo emergente e descobrir novos nichos antes que fiquem saturados.
           </p>
         </div>
       )}
