@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from './ui/button';
@@ -25,6 +26,9 @@ const Header = () => {
         </NavLink>
         <NavLink to="/video-analyzer" currentPath={location.pathname}>
           Analisar Vídeo
+        </NavLink>
+        <NavLink to="/title-generator" currentPath={location.pathname}>
+          Gerar Títulos
         </NavLink>
       </nav>
     </header>
