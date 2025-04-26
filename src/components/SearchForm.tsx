@@ -6,8 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Search, Key } from "lucide-react";
+import { Search } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SearchFormProps {
   onSearch: (params: YoutubeSearchParams) => void;
@@ -15,6 +16,7 @@ interface SearchFormProps {
 }
 
 const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
+  const { youtubeApiKey } = useAuth();
   const [params, setParams] = useState<YoutubeSearchParams>({
     keywords: "",
     searchType: "videos",
@@ -25,19 +27,13 @@ const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
     maxSubscribers: null,
     period: "30d",
     maxResults: 50,
-    apiKey: localStorage.getItem("youtubeApiKey") || "",
+    apiKey: youtubeApiKey || "",
     excludeMusic: true,
     excludeKeywords: ""
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Save API key to localStorage
-    if (params.apiKey) {
-      localStorage.setItem("youtubeApiKey", params.apiKey);
-    }
-    
     onSearch(params);
   };
 
@@ -79,23 +75,6 @@ const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
               <SelectItem value="playlists">Playlists</SelectItem>
             </SelectContent>
           </Select>
-        </div>
-
-        {/* Chave API do YouTube */}
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="apiKey" className="flex items-center">
-            <Key className="h-4 w-4 mr-1" /> Chave API do YouTube
-          </Label>
-          <Input
-            id="apiKey"
-            type="password"
-            placeholder="Insira sua chave de API do YouTube"
-            value={params.apiKey}
-            onChange={(e) => handleChange("apiKey", e.target.value)}
-          />
-          <p className="text-xs text-muted-foreground">
-            Necessário para buscar resultados reais. <a href="https://developers.google.com/youtube/v3/getting-started" target="_blank" rel="noopener noreferrer" className="underline">Saiba como obter sua chave API</a>
-          </p>
         </div>
 
         {/* Idioma */}
