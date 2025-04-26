@@ -1,14 +1,12 @@
-
-import { VideoResult } from "@/types/youtube-types";
-import { KPISection } from "@/components/KPISection";
-import { ChartSection } from "@/components/ChartSection";
-import { ActionButtons } from "@/components/ActionButtons";
+import { VideoResult, YoutubeSearchParams } from "@/types/youtube-types";
+import KPISection from "@/components/KPISection";
+import ChartSection from "@/components/ChartSection";
+import ActionButtons from "@/components/ActionButtons";
 import { Card } from "@/components/ui/card";
 import ResultsTable from "@/components/ResultsTable";
 import RemodelingIdeas from "@/components/RemodelingIdeas";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ZapierIntegration from "@/components/ZapierIntegration";
-import { YoutubeSearchParams } from "@/types/youtube-types";
 
 interface ResultsSectionProps {
   results: VideoResult[];

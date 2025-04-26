@@ -1,10 +1,10 @@
-
 import Header from "@/components/Header";
 import SearchForm from "@/components/SearchForm";
 import SavedSearches from "@/components/SavedSearches";
 import ResultsSection from "@/components/ResultsSection";
 import WelcomeMessage from "@/components/WelcomeMessage";
 import { useYouTubeSearch } from "@/hooks/useYouTubeSearch";
+import { YoutubeSearchParams } from "@/types/youtube-types";
 
 const Index = () => {
   const { 
