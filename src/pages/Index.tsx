@@ -29,25 +29,62 @@ const Index = () => {
 
     try {
       const data = await searchYouTubeVideos(params);
-      setResults(data);
       
-      if (data.length === 0) {
+      // Enriquecer os dados com propriedades adicionais
+      const enrichedData = data.map(video => {
+        // Calcular visualizações por hora
+        const viewsPerHour = video.videoAge > 0 ? Math.round(video.views / (video.videoAge * 24)) : 0;
+        
+        // Determinar tamanho do canal
+        let channelSize: "small" | "medium" | "large" = "medium";
+        if (video.subscribers < 100000) channelSize = "small";
+        else if (video.subscribers > 1000000) channelSize = "large";
+        
+        // Determinar potencial de viralidade
+        let viralityPotential: "low" | "medium" | "high" = "low";
+        let viralityReason = "";
+        
+        // Considerar vários fatores para o potencial de viralidade
+        if (video.videoAge < 3 && video.engagement > 7 && viewsPerHour > 200) {
+          viralityPotential = "high";
+          viralityReason = "vídeo recente, alto engajamento, crescimento rápido";
+        } else if ((video.videoAge < 7 && video.engagement > 5) || viewsPerHour > 100) {
+          viralityPotential = "medium";
+          viralityReason = video.videoAge < 7 
+            ? "bom engajamento em vídeo recente" 
+            : "taxa de visualizações consistente";
+        } else {
+          viralityReason = "métricas de engajamento e crescimento moderadas";
+        }
+        
+        return {
+          ...video,
+          viewsPerHour,
+          channelSize,
+          viralityPotential,
+          viralityReason
+        };
+      });
+      
+      setResults(enrichedData);
+      
+      if (enrichedData.length === 0) {
         toast({
           title: "Sem resultados",
           description: "Sua pesquisa não retornou resultados. Tente outros parâmetros.",
         });
       } else {
         // Destacar vídeos emergentes (últimos 3 dias) com alto potencial viral
-        const emergingVideos = data.filter(video => video.videoAge <= 3 && video.viralScore > 700);
+        const emergingVideos = enrichedData.filter(video => video.videoAge <= 3 && video.viralScore > 700);
         
         toast({
           title: "Pesquisa concluída",
-          description: `Encontrados ${data.length} resultados para sua busca${emergingVideos.length > 0 ? `, incluindo ${emergingVideos.length} vídeos emergentes` : ""}.`,
+          description: `Encontrados ${enrichedData.length} resultados para sua busca${emergingVideos.length > 0 ? `, incluindo ${emergingVideos.length} vídeos emergentes` : ""}.`,
         });
         
         // Selecionar o vídeo mais viral para exibir sugestões de remodelagem
-        if (data.length > 0) {
-          const topVideo = [...data].sort((a, b) => b.viralScore - a.viralScore)[0];
+        if (enrichedData.length > 0) {
+          const topVideo = [...enrichedData].sort((a, b) => b.viralScore - a.viralScore)[0];
           setSelectedVideo(topVideo);
         }
       }
@@ -106,7 +143,7 @@ const Index = () => {
           </TabsList>
           
           <TabsContent value="resultados" className="mt-4">
-            <ResultsTable results={results} />
+            <ResultsTable results={results} onSelectVideo={handleSelectVideo} />
           </TabsContent>
           
           <TabsContent value="remodelagem" className="mt-4">

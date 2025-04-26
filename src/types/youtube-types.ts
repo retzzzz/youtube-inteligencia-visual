@@ -38,6 +38,12 @@ export interface VideoResult {
   alternativeTitles?: string[];
   targetAudience?: string;
   escalabilityScore?: number;
+  viewsPerHour?: number;
+  channelSize?: "small" | "medium" | "large";
+  viralityPotential?: "low" | "medium" | "high";
+  viralityReason?: string;
+  likes?: number;
+  comments?: number;
 }
 
 export interface SavedSearch {

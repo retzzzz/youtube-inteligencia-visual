@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { VideoResult, ColumnDefinition } from "@/types/youtube-types";
 import { Button } from "@/components/ui/button";
@@ -11,8 +10,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ArrowUp, ArrowDown, Youtube, ExternalLink } from "lucide-react";
-import { format, formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import {
   Pagination,
   PaginationContent,
@@ -25,15 +22,15 @@ import {
 
 interface ResultsTableProps {
   results: VideoResult[];
+  onSelectVideo?: (video: VideoResult) => void;
 }
 
-const ResultsTable = ({ results }: ResultsTableProps) => {
-  const [sortColumn, setSortColumn] = useState<keyof VideoResult>("viralScore"); // Modificado para ordenar por viral score por padrão
+const ResultsTable = ({ results, onSelectVideo }: ResultsTableProps) => {
+  const [sortColumn, setSortColumn] = useState<keyof VideoResult>("viralScore");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [currentPage, setCurrentPage] = useState(1);
   const resultsPerPage = 50;
 
-  // Definição das colunas da tabela
   const columns: ColumnDefinition[] = [
     { id: "title", label: "Título do Vídeo", sortable: true },
     { id: "channel", label: "Canal", sortable: true },
@@ -59,7 +56,6 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
     }
   };
 
-  // Ordenar os resultados
   const sortedResults = [...results].sort((a, b) => {
     const valA = a[sortColumn];
     const valB = b[sortColumn];
@@ -77,17 +73,14 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
     return 0;
   });
 
-  // Formatar números
   const formatNumber = (num: number) => {
     return new Intl.NumberFormat("pt-BR").format(num);
   };
 
-  // Formatar valores monetários
   const formatCurrency = (num: number) => {
     return `$${num.toFixed(2)}`;
   };
 
-  // Formatar idade do vídeo
   const formatVideoAge = (days: number) => {
     if (days < 1) {
       const hours = Math.round(days * 24);
@@ -103,26 +96,21 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
     }
   };
 
-  // Calcular total de páginas
   const totalPages = Math.ceil(results.length / resultsPerPage);
   
-  // Preparar resultados para a página atual
   const startIndex = (currentPage - 1) * resultsPerPage;
   const endIndex = startIndex + resultsPerPage;
   const currentPageResults = sortedResults.slice(startIndex, endIndex);
 
-  // Navegação entre páginas
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
 
-  // Melhorar a exibição dos números de página da paginação
   const renderPaginationNumbers = () => {
     const pageItems = [];
-    const maxVisiblePages = 5; // Número máximo de páginas visíveis
-    
+    const maxVisiblePages = 5;
+
     if (totalPages <= maxVisiblePages) {
-      // Mostrar todas as páginas se o total for pequeno
       for (let i = 1; i <= totalPages; i++) {
         pageItems.push(
           <PaginationItem key={i}>
@@ -136,7 +124,6 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
         );
       }
     } else {
-      // Sempre mostrar a primeira página
       pageItems.push(
         <PaginationItem key={1}>
           <PaginationLink
@@ -148,16 +135,13 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
         </PaginationItem>
       );
       
-      // Determinar o intervalo de páginas a exibir
       let startPage = Math.max(2, currentPage - 2);
       let endPage = Math.min(totalPages - 1, startPage + 3);
       
-      // Ajustar o startPage se estiver no final
       if (endPage === totalPages - 1) {
         startPage = Math.max(2, endPage - 3);
       }
       
-      // Mostrar elipsis após a primeira página se necessário
       if (startPage > 2) {
         pageItems.push(
           <PaginationItem key="ellipsis-start">
@@ -166,7 +150,6 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
         );
       }
       
-      // Mostrar páginas do intervalo
       for (let i = startPage; i <= endPage; i++) {
         pageItems.push(
           <PaginationItem key={i}>
@@ -180,7 +163,6 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
         );
       }
       
-      // Mostrar elipsis antes da última página se necessário
       if (endPage < totalPages - 1) {
         pageItems.push(
           <PaginationItem key="ellipsis-end">
@@ -189,7 +171,6 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
         );
       }
       
-      // Sempre mostrar a última página
       pageItems.push(
         <PaginationItem key={totalPages}>
           <PaginationLink
@@ -205,7 +186,6 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
     return pageItems;
   };
 
-  // Traduzir códigos de idioma para nomes mais amigáveis
   const formatLanguage = (languageCode: string): string => {
     const languageMap: Record<string, string> = {
       "pt-BR": "Português (BR)",
@@ -267,7 +247,11 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
             </TableHeader>
             <TableBody>
               {currentPageResults.map((result) => (
-                <TableRow key={result.id}>
+                <TableRow 
+                  key={result.id} 
+                  className={onSelectVideo ? "cursor-pointer hover:bg-muted" : ""}
+                  onClick={() => onSelectVideo && onSelectVideo(result)}
+                >
                   <TableCell className="max-w-[500px] min-w-[300px] pr-4" title={result.title}>
                     <div className="truncate">
                       {result.videoUrl ? (
@@ -276,6 +260,7 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
                           target="_blank" 
                           rel="noopener noreferrer" 
                           className="hover:underline text-blue-600 hover:text-blue-800"
+                          onClick={(e) => e.stopPropagation()}
                         >
                           {result.title}
                         </a>
@@ -284,7 +269,13 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
                   </TableCell>
                   <TableCell>
                     {result.channelUrl ? (
-                      <a href={result.channelUrl} target="_blank" rel="noopener noreferrer" className="hover:underline text-blue-600 hover:text-blue-800">
+                      <a 
+                        href={result.channelUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="hover:underline text-blue-600 hover:text-blue-800"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         {result.channel}
                       </a>
                     ) : (
@@ -310,6 +301,7 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
                           rel="noopener noreferrer" 
                           className="inline-flex items-center text-youtube-red hover:text-red-700"
                           title="Assistir no YouTube"
+                          onClick={(e) => e.stopPropagation()}
                         >
                           <Youtube className="h-5 w-5" />
                         </a>
@@ -321,6 +313,7 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
                           rel="noopener noreferrer" 
                           className="inline-flex items-center text-gray-500 hover:text-gray-700"
                           title="Visitar Canal"
+                          onClick={(e) => e.stopPropagation()}
                         >
                           <ExternalLink className="h-4 w-4" />
                         </a>
