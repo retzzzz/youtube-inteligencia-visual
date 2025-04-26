@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
-import { Copy, Check, Filter, ArrowDown, ArrowUp } from 'lucide-react';
+import { Copy, Check, Language } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { TitleVariation } from '@/pages/TitleGenerator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
@@ -12,9 +11,17 @@ interface TitleVariationsListProps {
   variations: TitleVariation[];
   onGenerateMore: () => void;
   totalCount: number;
+  setVariations: (variations: TitleVariation[]) => void;
+  keyword: string;
 }
 
-const TitleVariationsList = ({ variations, onGenerateMore, totalCount }: TitleVariationsListProps) => {
+const TitleVariationsList = ({ 
+  variations, 
+  onGenerateMore, 
+  totalCount,
+  setVariations,
+  keyword
+}: TitleVariationsListProps) => {
   const { toast } = useToast();
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<string>("all");
@@ -33,6 +40,33 @@ const TitleVariationsList = ({ variations, onGenerateMore, totalCount }: TitleVa
     }, 2000);
   };
 
+  const translateTitle = (variation: TitleVariation, index: number) => {
+    const languages: Array<"pt" | "es" | "en" | "fr"> = ["pt", "es", "en", "fr"].filter(
+      lang => lang !== variation.language
+    );
+
+    const translations = languages.map(lang => {
+      let translatedText = "";
+      if (lang === "pt") {
+        translatedText = `[Português] ${variation.text.replace(/^(\[.*?\])?/, '')}`;
+      } else if (lang === "es") {
+        translatedText = `[Español] ${variation.text.replace(/^(\[.*?\])?/, '')}`;
+      } else if (lang === "en") {
+        translatedText = `[English] ${variation.text.replace(/^(\[.*?\])?/, '')}`;
+      } else {
+        translatedText = `[Français] ${variation.text.replace(/^(\[.*?\])?/, '')}`;
+      }
+      return { text: translatedText, language: lang };
+    });
+
+    const updatedVariations = [...variations];
+    updatedVariations[index] = {
+      ...variation,
+      translations: translations
+    };
+    setVariations(updatedVariations);
+  };
+
   const copyAllTitles = () => {
     const titlesToDisplay = getFilteredAndSortedVariations();
     const titleText = titlesToDisplay.map(v => v.text).join('\n\n');
@@ -46,7 +80,6 @@ const TitleVariationsList = ({ variations, onGenerateMore, totalCount }: TitleVa
   const getFilteredAndSortedVariations = () => {
     let filtered = [...variations];
     
-    // Aplicar filtro por tipo de emoção
     if (filterType !== "all") {
       filtered = filtered.filter(v => {
         if (filterType === "dor") return v.type === "dor";
@@ -57,7 +90,6 @@ const TitleVariationsList = ({ variations, onGenerateMore, totalCount }: TitleVa
       });
     }
     
-    // Aplicar ordenação
     filtered.sort((a, b) => {
       if (sortBy === "emotion") {
         return a.type.localeCompare(b.type);
@@ -139,80 +171,114 @@ const TitleVariationsList = ({ variations, onGenerateMore, totalCount }: TitleVa
             const isCopied = copiedId === id;
             
             return (
-              <div 
-                key={id}
-                className="flex justify-between items-center p-4 rounded-md bg-muted/50 hover:bg-muted/80 transition-colors"
-              >
-                <div className="flex-1 mr-4">
-                  <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                    {variation.type === "dor" && (
-                      <Badge variant="outline" className="bg-red-50 text-red-800 border-red-200">
-                        Dor
-                      </Badge>
-                    )}
-                    {variation.type === "esperanca" && (
-                      <Badge variant="outline" className="bg-green-50 text-green-800 border-green-200">
-                        Esperança
-                      </Badge>
-                    )}
-                    {variation.type === "curiosidade" && (
-                      <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200">
-                        Curiosidade
-                      </Badge>
-                    )}
-                    
-                    {variation.saturation === "low" && (
-                      <Badge className="bg-green-100 text-green-800">
-                        Baixa Saturação
-                      </Badge>
-                    )}
-                    {variation.saturation === "medium" && (
-                      <Badge className="bg-yellow-100 text-yellow-800">
-                        Média Saturação
-                      </Badge>
-                    )}
-                    {variation.saturation === "high" && (
-                      <Badge className="bg-red-100 text-red-800">
-                        Alta Saturação
-                      </Badge>
-                    )}
-                    
-                    {variation.language === "pt" && (
-                      <Badge variant="secondary" className="text-xs">
-                        Português
-                      </Badge>
-                    )}
-                    {variation.language === "en" && (
-                      <Badge variant="secondary" className="text-xs">
-                        Inglês
-                      </Badge>
-                    )}
-                    {variation.language === "es" && (
-                      <Badge variant="secondary" className="text-xs">
-                        Espanhol
-                      </Badge>
-                    )}
-                    {variation.language === "fr" && (
-                      <Badge variant="secondary" className="text-xs">
-                        Francês
-                      </Badge>
-                    )}
+              <div key={id} className="space-y-3">
+                <div className="flex justify-between items-center p-4 rounded-md bg-muted/50 hover:bg-muted/80 transition-colors">
+                  <div className="flex-1 mr-4">
+                    <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                      {variation.type === "dor" && (
+                        <Badge variant="outline" className="bg-red-50 text-red-800 border-red-200">
+                          Dor
+                        </Badge>
+                      )}
+                      {variation.type === "esperanca" && (
+                        <Badge variant="outline" className="bg-green-50 text-green-800 border-green-200">
+                          Esperança
+                        </Badge>
+                      )}
+                      {variation.type === "curiosidade" && (
+                        <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200">
+                          Curiosidade
+                        </Badge>
+                      )}
+                      
+                      {variation.saturation === "low" && (
+                        <Badge className="bg-green-100 text-green-800">
+                          Baixa Saturação
+                        </Badge>
+                      )}
+                      {variation.saturation === "medium" && (
+                        <Badge className="bg-yellow-100 text-yellow-800">
+                          Média Saturação
+                        </Badge>
+                      )}
+                      {variation.saturation === "high" && (
+                        <Badge className="bg-red-100 text-red-800">
+                          Alta Saturação
+                        </Badge>
+                      )}
+                      
+                      {variation.language === "pt" && (
+                        <Badge variant="secondary" className="text-xs">
+                          Português
+                        </Badge>
+                      )}
+                      {variation.language === "en" && (
+                        <Badge variant="secondary" className="text-xs">
+                          Inglês
+                        </Badge>
+                      )}
+                      {variation.language === "es" && (
+                        <Badge variant="secondary" className="text-xs">
+                          Espanhol
+                        </Badge>
+                      )}
+                      {variation.language === "fr" && (
+                        <Badge variant="secondary" className="text-xs">
+                          Francês
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-base">{variation.text}</p>
                   </div>
-                  <p className="text-base">{variation.text}</p>
+                  
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => translateTitle(variation, index)}
+                      className="h-8 px-2"
+                    >
+                      <Language className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => copyToClipboard(variation.text, id)}
+                      className="h-8 w-8 p-0"
+                    >
+                      {isCopied ? (
+                        <Check className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
                 
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => copyToClipboard(variation.text, id)}
-                  className="h-8 w-8 p-0"
-                >
-                  {isCopied ? (
-                    <Check className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
-                </Button>
+                {variation.translations && variation.translations.length > 0 && (
+                  <div className="ml-4 space-y-2">
+                    {variation.translations.map((translation, tIndex) => (
+                      <div 
+                        key={`${id}-translation-${tIndex}`}
+                        className="flex justify-between items-center p-3 rounded-md bg-muted/30"
+                      >
+                        <p className="flex-1 mr-4 text-sm">{translation.text}</p>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyToClipboard(translation.text, `${id}-translation-${tIndex}`)}
+                          className="h-8 w-8 p-0"
+                        >
+                          {copiedId === `${id}-translation-${tIndex}` ? (
+                            <Check className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             );
           })}
