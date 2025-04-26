@@ -10,6 +10,7 @@ export interface YoutubeSearchParams {
   period: "24h" | "48h" | "72h" | "7d" | "30d" | "90d" | "180d" | "all";
   maxResults: number;
   apiKey?: string;
+  excludeMusic?: boolean;
 }
 
 export interface VideoResult {
@@ -32,6 +33,11 @@ export interface VideoResult {
   language: string;
   mainNiche?: string;
   subNiche?: string;
+  category?: string;
+  remodelingIdeas?: string[];
+  alternativeTitles?: string[];
+  targetAudience?: string;
+  escalabilityScore?: number;
 }
 
 export interface SavedSearch {
@@ -45,4 +51,12 @@ export interface ColumnDefinition {
   id: keyof VideoResult;
   label: string;
   sortable: boolean;
+}
+
+export interface RemodelingIdea {
+  originalTitle: string;
+  remodeledTitle: string;
+  targetNiche: string;
+  alternativeSubniche: string;
+  thumbnailIdea?: string;
 }

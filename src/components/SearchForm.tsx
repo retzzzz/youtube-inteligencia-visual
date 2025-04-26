@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Search, Key } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface SearchFormProps {
   onSearch: (params: YoutubeSearchParams) => void;
@@ -24,7 +25,8 @@ const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
     maxSubscribers: null,
     period: "30d",
     maxResults: 50,
-    apiKey: localStorage.getItem("youtubeApiKey") || ""
+    apiKey: localStorage.getItem("youtubeApiKey") || "",
+    excludeMusic: true
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -187,6 +189,22 @@ const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
           />
         </div>
 
+        {/* Excluir conteúdo musical */}
+        <div className="space-y-2 flex items-center">
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="excludeMusic" 
+              checked={params.excludeMusic} 
+              onCheckedChange={(checked) => 
+                handleChange("excludeMusic", checked === "indeterminate" ? true : checked)
+              }
+            />
+            <Label htmlFor="excludeMusic" className="text-sm font-medium">
+              Excluir vídeos musicais
+            </Label>
+          </div>
+        </div>
+
         {/* Máximo de resultados */}
         <div className="space-y-2">
           <div className="flex justify-between">
@@ -195,7 +213,7 @@ const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
           <Slider
             id="maxResults"
             min={10}
-            max={100}
+            max={200}
             step={10}
             value={[params.maxResults]}
             onValueChange={(value) => handleChange("maxResults", value[0])}

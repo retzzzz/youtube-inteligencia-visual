@@ -233,7 +233,12 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
                 {columns.map((column) => (
                   <TableHead 
                     key={column.id} 
-                    className={`whitespace-nowrap ${column.id === 'title' ? 'w-[400px]' : ''} ${column.id === 'videoAge' ? 'w-[60px]' : ''} ${column.id === 'id' ? 'w-[80px] text-center' : ''}`}
+                    className={`whitespace-nowrap 
+                      ${column.id === 'title' ? 'w-[500px] min-w-[300px]' : ''} 
+                      ${column.id === 'videoAge' ? 'w-[60px]' : ''} 
+                      ${column.id === 'id' ? 'w-[80px] text-center' : ''}
+                      ${column.id === 'language' ? 'w-[120px]' : ''}
+                    `}
                   >
                     {column.sortable ? (
                       <Button
@@ -263,12 +268,23 @@ const ResultsTable = ({ results }: ResultsTableProps) => {
             <TableBody>
               {currentPageResults.map((result) => (
                 <TableRow key={result.id}>
-                  <TableCell className="max-w-[400px] truncate" title={result.title}>
-                    {result.title}
+                  <TableCell className="max-w-[500px] min-w-[300px] pr-4" title={result.title}>
+                    <div className="truncate">
+                      {result.videoUrl ? (
+                        <a 
+                          href={result.videoUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="hover:underline text-blue-600 hover:text-blue-800"
+                        >
+                          {result.title}
+                        </a>
+                      ) : result.title}
+                    </div>
                   </TableCell>
                   <TableCell>
                     {result.channelUrl ? (
-                      <a href={result.channelUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                      <a href={result.channelUrl} target="_blank" rel="noopener noreferrer" className="hover:underline text-blue-600 hover:text-blue-800">
                         {result.channel}
                       </a>
                     ) : (
