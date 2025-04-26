@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -8,6 +7,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import VideoAnalyzer from "./pages/VideoAnalyzer";
 import Login from "./pages/Login";
+import TitleGenerator from "./pages/TitleGenerator";
 import { AuthProvider } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
@@ -22,6 +22,7 @@ const AuthenticatedRoutes = () => {
     <Routes>
       <Route path="/" element={<Index />} />
       <Route path="/video-analyzer" element={<VideoAnalyzer />} />
+      <Route path="/title-generator" element={<TitleGenerator />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

@@ -1,64 +1,50 @@
 
+import React from "react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Youtube, Edit } from "lucide-react";
 import Header from "@/components/Header";
-import SearchForm from "@/components/SearchForm";
-import SavedSearches from "@/components/SavedSearches";
-import ResultsSection from "@/components/ResultsSection";
-import WelcomeMessage from "@/components/WelcomeMessage";
-import SaturationIndicator from "@/components/SaturationIndicator";
-import { useYouTubeSearch } from "@/hooks/useYouTubeSearch";
-import { YoutubeSearchParams } from "@/types/youtube-types";
-import { analyzeSaturation } from "@/utils/formatters";
 
 const Index = () => {
-  const { 
-    searchParams, 
-    results, 
-    isLoading, 
-    selectedVideo, 
-    setSelectedVideo, 
-    handleSearch 
-  } = useYouTubeSearch();
-
-  const handleLoadSearch = (params: YoutubeSearchParams) => {
-    handleSearch(params);
-  };
-
-  const saturationAnalysis = searchParams?.keywords && results.length > 0
-    ? analyzeSaturation(results, searchParams.keywords)
-    : null;
-
   return (
-    <div className="container mx-auto px-4 py-6 max-w-[1400px]">
+    <div className="container mx-auto px-4 py-6">
       <Header />
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <SearchForm onSearch={handleSearch} isLoading={isLoading} />
-          {saturationAnalysis && (
-            <SaturationIndicator 
-              status={saturationAnalysis.status}
-              message={saturationAnalysis.message}
-              count={saturationAnalysis.count}
-              keyword={searchParams?.keywords || ''}
-            />
-          )}
-        </div>
-        
-        <div>
-          <SavedSearches currentSearch={searchParams} onLoadSearch={handleLoadSearch} />
-        </div>
+      
+      <div className="grid gap-6 mt-6">
+        <Card className="p-6">
+          <h1 className="text-2xl font-bold mb-4">Bem-vindo ao Analisador de YouTube</h1>
+          <p className="text-muted-foreground mb-6">
+            Escolha uma das ferramentas abaixo para começar:
+          </p>
+          
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Link to="/video-analyzer">
+              <Button variant="outline" className="w-full h-auto py-4 px-6">
+                <Youtube className="mr-2 h-5 w-5" />
+                <div className="text-left">
+                  <div className="font-semibold">Analisador de Vídeos</div>
+                  <div className="text-sm text-muted-foreground">
+                    Analise vídeos do YouTube e receba insights
+                  </div>
+                </div>
+              </Button>
+            </Link>
+            
+            <Link to="/title-generator">
+              <Button variant="outline" className="w-full h-auto py-4 px-6">
+                <Edit className="mr-2 h-5 w-5" />
+                <div className="text-left">
+                  <div className="font-semibold">Gerador de Títulos</div>
+                  <div className="text-sm text-muted-foreground">
+                    Crie títulos criativos e envolventes
+                  </div>
+                </div>
+              </Button>
+            </Link>
+          </div>
+        </Card>
       </div>
-
-      {results.length > 0 ? (
-        <ResultsSection 
-          results={results}
-          selectedVideo={selectedVideo}
-          onSelectVideo={setSelectedVideo}
-          searchParams={searchParams}
-        />
-      ) : !isLoading && (
-        <WelcomeMessage />
-      )}
     </div>
   );
 };
