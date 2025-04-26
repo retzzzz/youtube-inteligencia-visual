@@ -1,4 +1,3 @@
-
 import { VideoResult } from "@/types/youtube-types";
 
 interface NicheAnalysis {
@@ -64,4 +63,35 @@ export const generateChannelSuggestions = (videos: VideoResult[]): string[] => {
     const estimatedEarnings = Math.round(niche.avgRPM * 10000) / 100;
     return `Canal de ${niche.niche} para ${niche.country}: Potencial de R$${estimatedEarnings} por 1000 visualizações`;
   });
+};
+
+export const analyzeGrowthPotential = (video: VideoResult) => {
+  const isSmallChannel = video.subscribers < 100000;
+  const hasHighEngagement = video.engagement > 7;
+  const hasHighViewRate = (video.views / (video.videoAge * 24)) > 100;
+  const isNewVideo = video.videoAge < 7;
+  
+  const growthScore = [
+    isSmallChannel && 20,
+    hasHighEngagement && 30,
+    hasHighViewRate && 30,
+    isNewVideo && 20
+  ].filter(Boolean).reduce((a, b) => a + (b || 0), 0);
+  
+  let growthType: "explosive" | "emerging" | "latent" | undefined;
+  
+  if (growthScore >= 80 && hasHighViewRate) {
+    growthType = "explosive";
+  } else if (growthScore >= 60) {
+    growthType = "emerging";
+  } else if (isSmallChannel && hasHighEngagement) {
+    growthType = "latent";
+  }
+  
+  return {
+    growthScore,
+    growthType,
+    isSmallChannel,
+    hasHighEngagement
+  };
 };

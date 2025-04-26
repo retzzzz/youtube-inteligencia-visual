@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { VideoResult, ColumnDefinition } from "@/types/youtube-types";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,16 +11,8 @@ import {
 } from "@/components/ui/table";
 import { ArrowUp, ArrowDown, Youtube, ExternalLink, TrendingUp, Zap, Rocket } from "lucide-react";
 import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-  PaginationEllipsis,
-} from "@/components/ui/pagination";
-import { Badge } from "@/components/ui/badge";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+  Tooltip, TooltipContent, TooltipProvider, TooltipTrigger
+} from "@/components/ui/tooltip";
 
 interface ResultsTableProps {
   results: VideoResult[];
@@ -31,7 +23,12 @@ const ResultsTable = ({ results, onSelectVideo }: ResultsTableProps) => {
   const [sortColumn, setSortColumn] = useState<keyof VideoResult>("viralScore");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [currentPage, setCurrentPage] = useState(1);
-  const resultsPerPage = 50;
+  const [displayCount, setDisplayCount] = useState(50);
+  const [loadedResults, setLoadedResults] = useState<VideoResult[]>([]);
+
+  useEffect(() => {
+    setLoadedResults(results.slice(0, displayCount));
+  }, [results, displayCount]);
 
   const columns: ColumnDefinition[] = [
     { id: "title", label: "Título do Vídeo", sortable: true },
@@ -58,23 +55,6 @@ const ResultsTable = ({ results, onSelectVideo }: ResultsTableProps) => {
     }
   };
 
-  const sortedResults = [...results].sort((a, b) => {
-    const valA = a[sortColumn];
-    const valB = b[sortColumn];
-    
-    if (typeof valA === "string" && typeof valB === "string") {
-      return sortDirection === "asc" 
-        ? valA.localeCompare(valB) 
-        : valB.localeCompare(valA);
-    }
-    
-    if (typeof valA === "number" && typeof valB === "number") {
-      return sortDirection === "asc" ? valA - valB : valB - valA;
-    }
-    
-    return 0;
-  });
-
   const formatNumber = (num: number) => {
     return new Intl.NumberFormat("pt-BR").format(num);
   };
@@ -96,96 +76,6 @@ const ResultsTable = ({ results, onSelectVideo }: ResultsTableProps) => {
       const years = Math.round(days / 365);
       return `${years} a`;
     }
-  };
-
-  const totalPages = Math.ceil(results.length / resultsPerPage);
-  
-  const startIndex = (currentPage - 1) * resultsPerPage;
-  const endIndex = startIndex + resultsPerPage;
-  const currentPageResults = sortedResults.slice(startIndex, endIndex);
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  const renderPaginationNumbers = () => {
-    const pageItems = [];
-    const maxVisiblePages = 5;
-
-    if (totalPages <= maxVisiblePages) {
-      for (let i = 1; i <= totalPages; i++) {
-        pageItems.push(
-          <PaginationItem key={i}>
-            <PaginationLink
-              isActive={currentPage === i}
-              onClick={() => handlePageChange(i)}
-            >
-              {i}
-            </PaginationLink>
-          </PaginationItem>
-        );
-      }
-    } else {
-      pageItems.push(
-        <PaginationItem key={1}>
-          <PaginationLink
-            isActive={currentPage === 1}
-            onClick={() => handlePageChange(1)}
-          >
-            1
-          </PaginationLink>
-        </PaginationItem>
-      );
-      
-      let startPage = Math.max(2, currentPage - 2);
-      let endPage = Math.min(totalPages - 1, startPage + 3);
-      
-      if (endPage === totalPages - 1) {
-        startPage = Math.max(2, endPage - 3);
-      }
-      
-      if (startPage > 2) {
-        pageItems.push(
-          <PaginationItem key="ellipsis-start">
-            <PaginationEllipsis />
-          </PaginationItem>
-        );
-      }
-      
-      for (let i = startPage; i <= endPage; i++) {
-        pageItems.push(
-          <PaginationItem key={i}>
-            <PaginationLink
-              isActive={currentPage === i}
-              onClick={() => handlePageChange(i)}
-            >
-              {i}
-            </PaginationLink>
-          </PaginationItem>
-        );
-      }
-      
-      if (endPage < totalPages - 1) {
-        pageItems.push(
-          <PaginationItem key="ellipsis-end">
-            <PaginationEllipsis />
-          </PaginationItem>
-        );
-      }
-      
-      pageItems.push(
-        <PaginationItem key={totalPages}>
-          <PaginationLink
-            isActive={currentPage === totalPages}
-            onClick={() => handlePageChange(totalPages)}
-          >
-            {totalPages}
-          </PaginationLink>
-        </PaginationItem>
-      );
-    }
-    
-    return pageItems;
   };
 
   const formatLanguage = (languageCode: string): string => {
@@ -231,10 +121,33 @@ const ResultsTable = ({ results, onSelectVideo }: ResultsTableProps) => {
     }
   };
 
+  const handleLoadMore = () => {
+    const newDisplayCount = Math.min(displayCount + 50, results.length);
+    setDisplayCount(newDisplayCount);
+    setLoadedResults(results.slice(0, newDisplayCount));
+  };
+
+  const sortedResults = [...loadedResults].sort((a, b) => {
+    const valA = a[sortColumn];
+    const valB = b[sortColumn];
+    
+    if (typeof valA === "string" && typeof valB === "string") {
+      return sortDirection === "asc" 
+        ? valA.localeCompare(valB) 
+        : valB.localeCompare(valA);
+    }
+    
+    if (typeof valA === "number" && typeof valB === "number") {
+      return sortDirection === "asc" ? valA - valB : valB - valA;
+    }
+    
+    return 0;
+  });
+
   return (
     <TooltipProvider>
-      <div className="space-y-4">
-        <div className="rounded-md border overflow-hidden">
+      <div className="space-y-4 animate-fade-in">
+        <div className="glass-panel overflow-hidden">
           <div className="overflow-x-auto">
             <Table className="w-full">
               <TableHeader>
@@ -275,7 +188,7 @@ const ResultsTable = ({ results, onSelectVideo }: ResultsTableProps) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {currentPageResults.map((result) => (
+                {sortedResults.map((result) => (
                   <TableRow 
                     key={result.id} 
                     className={onSelectVideo ? "cursor-pointer hover:bg-muted" : ""}
@@ -398,30 +311,20 @@ const ResultsTable = ({ results, onSelectVideo }: ResultsTableProps) => {
           </div>
         </div>
 
-        {totalPages > 1 && (
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious 
-                  onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                  className={currentPage === 1 ? 'pointer-events-none opacity-50' : ''}
-                />
-              </PaginationItem>
-              
-              {renderPaginationNumbers()}
-              
-              <PaginationItem>
-                <PaginationNext 
-                  onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-                  className={currentPage === totalPages ? 'pointer-events-none opacity-50' : ''}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        )}
-        
-        <div className="text-sm text-muted-foreground text-right">
-          Exibindo {startIndex + 1}-{Math.min(endIndex, results.length)} de {results.length} resultados
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            Exibindo {loadedResults.length} de {results.length} resultados
+          </p>
+          
+          {loadedResults.length < results.length && (
+            <Button
+              variant="outline"
+              onClick={handleLoadMore}
+              className="transition-all duration-300 hover:shadow-md"
+            >
+              Carregar mais 50 resultados
+            </Button>
+          )}
         </div>
       </div>
     </TooltipProvider>
