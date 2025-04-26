@@ -6,6 +6,7 @@ import ResultsSection from "@/components/ResultsSection";
 import SavedSearches from "@/components/SavedSearches";
 import { useYouTubeSearch } from "@/hooks/useYouTubeSearch";
 import { YoutubeSearchParams } from "@/types/youtube-types";
+import ApiKeyModal from "@/components/ApiKeyModal";
 
 const Index = () => {
   const { searchParams, results, isLoading, selectedVideo, setSelectedVideo, handleSearch } = useYouTubeSearch();
@@ -16,6 +17,7 @@ const Index = () => {
 
   return (
     <div className="container mx-auto px-4 py-6">
+      <ApiKeyModal />
       <Header />
       
       <div className="grid gap-6 mt-6">
