@@ -11,7 +11,7 @@ const Header = () => {
   const { logout, user } = useAuth();
   
   return (
-    <header className="flex flex-col sm:flex-row justify-between items-center mb-12 relative">
+    <header className="flex flex-col sm:flex-row justify-between items-center mb-16 relative">
       <div className="mb-4 sm:mb-0">
         <h1 className="text-3xl font-bold tracking-tight">
           <Link to="/">
@@ -38,7 +38,7 @@ const Header = () => {
         </NavLink>
       </nav>
 
-      <div className="absolute top-[-70px] right-0 flex items-center space-x-4">
+      <div className="absolute top-[-50px] right-0 flex items-center space-x-4">
         <span className="text-muted-foreground text-sm">
           Bem vindo, {user?.name || 'Usuário'}
         </span>
