@@ -3,12 +3,15 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
+import { LogOut } from 'lucide-react';
 
 const Header = () => {
   const location = useLocation();
+  const { logout, user } = useAuth();
   
   return (
-    <header className="flex flex-col sm:flex-row justify-between items-center mb-8">
+    <header className="flex flex-col sm:flex-row justify-between items-center mb-8 relative">
       <div className="mb-4 sm:mb-0">
         <h1 className="text-3xl font-bold tracking-tight">
           <Link to="/">
@@ -34,6 +37,21 @@ const Header = () => {
           Roteirizador Automático
         </NavLink>
       </nav>
+
+      <div className="absolute top-0 right-0 flex items-center space-x-4">
+        <span className="text-muted-foreground">
+          Bem vindo, {user?.name || 'Usuário'}
+        </span>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={logout}
+          className="flex items-center gap-2"
+        >
+          <LogOut className="h-4 w-4" />
+          Sair
+        </Button>
+      </div>
     </header>
   );
 };
