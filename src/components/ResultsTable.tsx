@@ -9,10 +9,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowUp, ArrowDown, Youtube, ExternalLink, TrendingUp, Zap, Rocket } from "lucide-react";
-import {
-  Tooltip, TooltipContent, TooltipProvider, TooltipTrigger
-} from "@/components/ui/tooltip";
+import { ArrowUp, ArrowDown } from "lucide-react";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import VideoTitleCell from "./table/VideoTitleCell";
+import GrowthTypeCell from "./table/GrowthTypeCell";
+import VideoLinksCell from "./table/VideoLinksCell";
+import { formatNumber, formatCurrency, formatVideoAge, formatLanguage } from "@/utils/formatters";
 
 interface ResultsTableProps {
   results: VideoResult[];
@@ -22,7 +24,6 @@ interface ResultsTableProps {
 const ResultsTable = ({ results, onSelectVideo }: ResultsTableProps) => {
   const [sortColumn, setSortColumn] = useState<keyof VideoResult>("viralScore");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  const [currentPage, setCurrentPage] = useState(1);
   const [displayCount, setDisplayCount] = useState(50);
   const [loadedResults, setLoadedResults] = useState<VideoResult[]>([]);
 
@@ -52,72 +53,6 @@ const ResultsTable = ({ results, onSelectVideo }: ResultsTableProps) => {
     } else {
       setSortColumn(column);
       setSortDirection("desc");
-    }
-  };
-
-  const formatNumber = (num: number) => {
-    return new Intl.NumberFormat("pt-BR").format(num);
-  };
-
-  const formatCurrency = (num: number) => {
-    return `$${num.toFixed(2)}`;
-  };
-
-  const formatVideoAge = (days: number) => {
-    if (days < 1) {
-      const hours = Math.round(days * 24);
-      return `${hours} h`;
-    } else if (days < 30) {
-      return `${Math.round(days)} d`;
-    } else if (days < 365) {
-      const months = Math.round(days / 30);
-      return `${months} m`;
-    } else {
-      const years = Math.round(days / 365);
-      return `${years} a`;
-    }
-  };
-
-  const formatLanguage = (languageCode: string): string => {
-    const languageMap: Record<string, string> = {
-      "pt-BR": "Português (BR)",
-      "en-US": "Inglês (EUA)",
-      "es-ES": "Espanhol",
-      "fr-FR": "Francês",
-      "de-DE": "Alemão",
-      "it-IT": "Italiano",
-      "ja-JP": "Japonês",
-      "ko-KR": "Coreano",
-      "ru-RU": "Russo",
-      "zh-CN": "Chinês"
-    };
-    
-    return languageMap[languageCode] || languageCode;
-  };
-  
-  const getGrowthIcon = (type?: string) => {
-    switch (type) {
-      case "explosive":
-        return <Zap className="h-4 w-4 text-red-500" />;
-      case "emerging":
-        return <TrendingUp className="h-4 w-4 text-green-500" />;
-      case "latent":
-        return <Rocket className="h-4 w-4 text-blue-500" />;
-      default:
-        return null;
-    }
-  };
-
-  const getGrowthLabel = (type?: string) => {
-    switch (type) {
-      case "explosive":
-        return "Explosivo";
-      case "emerging":
-        return "Emergente";
-      case "latent":
-        return "Latente";
-      default:
-        return "—";
     }
   };
 
@@ -194,35 +129,8 @@ const ResultsTable = ({ results, onSelectVideo }: ResultsTableProps) => {
                     className={onSelectVideo ? "cursor-pointer hover:bg-muted" : ""}
                     onClick={() => onSelectVideo && onSelectVideo(result)}
                   >
-                    <TableCell className="max-w-[500px] min-w-[400px] pr-4" title={result.title}>
-                      <div className="flex items-center gap-3 w-full">
-                        {result.thumbnail && (
-                          <div className="w-12 h-8 flex-shrink-0">
-                            <img 
-                              src={result.thumbnail} 
-                              alt={result.title}
-                              className="w-full h-full object-cover rounded-sm"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).style.display = 'none';
-                              }}
-                            />
-                          </div>
-                        )}
-                        <div className="truncate w-full">
-                          {result.videoUrl ? (
-                            <a 
-                              href={result.videoUrl} 
-                              target="_blank" 
-                              rel="noopener noreferrer" 
-                              className="hover:underline text-blue-600 hover:text-blue-800 truncate"
-                              onClick={(e) => e.stopPropagation()}
-                              title={result.title}
-                            >
-                              {result.title}
-                            </a>
-                          ) : result.title}
-                        </div>
-                      </div>
+                    <TableCell className="max-w-[500px] min-w-[400px] pr-4">
+                      <VideoTitleCell video={result} />
                     </TableCell>
                     <TableCell>
                       {result.channelUrl ? (
@@ -244,20 +152,7 @@ const ResultsTable = ({ results, onSelectVideo }: ResultsTableProps) => {
                     <TableCell className="font-medium">{result.viralScore}</TableCell>
                     <TableCell>{result.mainNiche || "Diversos"}</TableCell>
                     <TableCell>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="flex items-center gap-1.5">
-                            {getGrowthIcon(result.growthType)}
-                            <span className="text-sm">{getGrowthLabel(result.growthType)}</span>
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {result.growthType === "explosive" ? "Crescimento explosivo - viral rápido" : 
-                           result.growthType === "emerging" ? "Crescimento consistente e promissor" : 
-                           result.growthType === "latent" ? "Potencial ainda não explorado" : 
-                           "Padrão de crescimento não classificado"}
-                        </TooltipContent>
-                      </Tooltip>
+                      <GrowthTypeCell type={result.growthType} />
                     </TableCell>
                     <TableCell>
                       {result.viewsPerHour ? formatNumber(result.viewsPerHour) : "—"}
@@ -267,42 +162,10 @@ const ResultsTable = ({ results, onSelectVideo }: ResultsTableProps) => {
                     <TableCell>{formatVideoAge(result.videoAge)}</TableCell>
                     <TableCell>{formatLanguage(result.language)}</TableCell>
                     <TableCell className="text-center">
-                      <div className="flex items-center justify-center space-x-2">
-                        {result.videoUrl && (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <a 
-                                href={result.videoUrl} 
-                                target="_blank" 
-                                rel="noopener noreferrer" 
-                                className="inline-flex items-center text-youtube-red hover:text-red-700 p-1.5"
-                                title="Assistir no YouTube"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <Youtube className="h-5 w-5" />
-                              </a>
-                            </TooltipTrigger>
-                            <TooltipContent>Assistir no YouTube</TooltipContent>
-                          </Tooltip>
-                        )}
-                        {result.channelUrl && (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <a 
-                                href={result.channelUrl} 
-                                target="_blank" 
-                                rel="noopener noreferrer" 
-                                className="inline-flex items-center text-gray-500 hover:text-gray-700 p-1.5"
-                                title="Visitar Canal"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <ExternalLink className="h-4 w-4" />
-                              </a>
-                            </TooltipTrigger>
-                            <TooltipContent>Visitar Canal</TooltipContent>
-                          </Tooltip>
-                        )}
-                      </div>
+                      <VideoLinksCell 
+                        videoUrl={result.videoUrl} 
+                        channelUrl={result.channelUrl} 
+                      />
                     </TableCell>
                   </TableRow>
                 ))}
