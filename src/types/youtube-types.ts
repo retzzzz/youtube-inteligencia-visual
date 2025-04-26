@@ -1,4 +1,3 @@
-
 export interface YoutubeSearchParams {
   keywords: string;
   searchType: "videos" | "shorts" | "channels" | "playlists";
@@ -71,4 +70,54 @@ export interface RemodelingIdea {
   targetNiche: string;
   alternativeSubniche: string;
   thumbnailIdea?: string;
+}
+
+export interface BasicVideoInfo {
+  title: string;
+  description: string;
+  views?: number;
+  publishDate?: string;
+  language: string;
+  duration?: string;
+  category?: string;
+  tags?: string[];
+}
+
+export interface VideoTranslation {
+  title: string;
+  description: string;
+}
+
+export interface VideoTranslations {
+  english: VideoTranslation;
+  spanish: VideoTranslation;
+  french: VideoTranslation;
+  italian: VideoTranslation;
+}
+
+export interface SaturationAnalysis {
+  status: 'high' | 'medium' | 'low';
+  message: string;
+  count: number;
+}
+
+export interface SubNicheIdea {
+  name: string;
+  description: string;
+  examples: string[];
+}
+
+export interface VideoAnalysis {
+  basicInfo: BasicVideoInfo;
+  translations: VideoTranslations;
+  titleVariations: {
+    emotional: string[];
+    structural: string[];
+    multilingual: string[];
+  };
+  scriptIdeas: string[];
+  thumbnailPrompts: string[];
+  supportImagePrompts: string[];
+  subNicheIdeas: SubNicheIdea[];
+  saturation?: SaturationAnalysis;
 }

@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import VideoAnalyzer from "./pages/VideoAnalyzer";
 
 const queryClient = new QueryClient();
 
@@ -17,6 +18,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/video-analyzer" element={<VideoAnalyzer />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
