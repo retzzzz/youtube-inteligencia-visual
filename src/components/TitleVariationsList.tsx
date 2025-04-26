@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
-import { Copy, Check, Language } from 'lucide-react';
+import { Copy, Check, Languages, ArrowDown as ArrowDownIcon, ArrowUp as ArrowUpIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { TitleVariation } from '@/pages/TitleGenerator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
@@ -117,9 +118,9 @@ const TitleVariationsList = ({
             onClick={() => setSortBy(sortBy === "emotion" ? "saturation" : "emotion")}
           >
             {sortBy === "emotion" ? (
-              <>Ordenar por Saturação <ArrowDown className="ml-1 h-3.5 w-3.5" /></>
+              <>Ordenar por Saturação <ArrowDownIcon className="ml-1 h-3.5 w-3.5" /></>
             ) : (
-              <>Ordenar por Emoção <ArrowUp className="ml-1 h-3.5 w-3.5" /></>
+              <>Ordenar por Emoção <ArrowUpIcon className="ml-1 h-3.5 w-3.5" /></>
             )}
           </Button>
           
@@ -238,7 +239,7 @@ const TitleVariationsList = ({
                       onClick={() => translateTitle(variation, index)}
                       className="h-8 px-2"
                     >
-                      <Language className="h-4 w-4" />
+                      <Languages className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="ghost"
