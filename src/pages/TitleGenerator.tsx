@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Copy, Translate } from "lucide-react";
+import { Loader2, Copy, Globe } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import { useAuth } from "@/contexts/AuthContext";
@@ -136,7 +136,7 @@ const TitleGenerator = () => {
                       <div className="flex gap-2">
                         {key === "translated" && (
                           <Badge variant="outline" className="mr-2">
-                            <Translate className="h-3 w-3 mr-1" />
+                            <Globe className="h-3 w-3 mr-1" />
                             EN
                           </Badge>
                         )}

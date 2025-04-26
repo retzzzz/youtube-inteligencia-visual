@@ -20,12 +20,15 @@ const Header = () => {
         </p>
       </div>
       
-      <nav className="flex gap-3">
+      <nav className="flex gap-3 flex-wrap">
         <NavLink to="/" currentPath={location.pathname}>
-          Pesquisar
+          Início
         </NavLink>
         <NavLink to="/video-analyzer" currentPath={location.pathname}>
           Analisar Vídeo
+        </NavLink>
+        <NavLink to="/title-generator" currentPath={location.pathname}>
+          Gerar Títulos
         </NavLink>
       </nav>
     </header>
