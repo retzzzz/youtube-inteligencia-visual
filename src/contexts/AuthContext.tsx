@@ -37,13 +37,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const handleSetYoutubeApiKey = (key: string) => {
     setYoutubeApiKey(key);
-    localStorage.setItem("youtubeApiKey", key);
     setNeedsApiKey(false);
   };
 
   const logout = () => {
     localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("youtubeApiKey");
     setIsLoggedIn(false);
+    setYoutubeApiKey(null);
     navigate("/login");
   };
 
@@ -66,3 +67,4 @@ export const useAuth = () => {
   }
   return context;
 };
+

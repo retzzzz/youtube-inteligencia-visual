@@ -26,7 +26,7 @@ const Login = () => {
     } else {
       toast({
         title: "Erro de login",
-        description: "Nome de usuário ou senha incorretos. Use admin/admin.",
+        description: "Nome de usuário ou senha incorretos.",
         variant: "destructive",
       });
     }
@@ -49,7 +49,6 @@ const Login = () => {
             <Label htmlFor="username">Usuário</Label>
             <Input 
               id="username" 
-              placeholder="admin" 
               value={username} 
               onChange={(e) => setUsername(e.target.value)}
               required
@@ -61,7 +60,6 @@ const Login = () => {
             <Input 
               id="password" 
               type="password" 
-              placeholder="●●●●●●" 
               value={password} 
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -70,13 +68,10 @@ const Login = () => {
 
           <Button type="submit" className="w-full">Entrar</Button>
         </form>
-        
-        <p className="text-sm text-center text-muted-foreground mt-4">
-          Credenciais de demonstração: admin / admin
-        </p>
       </Card>
     </div>
   );
 };
 
 export default Login;
+

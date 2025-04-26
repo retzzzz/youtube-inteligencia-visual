@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Header from "@/components/Header";
 import YoutubeAnalyzerForm from "@/components/YoutubeAnalyzerForm";
@@ -16,11 +15,10 @@ const VideoAnalyzer = () => {
   const [analysis, setAnalysis] = useState<VideoAnalysis | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { youtubeApiKey, logout, setNeedsApiKey } = useAuth();
+  const { youtubeApiKey, logout } = useAuth();
 
   const handleAnalyzeVideo = async (videoUrl: string) => {
     if (!youtubeApiKey) {
-      setNeedsApiKey(true);
       toast({
         title: "API Key necessária",
         description: "Por favor, configure sua chave de API do YouTube primeiro.",
@@ -51,10 +49,6 @@ const VideoAnalyzer = () => {
     }
   };
 
-  const handleChangeApiKey = () => {
-    setNeedsApiKey(true);
-  };
-
   return (
     <div className="container mx-auto px-4 py-6 max-w-[1400px]">
       <ApiKeyDialog />
@@ -64,14 +58,9 @@ const VideoAnalyzer = () => {
         <Card className="p-6">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-2xl font-bold">Analisador de Vídeos do YouTube</h1>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={handleChangeApiKey}>
-                Configurar API
-              </Button>
-              <Button variant="outline" onClick={logout}>
-                Sair
-              </Button>
-            </div>
+            <Button variant="outline" onClick={logout}>
+              Sair
+            </Button>
           </div>
           
           <p className="mb-6 text-muted-foreground">
@@ -92,8 +81,7 @@ const VideoAnalyzer = () => {
             <div className="bg-amber-50 border border-amber-200 rounded p-4 mb-6">
               <h3 className="text-amber-800 font-medium mb-2">Configuração necessária</h3>
               <p className="text-amber-700">
-                Para utilizar esta ferramenta, você precisa configurar sua chave de API do YouTube.
-                Clique no botão "Configurar API" acima.
+                Configure sua chave de API do YouTube para começar a usar esta ferramenta.
               </p>
             </div>
           ) : (
