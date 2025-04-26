@@ -1,3 +1,4 @@
+
 export const formatNumber = (num: number) => {
   return new Intl.NumberFormat("pt-BR").format(num);
 };
@@ -53,19 +54,19 @@ export const analyzeSaturation = (results: any[], keyword: string) => {
 
   if (keywordVideos.length > 20) {
     return {
-      status: 'high',
+      status: 'high' as 'high',
       message: 'Alta saturação: mais de 20 vídeos nos últimos 30 dias',
       count: keywordVideos.length
     };
   } else if (keywordVideos.length > 10) {
     return {
-      status: 'medium',
+      status: 'medium' as 'medium',
       message: 'Saturação média: entre 10-20 vídeos nos últimos 30 dias',
       count: keywordVideos.length
     };
   } else {
     return {
-      status: 'low',
+      status: 'low' as 'low',
       message: 'Espaço aberto: menos de 10 vídeos nos últimos 30 dias',
       count: keywordVideos.length
     };
