@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import ApiKeyDialog from "@/components/ApiKeyDialog";
+import { Link } from "react-router-dom";
 
 const VideoAnalyzer = () => {
   const [analysis, setAnalysis] = useState<VideoAnalysis | null>(null);
@@ -77,6 +78,15 @@ const VideoAnalyzer = () => {
             Cole o link de um vídeo do YouTube para analisar seu conteúdo, receber sugestões de títulos, 
             roteiros e ideias para remodelar o conteúdo de forma original.
           </p>
+          
+          <div className="flex flex-wrap gap-3 mb-6">
+            <Link to="/title-generator">
+              <Button variant="secondary">Gerador de Títulos</Button>
+            </Link>
+            <Link to="/script-generator">
+              <Button variant="secondary">Roteirizador Automático</Button>
+            </Link>
+          </div>
           
           {!youtubeApiKey ? (
             <div className="bg-amber-50 border border-amber-200 rounded p-4 mb-6">

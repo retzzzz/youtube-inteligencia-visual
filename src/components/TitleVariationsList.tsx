@@ -41,7 +41,7 @@ const TitleVariationsList = ({
   };
 
   const translateTitle = (variation: TitleVariation, index: number) => {
-    const languages: Array<"pt" | "es" | "en" | "fr"> = (["pt", "es", "en", "fr"] as const).filter(
+    const languages = (["pt", "es", "en", "fr"] as const).filter(
       lang => lang !== variation.language
     );
 

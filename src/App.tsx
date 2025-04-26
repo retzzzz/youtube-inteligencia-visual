@@ -9,6 +9,7 @@ import NotFound from "./pages/NotFound";
 import VideoAnalyzer from "./pages/VideoAnalyzer";
 import Login from "./pages/Login";
 import TitleGenerator from "./pages/TitleGenerator";
+import ScriptGenerator from "./pages/ScriptGenerator";
 import { AuthProvider } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const AuthenticatedRoutes = () => {
       <Route path="/" element={<Index />} />
       <Route path="/video-analyzer" element={<VideoAnalyzer />} />
       <Route path="/title-generator" element={<TitleGenerator />} />
+      <Route path="/script-generator" element={<ScriptGenerator />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
