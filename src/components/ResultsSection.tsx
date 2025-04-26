@@ -1,7 +1,9 @@
+
 import { VideoResult, YoutubeSearchParams } from "@/types/youtube-types";
 import KPISection from "@/components/KPISection";
 import ChartSection from "@/components/ChartSection";
 import ActionButtons from "@/components/ActionButtons";
+import CPMAnalysisChart from "@/components/CPMAnalysisChart";
 import { Card } from "@/components/ui/card";
 import ResultsTable from "@/components/ResultsTable";
 import RemodelingIdeas from "@/components/RemodelingIdeas";
@@ -23,6 +25,7 @@ const ResultsSection = ({ results, selectedVideo, onSelectVideo, searchParams }:
       <div id="dashboard-section">
         <KPISection results={results} />
         <ChartSection results={results} />
+        <CPMAnalysisChart results={results} />
         <ActionButtons results={results} />
       </div>
 
@@ -64,7 +67,7 @@ const ResultsSection = ({ results, selectedVideo, onSelectVideo, searchParams }:
                 </Card>
               </div>
               <div className="lg:col-span-2">
-                <RemodelingIdeas video={selectedVideo} />
+                <RemodelingIdeas video={selectedVideo} allVideos={results} />
               </div>
             </div>
           ) : (

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,16 +10,19 @@ import {
   generateAlternativeTitles, 
   estimateTargetAudience 
 } from "@/utils/contentSuggestions";
+import { generateChannelSuggestions } from "@/utils/advancedAnalytics";
 
 interface RemodelingIdeasProps {
   video: VideoResult;
+  allVideos: VideoResult[];
 }
 
-const RemodelingIdeas: React.FC<RemodelingIdeasProps> = ({ video }) => {
+const RemodelingIdeas: React.FC<RemodelingIdeasProps> = ({ video, allVideos }) => {
   const virality = assessViralityPotential(video);
   const remodelingIdeas = generateRemodelingIdeas(video.title, video.mainNiche);
   const alternativeTitles = generateAlternativeTitles(video.title, video.language);
   const targetAudience = estimateTargetAudience(video.title, video.mainNiche, video.language);
+  const channelSuggestions = generateChannelSuggestions(allVideos);
   
   const getViralityColor = (potential: string): string => {
     switch (potential) {
@@ -92,6 +94,20 @@ const RemodelingIdeas: React.FC<RemodelingIdeasProps> = ({ video }) => {
             </div>
           </div>
           
+          <div className="border rounded-md p-4 bg-emerald-50/50">
+            <h3 className="text-md font-semibold mb-3 flex items-center gap-2">
+              <Lightbulb className="h-4 w-4 text-emerald-500" />
+              Sugestões de Novos Canais
+            </h3>
+            <div className="space-y-2">
+              {channelSuggestions.map((suggestion, index) => (
+                <p key={index} className="text-sm">
+                  {suggestion}
+                </p>
+              ))}
+            </div>
+          </div>
+          
           <VideoMetrics video={video} />
         </CardContent>
       </Card>
@@ -100,4 +116,3 @@ const RemodelingIdeas: React.FC<RemodelingIdeasProps> = ({ video }) => {
 };
 
 export default RemodelingIdeas;
-
