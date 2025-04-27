@@ -41,6 +41,13 @@ export const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<Vid
     if (!searchResponse.ok) {
       const errorData = await searchResponse.json();
       console.error("Resposta de erro da API:", errorData);
+      
+      // Verificar se o erro é de quota excedida
+      if (errorData.error && errorData.error.errors && 
+          errorData.error.errors.some((e: any) => e.reason === "quotaExceeded")) {
+        throw new Error("Quota da API do YouTube excedida. Tente novamente mais tarde ou use uma chave de API diferente.");
+      }
+      
       throw new Error(`Erro na API do YouTube: ${errorData.error?.message || searchResponse.statusText || searchResponse.status}`);
     }
     
@@ -68,6 +75,12 @@ export const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<Vid
         `https://www.googleapis.com/youtube/v3/videos?part=statistics,contentDetails,snippet,topicDetails&id=${videoIds.join(",")}&key=${params.apiKey}`
       );
       
+      if (!videoStatsResponse.ok) {
+        const errorData = await videoStatsResponse.json();
+        console.error("Erro ao buscar estatísticas de vídeos:", errorData);
+        throw new Error(`Erro ao buscar estatísticas de vídeos: ${errorData.error?.message || videoStatsResponse.statusText}`);
+      }
+      
       if (videoStatsResponse.ok) {
         const videoStatsData = await videoStatsResponse.json();
         videoStatsMap = (videoStatsData.items || []).reduce((acc: Record<string, any>, item: any) => {
@@ -93,6 +106,12 @@ export const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<Vid
       const channelStatsResponse = await fetch(
         `https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet&id=${channelIds.join(",")}&key=${params.apiKey}`
       );
+      
+      if (!channelStatsResponse.ok) {
+        const errorData = await channelStatsResponse.json();
+        console.error("Erro ao buscar estatísticas de canais:", errorData);
+        throw new Error(`Erro ao buscar estatísticas de canais: ${errorData.error?.message || channelStatsResponse.statusText}`);
+      }
       
       if (channelStatsResponse.ok) {
         const channelStatsData = await channelStatsResponse.json();

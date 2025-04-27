@@ -5,6 +5,10 @@ import Header from '@/components/Header';
 import SearchForm from '@/components/SearchForm';
 import { useYouTubeSearch } from '@/hooks/useYouTubeSearch';
 import ResultsSection from '@/components/ResultsSection';
+import { AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Search = () => {
   const { 
@@ -13,9 +17,11 @@ const Search = () => {
     results, 
     searchParams, 
     selectedVideo, 
-    setSelectedVideo 
+    setSelectedVideo,
+    error 
   } = useYouTubeSearch();
   
+  const { setNeedsApiKey } = useAuth();
   const location = useLocation();
   
   // Carregar pesquisa a partir dos parâmetros da URL, se existirem
@@ -42,6 +48,24 @@ const Search = () => {
         <h2 className="text-2xl font-bold mb-6">Pesquisa Avançada</h2>
         <SearchForm onSearch={handleSearch} isLoading={isLoading} />
         
+        {error && (
+          <Alert variant="destructive" className="mt-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              {error}
+              {error.includes("API") && (
+                <Button
+                  variant="link"
+                  className="p-0 h-auto ml-2"
+                  onClick={() => setNeedsApiKey(true)}
+                >
+                  Configurar chave API
+                </Button>
+              )}
+            </AlertDescription>
+          </Alert>
+        )}
+        
         {results && results.length > 0 && (
           <div className="mt-8">
             <ResultsSection 
@@ -59,7 +83,7 @@ const Search = () => {
           </div>
         )}
         
-        {!isLoading && results && results.length === 0 && searchParams && (
+        {!isLoading && results && results.length === 0 && searchParams && !error && (
           <div className="text-center p-12">
             <p className="text-xl font-medium">Nenhum resultado encontrado</p>
             <p className="text-muted-foreground mt-2">Tente ajustar seus critérios de pesquisa</p>

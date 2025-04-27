@@ -10,6 +10,7 @@ import SearchFormHeader from "./search/SearchFormHeader";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface SearchFormProps {
   onSearch: (params: YoutubeSearchParams) => void;
@@ -17,7 +18,7 @@ interface SearchFormProps {
 }
 
 const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
-  const { youtubeApiKey } = useAuth();
+  const { youtubeApiKey, needsApiKey, setNeedsApiKey } = useAuth();
   const { toast } = useToast();
   const [params, setParams] = useState<YoutubeSearchParams>({
     keywords: "",
@@ -44,11 +45,23 @@ const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
     e.preventDefault();
     
     if (!params.apiKey || params.apiKey.trim() === "") {
+      setNeedsApiKey(true);
       toast({
-        title: "Atenção",
-        description: "Nenhuma chave de API fornecida. Serão exibidos apenas dados simulados.",
-        variant: "default"
+        title: "Chave de API necessária",
+        description: "Por favor, configure uma chave de API do YouTube para continuar.",
+        variant: "destructive"
       });
+      return;
+    }
+    
+    // Verificar se as palavras-chave foram fornecidas
+    if (!params.keywords.trim()) {
+      toast({
+        title: "Palavras-chave obrigatórias",
+        description: "Por favor, insira pelo menos uma palavra-chave para pesquisar.",
+        variant: "destructive"
+      });
+      return;
     }
     
     onSearch(params);
@@ -60,6 +73,22 @@ const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-card rounded-lg border border-border backdrop-blur-sm bg-opacity-90">
+      {!youtubeApiKey && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Você precisa configurar uma chave de API do YouTube para obter resultados reais.
+            <button 
+              type="button" 
+              className="ml-2 underline font-medium" 
+              onClick={() => setNeedsApiKey(true)}
+            >
+              Configurar API
+            </button>
+          </AlertDescription>
+        </Alert>
+      )}
+      
       <SearchFormHeader isLoading={isLoading} onSubmit={handleSubmit} />
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
