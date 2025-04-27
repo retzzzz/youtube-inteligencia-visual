@@ -21,6 +21,16 @@ const FAQ = () => {
             </AccordionContent>
           </AccordionItem>
 
+          <AccordionItem value="video-formats">
+            <AccordionTrigger className="text-lg">
+              Diferença entre formatos de vídeo
+            </AccordionTrigger>
+            <AccordionContent className="space-y-2 text-muted-foreground">
+              <p>Vídeos "imagem + IA + legenda" têm entrada muito rápida, mas saturam e não mantêm o crescimento a longo prazo.</p>
+              <p>Vídeos no formato tradicional (clips nativos, edição completa) exigem mais trabalho, mas tendem a sustentar melhor a performance.</p>
+            </AccordionContent>
+          </AccordionItem>
+
           <AccordionItem value="minimum-videos">
             <AccordionTrigger className="text-lg">
               Volume mínimo de vídeos para avaliação
@@ -31,13 +41,13 @@ const FAQ = () => {
             </AccordionContent>
           </AccordionItem>
 
-          <AccordionItem value="video-formats">
+          <AccordionItem value="test-pivot">
             <AccordionTrigger className="text-lg">
-              Diferença entre formatos de vídeo
+              Estratégia de "testar e pivotar"
             </AccordionTrigger>
             <AccordionContent className="space-y-2 text-muted-foreground">
-              <p>Vídeos "imagem + IA + legenda" têm entrada muito rápida, mas saturam e não mantêm o crescimento a longo prazo.</p>
-              <p>Vídeos no formato tradicional (clips nativos, edição completa) exigem mais trabalho, mas tendem a sustentar melhor a performance.</p>
+              <p>Se um subnicho não funcionar após o mínimo de vídeos, mude imediatamente para outro; não se apegue a um canal que não engrena.</p>
+              <p>Canais bem-sucedidos chegam a 300–500k views/mês nos primeiros 15 vídeos quando aplicam corretamente títulos, subnichagem e micro-subnichos.</p>
             </AccordionContent>
           </AccordionItem>
 
@@ -49,16 +59,6 @@ const FAQ = () => {
               <p>Queda de alcance quase sempre decorre de strikes, de ter entrado num nicho saturado ou de falhas na aplicação das estratégias explicadas—e não de penalização oculta pelo YouTube.</p>
             </AccordionContent>
           </AccordionItem>
-
-          <AccordionItem value="test-pivot">
-            <AccordionTrigger className="text-lg">
-              Estratégia de "testar e pivotar"
-            </AccordionTrigger>
-            <AccordionContent className="space-y-2 text-muted-foreground">
-              <p>Se um subnicho não funcionar após o mínimo de vídeos, mude imediatamente para outro; não se apegue a um canal que não engrena.</p>
-              <p>Canais bem-sucedidos chegam a 300–500 mil views/mês nos primeiros 15 vídeos quando aplicam corretamente títulos, subnichagem e micro-subnichos.</p>
-            </AccordionContent>
-          </AccordionItem>
         </Accordion>
       </Card>
     </div>
@@ -66,3 +66,4 @@ const FAQ = () => {
 };
 
 export default FAQ;
+
