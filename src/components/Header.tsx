@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from './ui/button';
@@ -46,10 +45,7 @@ const Header = () => {
           Analisar Vídeo
         </NavLink>
         <NavLink to="/title-generator" currentPath={location.pathname}>
-          Gerar Títulos
-        </NavLink>
-        <NavLink to="/title-analyzer" currentPath={location.pathname}>
-          Analisar Títulos
+          Títulos
         </NavLink>
         <NavLink to="/script-generator" currentPath={location.pathname}>
           Roteirizador Automático

@@ -1,11 +1,30 @@
+
 import React, { useState } from "react";
 import Header from "@/components/Header";
-import TitleGeneratorForm from "@/components/TitleGeneratorForm";
-import TitleVariationsList from "@/components/TitleVariationsList";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import TitleGeneratorForm from "@/components/TitleGeneratorForm";
+import TitleVariationsList from "@/components/TitleVariationsList";
+import TitleVariations from "@/components/TitleVariations";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  extrairTitulosConcorrentes,
+  simularExtrairTitulosConcorrentes,
+  avaliarEPriorizarTitulos,
+  TitleData,
+  TitleWithScore
+} from '@/utils/titleAnalysis';
+import {
+  gerarVariacoesTitulo,
+  gerarVariacoesEstruturadas,
+  subnichearTitulos,
+  TitleVariations as TitleVariationsType
+} from '@/utils/titleGeneration';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 
 export interface TitleVariation {
   text: string;
@@ -19,104 +38,18 @@ export interface TitleVariation {
 }
 
 const TitleGenerator = () => {
-  const [variations, setVariations] = useState<TitleVariation[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  // Estados compartilhados
   const [keyword, setKeyword] = useState("");
+  const [variations, setVariations] = useState<TitleVariation[]>([]);
+  const [titulosConcorrentes, setTitulosConcorrentes] = useState<TitleData[]>([]);
+  const [variacoesTitulo, setVariacoesTitulo] = useState<TitleVariationsType | null>(null);
+  const [titulosSubnicho, setTitulosSubnicho] = useState<string[]>([]);
+  const [titulosPriorizados, setTitulosPriorizados] = useState<TitleWithScore[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { youtubeApiKey } = useAuth();
 
-  const generateTitleVariations = (
-    keyword: string, 
-    language: string, 
-    emotion: string,
-    count: number = 15
-  ): TitleVariation[] => {
-    const painTitles = language === "en" ? [
-      `The painful truth about ${keyword} that no one wants to admit`,
-      `Why ${keyword} might be destroying your life without you knowing`,
-      `The silent struggle of living with ${keyword} daily`,
-    ] : language === "es" ? [
-      `La verdad dolorosa sobre ${keyword} que nadie quiere admitir`,
-      `Por qué ${keyword} puede estar destruyendo tu vida sin que lo sepas`,
-      `La lucha silenciosa de vivir con ${keyword} diariamente`,
-    ] : language === "fr" ? [
-      `La vérité douloureuse sur ${keyword} que personne ne veut admettre`,
-      `Pourquoi ${keyword} pourrait détruire votre vie sans que vous le sachiez`,
-      `La lutte silencieuse de vivre avec ${keyword} quotidiennement`,
-    ] : [
-      `A verdade dolorosa sobre ${keyword} que ninguém quer admitir`,
-      `Por que ${keyword} pode estar destruindo sua vida sem você perceber`,
-      `A luta silenciosa de viver com ${keyword} diariamente`,
-    ];
-    
-    const hopeTitles = language === "en" ? [
-      `7 ways to transform ${keyword} into growth opportunities`,
-      `How I overcame ${keyword} and you can too`,
-      `The transformative power of ${keyword} in your journey`,
-    ] : language === "es" ? [
-      `7 formas de transformar ${keyword} en oportunidades de crecimiento`,
-      `Cómo superé ${keyword} y tú también puedes`,
-      `El poder transformador de ${keyword} en tu camino`,
-    ] : language === "fr" ? [
-      `7 façons de transformer ${keyword} en opportunités de croissance`,
-      `Comment j'ai surmonté ${keyword} et vous pouvez aussi`,
-      `Le pouvoir transformateur de ${keyword} dans votre voyage`,
-    ] : [
-      `7 maneiras de transformar ${keyword} em oportunidades de crescimento`,
-      `Como superei ${keyword} e você também pode`,
-      `O poder transformador de ${keyword} na sua jornada`,
-    ];
-    
-    const curiosityTitles = language === "en" ? [
-      `The hidden secret behind ${keyword} that no one tells`,
-      `Did you know these 5 surprising facts about ${keyword}?`,
-      `The unsolved mystery of ${keyword} that experts can't explain`,
-    ] : language === "es" ? [
-      `El secreto oculto detrás de ${keyword} que nadie cuenta`,
-      `¿Conocías estos 5 datos sorprendentes sobre ${keyword}?`,
-      `El misterio sin resolver de ${keyword} que los expertos no pueden explicar`,
-    ] : language === "fr" ? [
-      `Le secret caché derrière ${keyword} que personne ne dit`,
-      `Connaissez-vous ces 5 faits surprenants sur ${keyword}?`,
-      `Le mystère non résolu de ${keyword} que les experts ne peuvent expliquer`,
-    ] : [
-      `O segredo oculto por trás de ${keyword} que ninguém conta`,
-      `Você sabia destes 5 fatos surpreendentes sobre ${keyword}?`,
-      `O mistério não resolvido de ${keyword} que os especialistas não conseguem explicar`,
-    ];
-
-    let allTitles: TitleVariation[] = [];
-    const selectedLanguage = language as "pt" | "es" | "en" | "fr";
-    
-    if (emotion === "dor" || emotion === "mix") {
-      allTitles.push(...painTitles.map(text => ({
-        text,
-        type: "dor" as const,
-        saturation: getRandomSaturation(),
-        language: selectedLanguage
-      })));
-    }
-    
-    if (emotion === "esperanca" || emotion === "mix") {
-      allTitles.push(...hopeTitles.map(text => ({
-        text,
-        type: "esperanca" as const,
-        saturation: getRandomSaturation(),
-        language: selectedLanguage
-      })));
-    }
-    
-    if (emotion === "curiosidade" || emotion === "mix") {
-      allTitles.push(...curiosityTitles.map(text => ({
-        text,
-        type: "curiosidade" as const,
-        saturation: getRandomSaturation(),
-        language: selectedLanguage
-      })));
-    }
-    
-    return shuffleArray(allTitles).slice(0, count);
-  };
-
+  // Handlers unificados
   const handleGenerateTitles = async (
     keyword: string,
     language: string,
@@ -126,13 +59,26 @@ const TitleGenerator = () => {
     setKeyword(keyword);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      const generatedTitles = generateTitleVariations(keyword, language, emotion);
-      setVariations(generatedTitles);
+      // Gerar variações básicas
+      const basicVariations = generateTitleVariations(keyword, language, emotion);
+      setVariations(basicVariations);
+      
+      // Gerar variações estruturadas
+      const structuredVariations = gerarVariacoesEstruturadas(keyword);
+      setVariacoesTitulo(structuredVariations);
+      
+      // Extrair títulos concorrentes
+      let titulos;
+      if (youtubeApiKey) {
+        titulos = await extrairTitulosConcorrentes(keyword, language, 30, youtubeApiKey);
+      } else {
+        titulos = simularExtrairTitulosConcorrentes(keyword, language, 30);
+      }
+      setTitulosConcorrentes(titulos);
       
       toast({
         title: "Títulos gerados com sucesso!",
-        description: `${generatedTitles.length} variações criadas baseadas em "${keyword}"`,
+        description: `${basicVariations.length} variações criadas baseadas em "${keyword}"`,
       });
     } catch (error) {
       console.error("Erro ao gerar títulos:", error);
@@ -146,61 +92,187 @@ const TitleGenerator = () => {
     }
   };
 
-  const getRandomSaturation = (): "low" | "medium" | "high" => {
-    const rand = Math.random();
-    if (rand < 0.5) return "low";
-    if (rand < 0.8) return "medium";
-    return "high";
+  const handleSubnichearTitulos = () => {
+    if (!keyword) {
+      toast({
+        title: "Palavra-chave necessária",
+        description: "Digite uma palavra-chave primeiro.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    try {
+      const termos = keyword.split(',').map(termo => termo.trim());
+      const titulos = subnichearTitulos(keyword, termos, "pt");
+      setTitulosSubnicho(titulos);
+      
+      toast({
+        title: "Subnichos gerados",
+        description: `Foram gerados ${titulos.length} títulos subnichados.`,
+      });
+    } catch (error) {
+      console.error("Erro ao subnichear títulos:", error);
+      toast({
+        title: "Erro na subnichagem",
+        description: "Não foi possível gerar os títulos subnichados.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const shuffleArray = <T,>(array: T[]): T[] => {
-    const newArray = [...array];
-    for (let i = newArray.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  const handleAvaliarTitulos = () => {
+    if (!titulosSubnicho.length && !variacoesTitulo) {
+      toast({
+        title: "Sem títulos para avaliar",
+        description: "Gere variações ou subnichos de título primeiro.",
+        variant: "destructive",
+      });
+      return;
     }
-    return newArray;
+    
+    // Combinar todos os títulos gerados para avaliação
+    let todosTitulos: string[] = [...titulosSubnicho];
+    
+    if (variacoesTitulo) {
+      todosTitulos = [
+        ...todosTitulos,
+        ...variacoesTitulo.emotional,
+        ...variacoesTitulo.structural,
+        ...variacoesTitulo.multilingual
+      ];
+    }
+    
+    const criterios = {
+      max_repeticoes: 3,
+      min_score_inovacao: 0.5
+    };
+    
+    const titulos = avaliarEPriorizarTitulos(todosTitulos, titulosConcorrentes, criterios);
+    setTitulosPriorizados(titulos);
+    
+    toast({
+      title: "Análise concluída",
+      description: `Foram avaliados ${todosTitulos.length} títulos e priorizados ${titulos.length}.`,
+    });
   };
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-4 py-6 max-w-[1400px]">
       <Header />
       
-      <div className="grid gap-6 mt-6">
+      <div className="grid grid-cols-1 gap-6 mb-8">
         <Card className="p-6">
-          <h1 className="text-2xl font-bold mb-2">Gerador de Títulos Estratégicos</h1>
-          <p className="text-muted-foreground mb-6">
-            Crie títulos criativos, emocionais e com alto potencial de engajamento para seus vídeos em diferentes idiomas.
+          <h1 className="text-2xl font-bold mb-4">Gerador e Analisador de Títulos</h1>
+          
+          <p className="mb-6 text-muted-foreground">
+            Gere, analise e otimize títulos para seus vídeos usando dados da concorrência e técnicas avançadas de copywriting.
           </p>
           
-          <Alert className="mb-6">
-            <Info className="h-4 w-4" />
-            <AlertTitle>Como funciona</AlertTitle>
-            <AlertDescription>
-              Digite uma palavra-chave ou ideia, escolha o idioma principal e o tipo de emoção desejada. 
-              O sistema gerará automaticamente variações de títulos aplicando diferentes estratégias.
-            </AlertDescription>
-          </Alert>
-          
-          <TitleGeneratorForm onGenerate={handleGenerateTitles} isLoading={isLoading} />
+          <Tabs defaultValue="generate" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="generate">1. Gerar Títulos</TabsTrigger>
+              <TabsTrigger value="analyze">2. Analisar Concorrência</TabsTrigger>
+              <TabsTrigger value="variations">3. Variações</TabsTrigger>
+              <TabsTrigger value="evaluate">4. Avaliar Títulos</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="generate" className="space-y-4">
+              <Alert>
+                <Info className="h-4 w-4" />
+                <AlertTitle>Como funciona</AlertTitle>
+                <AlertDescription>
+                  Digite uma palavra-chave ou ideia, escolha o idioma principal e o tipo de emoção desejada.
+                  O sistema gerará automaticamente variações de títulos aplicando diferentes estratégias.
+                </AlertDescription>
+              </Alert>
+              
+              <TitleGeneratorForm onGenerate={handleGenerateTitles} isLoading={isLoading} />
+              
+              {variations.length > 0 && (
+                <TitleVariationsList 
+                  variations={variations}
+                  onGenerateMore={() => {
+                    const newVariations = generateTitleVariations(keyword, "auto", "mix", 10);
+                    setVariations([...variations, ...newVariations]);
+                  }}
+                  totalCount={variations.length}
+                  setVariations={setVariations}
+                  keyword={keyword}
+                />
+              )}
+            </TabsContent>
+            
+            <TabsContent value="analyze" className="space-y-4">
+              {titulosConcorrentes.length > 0 && (
+                <div className="mt-6">
+                  <h3 className="text-lg font-medium mb-2">Títulos Concorrentes</h3>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Título</TableHead>
+                        <TableHead>Canal</TableHead>
+                        <TableHead>Data</TableHead>
+                        <TableHead className="text-right">Visualizações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {titulosConcorrentes.slice(0, 10).map((titulo, index) => (
+                        <TableRow key={`titulo-${index}`}>
+                          <TableCell className="font-medium">{titulo.titulo}</TableCell>
+                          <TableCell>{titulo.canal}</TableCell>
+                          <TableCell>{new Date(titulo.data_publicacao).toLocaleDateString()}</TableCell>
+                          <TableCell className="text-right">{titulo.visualizacoes.toLocaleString()}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="variations" className="space-y-4">
+              {variacoesTitulo && (
+                <TitleVariations variations={variacoesTitulo} />
+              )}
+            </TabsContent>
+            
+            <TabsContent value="evaluate" className="space-y-4">
+              <div className="flex justify-end space-x-4">
+                <Button onClick={handleSubnichearTitulos}>
+                  Gerar Subnichos
+                </Button>
+                <Button onClick={handleAvaliarTitulos}>
+                  Avaliar Títulos
+                </Button>
+              </div>
+              
+              {titulosPriorizados.length > 0 && (
+                <div className="mt-6">
+                  <h3 className="text-lg font-medium mb-2">Títulos Priorizados</h3>
+                  <div className="space-y-4">
+                    {titulosPriorizados.map((titulo, index) => (
+                      <div 
+                        key={`priorizado-${index}`}
+                        className="p-4 rounded-md bg-muted/50 hover:bg-muted/80 transition-colors border"
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-semibold">{titulo.titulo}</h4>
+                          <Badge variant={titulo.score_inovacao > 0.7 ? "secondary" : "outline"}>
+                            Score: {(titulo.score_inovacao * 100).toFixed(0)}%
+                          </Badge>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          <span>Repetições detectadas: {titulo.repeticoes}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </Card>
-        
-        {variations.length > 0 && (
-          <TitleVariationsList 
-            variations={variations}
-            onGenerateMore={() => {
-              const newVariations = generateTitleVariations(keyword, "auto", "mix", 10);
-              setVariations([...variations, ...newVariations]);
-              toast({
-                title: "Mais títulos gerados!",
-                description: "10 novas variações de título foram adicionadas.",
-              });
-            }}
-            totalCount={variations.length}
-            setVariations={setVariations}
-            keyword={keyword}
-          />
-        )}
       </div>
     </div>
   );
