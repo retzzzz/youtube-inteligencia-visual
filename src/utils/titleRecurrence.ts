@@ -363,10 +363,13 @@ export const planejarCicloRecorrencia = (
       tituloAjustado = `Ep. ${i+1}: ${tituloAjustado}`;
     }
     
+    // Fix: Define the element if available in the title or use a default value
+    const elementoRecorrente = tituloAjustado.split(' ')[0] || "Episódio";
+    
     cronograma.push({
       titulo: tituloAjustado,
       data_publicacao: dataMelhor.toISOString(),
-      elemento_recorrente: gatilhos.find(g => g.gatilho === tituloAjustado.split(' ')[0])?.tipo_gatilho || ""
+      elemento_recorrente: elementoRecorrente
     });
   }
   
