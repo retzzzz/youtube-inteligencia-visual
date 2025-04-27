@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -540,13 +539,11 @@ const TitleGeneratorContainer = ({
   };
 
   const toggleLanguage = (language: string) => {
-    setIdiomasDestino((prev) => {
-      if (prev.includes(language)) {
-        return prev.filter(lang => lang !== language);
-      } else {
-        return [...prev, language];
-      }
-    });
+    if (idiomasDestino.includes(language)) {
+      setIdiomasDestino(idiomasDestino.filter(lang => lang !== language));
+    } else {
+      setIdiomasDestino([...idiomasDestino, language]);
+    }
   };
 
   return (
