@@ -38,7 +38,7 @@ import {
   planejarCicloRecorrencia,
   RecurrenceStructure,
   RecurrenceTrigger,
-  PublicationSchedule
+  PublicationSchedule as RecurrencePublicationSchedule
 } from '@/utils/titleRecurrence';
 import {
   extrairPerfilAudiencia,
@@ -46,7 +46,8 @@ import {
   adaptarTitulosPorAudiencia,
   planejarCronogramaPorAudiencia,
   AudienceProfile,
-  MicroSubnicho
+  MicroSubnicho,
+  PublicationSchedule as AudiencePublicationSchedule
 } from '@/utils/audienceAnalysis';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -144,6 +145,7 @@ const TitleGenerator = () => {
   const [audienceProfile, setAudienceProfile] = useState<AudienceProfile | null>(null);
   const [microSubnichos, setMicroSubnichos] = useState<MicroSubnicho[]>([]);
   const [titulosAdaptados, setTitulosAdaptados] = useState<string[]>([]);
+  const [cronogramaAudiencia, setCronogramaAudiencia] = useState<AudiencePublicationSchedule[]>([]);
   const [loadingAudiencia, setLoadingAudiencia] = useState(false);
 
   const handleGenerateTitles = async (
