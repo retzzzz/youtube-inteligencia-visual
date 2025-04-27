@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { YoutubeSearchParams, VideoResult } from "@/types/youtube-types";
-import { searchYouTubeVideos } from "@/services/youtube-mock-service";
+import { searchYouTubeVideos } from "@/services/youtube-mock";
 import { useToast } from "@/hooks/use-toast";
 import {
   filterVideosByLanguage,
