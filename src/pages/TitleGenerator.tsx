@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Header from "@/components/Header";
 import { Card } from "@/components/ui/card";
@@ -7,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import TitleGeneratorForm from "@/components/TitleGeneratorForm";
 import TitleVariationsList from "@/components/TitleVariationsList";
 import TitleVariations from "@/components/TitleVariations";
@@ -340,7 +340,6 @@ const TitleGenerator = () => {
     });
   };
 
-  // Handler functions for the new tabs
   const handleExtrairTitulosVirais = async () => {
     if (!nicho) {
       toast({
