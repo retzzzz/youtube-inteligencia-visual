@@ -14,7 +14,7 @@ const Header = () => {
       <div className="mb-4">
         <h1 className="text-3xl font-bold tracking-tight">
           <Link to="/">
-            YT<span className="text-primary">Analyzer</span>
+            YT<span className="text-primary">Optimizer</span>
           </Link>
         </h1>
         <p className="text-muted-foreground mt-1">

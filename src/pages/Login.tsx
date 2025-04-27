@@ -18,10 +18,10 @@ const Login = () => {
     
     if (username === "admin" && password === "admin") {
       localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("userName", username); // Save the username
+      localStorage.setItem("userName", username);
       toast({
         title: "Login bem-sucedido",
-        description: "Bem-vindo ao YTAnalyzer!",
+        description: "Bem-vindo ao YTOptimizer!",
       });
       navigate("/");
     } else {
@@ -38,7 +38,7 @@ const Login = () => {
       <Card className="w-full max-w-md p-8 space-y-6">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold">
-            YT<span className="text-primary">Analyzer</span>
+            YT<span className="text-primary">Optimizer</span>
           </h1>
           <p className="text-muted-foreground mt-2">
             Faça login para acessar a ferramenta de análise de vídeos
