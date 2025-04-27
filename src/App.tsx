@@ -1,3 +1,4 @@
+
 import { Routes, Route } from 'react-router-dom';
 import Index from './pages/Index';
 import Login from './pages/Login';
@@ -15,6 +16,7 @@ import ImportantLinks from './pages/ImportantLinks';
 import { AuthProvider } from './contexts/AuthContext';
 import { Toaster } from './components/ui/toaster';
 import Footer from './components/Footer';
+import ApiKeyDialog from './components/ApiKeyDialog';  // Import the API key dialog
 import './App.css';
 
 function App() {
@@ -39,6 +41,7 @@ function App() {
           </Routes>
         </div>
         <Footer />
+        <ApiKeyDialog />  {/* Add the API key dialog here */}
       </div>
       <Toaster />
     </AuthProvider>
@@ -46,3 +49,4 @@ function App() {
 }
 
 export default App;
+
