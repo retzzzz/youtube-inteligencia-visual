@@ -14,7 +14,15 @@ export const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<Vid
   }
 
   try {
-    // A validação foi movida para o hook useYouTubeSearch para evitar chamadas repetidas
+    // Verificação básica da chave antes de prosseguir
+    const validationResult = await validateApiKey(params.apiKey);
+    if (!validationResult.valid) {
+      throw new Error(validationResult.message);
+    }
+    
+    if (validationResult.quotaExceeded) {
+      throw new Error("Quota da API do YouTube excedida. Tente novamente mais tarde ou use uma chave de API diferente.");
+    }
     
     // Fetch initial search results
     const searchUrl = `https://www.googleapis.com/youtube/v3/search?${new URLSearchParams({

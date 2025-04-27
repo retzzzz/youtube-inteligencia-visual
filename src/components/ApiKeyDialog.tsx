@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ExternalLink, AlertCircle, RefreshCw } from "lucide-react";
+import { ExternalLink, AlertCircle, RefreshCw, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { validateApiKey } from "@/services/youtube/api-validator";
@@ -23,6 +23,7 @@ const ApiKeyDialog = () => {
   const [apiKey, setApiKey] = useState("");
   const [rememberKey, setRememberKey] = useState(true);
   const [error, setError] = useState("");
+  const [warning, setWarning] = useState("");
   const [isValidating, setIsValidating] = useState(false);
   const { toast } = useToast();
 
@@ -41,11 +42,22 @@ const ApiKeyDialog = () => {
     try {
       setIsValidating(true);
       setError("");
+      setWarning("");
       
-      // Usar o serviço de validação
-      await validateApiKey(apiKey.trim());
+      // Usar o serviço de validação melhorado
+      const validationResult = await validateApiKey(apiKey.trim());
       
-      // Se chegou aqui, a chave é válida ou tem quota excedida mas é válida
+      if (!validationResult.valid) {
+        setError(validationResult.message);
+        return;
+      }
+      
+      // Verificar se há aviso de quota excedida
+      if (validationResult.quotaExceeded) {
+        setWarning("Esta chave é válida, mas sua quota está excedida. Você poderá usá-la novamente quando a quota for renovada (geralmente a cada 24h).");
+      }
+      
+      // Se chegou aqui, a chave é válida (com ou sem quota)
       if (rememberKey) {
         localStorage.setItem("youtubeApiKey", apiKey.trim());
       }
@@ -55,7 +67,9 @@ const ApiKeyDialog = () => {
       
       toast({
         title: "Chave API salva",
-        description: "Sua chave API do YouTube foi configurada com sucesso!",
+        description: validationResult.quotaExceeded 
+          ? "Sua chave API foi salva, mas a quota está excedida. Considere usar outra chave."
+          : "Sua chave API do YouTube foi configurada com sucesso!",
       });
     } catch (error) {
       console.error("Erro ao validar chave:", error);
@@ -117,15 +131,26 @@ const ApiKeyDialog = () => {
               onChange={(e) => {
                 setApiKey(e.target.value);
                 setError("");
+                setWarning("");
               }} 
               placeholder="AIzaSyC..."
               disabled={isValidating}
             />
+            
             {error && (
               <Alert variant="destructive" className="py-2">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription className="text-xs">
                   {error}
+                </AlertDescription>
+              </Alert>
+            )}
+            
+            {warning && (
+              <Alert variant="warning" className="py-2 border-yellow-500 bg-yellow-50">
+                <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                <AlertDescription className="text-xs">
+                  {warning}
                 </AlertDescription>
               </Alert>
             )}

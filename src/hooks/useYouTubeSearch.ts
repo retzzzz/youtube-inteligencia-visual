@@ -4,7 +4,7 @@ import { YoutubeSearchParams, VideoResult } from "@/types/youtube-types";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchYouTubeData } from "@/services/youtube";
-import { checkApiQuota } from "@/services/youtube/api-validator";
+import { validateApiKey, checkApiQuota } from "@/services/youtube/api-validator";
 
 export const useYouTubeSearch = () => {
   const [searchParams, setSearchParams] = useState<YoutubeSearchParams | null>(null);
@@ -13,7 +13,7 @@ export const useYouTubeSearch = () => {
   const [selectedVideo, setSelectedVideo] = useState<VideoResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const { youtubeApiKey, setNeedsApiKey } = useAuth();
+  const { youtubeApiKey, setYoutubeApiKey, setNeedsApiKey } = useAuth();
 
   const handleSearch = async (params: YoutubeSearchParams) => {
     setIsLoading(true);
@@ -34,9 +34,21 @@ export const useYouTubeSearch = () => {
         throw new Error("Chave de API não fornecida");
       }
 
-      // Verificar se a API key tem quota disponível
-      const hasQuota = await checkApiQuota(youtubeApiKey);
-      if (!hasQuota) {
+      // Verificar a validade da chave API
+      const validationResult = await validateApiKey(youtubeApiKey);
+      
+      if (!validationResult.valid) {
+        toast({
+          title: "Chave de API inválida",
+          description: validationResult.message,
+          variant: "destructive",
+        });
+        setNeedsApiKey(true);
+        throw new Error(validationResult.message);
+      }
+
+      // Verificar se a chave tem quota disponível
+      if (validationResult.quotaExceeded) {
         toast({
           title: "Quota da API excedida",
           description: "A quota diária desta chave de API foi excedida. Por favor, use outra chave ou tente novamente mais tarde.",
@@ -93,6 +105,11 @@ export const useYouTubeSearch = () => {
     }
   };
 
+  // Adicionar função para tentar com outra API key
+  const tryWithNewKey = () => {
+    setNeedsApiKey(true);
+  };
+
   return {
     searchParams,
     results,
@@ -100,6 +117,7 @@ export const useYouTubeSearch = () => {
     selectedVideo,
     setSelectedVideo,
     handleSearch,
-    error
+    error,
+    tryWithNewKey
   };
 };

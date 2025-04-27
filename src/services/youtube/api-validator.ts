@@ -2,10 +2,14 @@
 /**
  * Valida uma chave de API do YouTube fazendo uma solicitação de teste
  */
-export const validateApiKey = async (apiKey: string): Promise<void> => {
+export const validateApiKey = async (apiKey: string): Promise<{valid: boolean, quotaExceeded: boolean, message: string}> => {
   // Se a chave estiver vazia, falha imediatamente
   if (!apiKey || apiKey.trim() === '') {
-    throw new Error("Chave de API vazia");
+    return {
+      valid: false,
+      quotaExceeded: false,
+      message: "Chave de API vazia"
+    };
   }
 
   try {
@@ -17,21 +21,40 @@ export const validateApiKey = async (apiKey: string): Promise<void> => {
       const errorData = await testResponse.json();
       
       if (errorData.error?.errors?.some((e: any) => e.reason === "keyInvalid")) {
-        throw new Error("Chave de API inválida. Verifique se a chave foi digitada corretamente.");
+        return {
+          valid: false,
+          quotaExceeded: false,
+          message: "Chave de API inválida. Verifique se a chave foi digitada corretamente."
+        };
       } else if (errorData.error?.errors?.some((e: any) => e.reason === "quotaExceeded")) {
         console.warn("Aviso: Quota da API excedida para esta chave");
-        // Não lançamos erro para quota excedida, pois a chave ainda é válida
-        return;
+        return {
+          valid: true, // A chave é válida, apenas sem quota
+          quotaExceeded: true,
+          message: "Quota da API excedida. Esta chave é válida, mas sua cota diária foi atingida."
+        };
       }
       
-      throw new Error(`Erro na validação da API: ${errorData.error?.message || testResponse.statusText}`);
+      return {
+        valid: false,
+        quotaExceeded: false,
+        message: `Erro na validação da API: ${errorData.error?.message || testResponse.statusText}`
+      };
     }
     
-    // Se chegou aqui, a chave é válida
-    console.log("Chave API validada com sucesso");
+    // Se chegou aqui, a chave é válida e tem quota
+    return {
+      valid: true,
+      quotaExceeded: false,
+      message: "Chave API validada com sucesso"
+    };
   } catch (error) {
     console.error("Erro ao validar chave API:", error);
-    throw error;
+    return {
+      valid: false,
+      quotaExceeded: false,
+      message: error instanceof Error ? error.message : "Erro desconhecido ao validar a chave"
+    };
   }
 };
 
@@ -40,6 +63,10 @@ export const validateApiKey = async (apiKey: string): Promise<void> => {
  */
 export const checkApiQuota = async (apiKey: string): Promise<boolean> => {
   try {
+    if (!apiKey || apiKey.trim() === "") {
+      return false;
+    }
+    
     const testResponse = await fetch(
       `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&q=test&key=${apiKey}`
     );
@@ -59,7 +86,7 @@ export const checkApiQuota = async (apiKey: string): Promise<boolean> => {
     // Quota excedida
     return false;
   } catch {
-    // Em caso de erro de rede ou outros, assumimos que pode haver quota
-    return true;
+    // Em caso de erro de rede ou outros, assumimos que pode não haver quota
+    return false;
   }
 };

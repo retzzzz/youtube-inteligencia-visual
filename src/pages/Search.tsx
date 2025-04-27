@@ -5,7 +5,7 @@ import Header from '@/components/Header';
 import SearchForm from '@/components/SearchForm';
 import { useYouTubeSearch } from '@/hooks/useYouTubeSearch';
 import ResultsSection from '@/components/ResultsSection';
-import { AlertCircle, Key } from 'lucide-react';
+import { AlertCircle, Key, RefreshCw } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,7 +18,8 @@ const Search = () => {
     searchParams, 
     selectedVideo, 
     setSelectedVideo,
-    error 
+    error,
+    tryWithNewKey
   } = useYouTubeSearch();
   
   const { youtubeApiKey, setNeedsApiKey } = useAuth();
@@ -54,6 +55,13 @@ const Search = () => {
     setNeedsApiKey(true);
   };
 
+  // Função para tentar novamente com a mesma chave
+  const handleRetry = () => {
+    if (searchParams) {
+      handleSearch(searchParams);
+    }
+  };
+
   if (!youtubeApiKey) {
     return (
       <div className="container mx-auto px-4 py-6 max-w-[1200px]">
@@ -84,14 +92,25 @@ const Search = () => {
           <div className="text-sm text-muted-foreground">
             Usando chave API: {youtubeApiKey.substring(0, 5)}...{youtubeApiKey.substring(youtubeApiKey.length - 4)}
           </div>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="text-xs" 
-            onClick={handleChangeApiKey}
-          >
-            <Key className="h-3 w-3 mr-1" /> Alterar chave API
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="text-xs" 
+              onClick={handleRetry}
+              disabled={isLoading || !searchParams}
+            >
+              <RefreshCw className="h-3 w-3 mr-1" /> Tentar novamente
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="text-xs" 
+              onClick={handleChangeApiKey}
+            >
+              <Key className="h-3 w-3 mr-1" /> Alterar chave API
+            </Button>
+          </div>
         </div>
       )}
       
@@ -102,15 +121,16 @@ const Search = () => {
         {error && (
           <Alert variant="destructive" className="mt-6">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              {error}
+            <AlertDescription className="flex justify-between items-center w-full">
+              <span>{error}</span>
               {error.includes("API") && (
                 <Button
-                  variant="link"
-                  className="p-0 h-auto ml-2"
+                  variant="outline"
+                  size="sm"
                   onClick={handleChangeApiKey}
+                  className="ml-2"
                 >
-                  Configurar chave API
+                  Configurar nova chave API
                 </Button>
               )}
             </AlertDescription>
