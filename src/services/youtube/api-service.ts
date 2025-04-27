@@ -5,27 +5,30 @@ import { fetchVideoStats } from './video-stats';
 import { fetchChannelStats } from './channel-stats';
 import { validateApiKey } from './api-validator';
 
+/**
+ * Busca dados do YouTube usando a API oficial
+ */
 export const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<VideoResult[]> => {
   if (!params.apiKey) {
     throw new Error("Chave de API do YouTube não fornecida");
   }
 
   try {
-    // Validate API key first
-    await validateApiKey(params.apiKey);
+    // A validação foi movida para o hook useYouTubeSearch para evitar chamadas repetidas
     
     // Fetch initial search results
-    const searchResponse = await fetch(
-      `https://www.googleapis.com/youtube/v3/search?${new URLSearchParams({
-        part: "snippet",
-        maxResults: params.maxResults.toString(),
-        q: params.keywords,
-        type: params.searchType === "shorts" ? "video" : params.searchType,
-        key: params.apiKey,
-        ...(params.searchType === "shorts" && { videoDuration: "short" }),
-        ...(params.language && params.language !== "any" && { relevanceLanguage: params.language })
-      }).toString()}`
-    );
+    const searchUrl = `https://www.googleapis.com/youtube/v3/search?${new URLSearchParams({
+      part: "snippet",
+      maxResults: params.maxResults.toString(),
+      q: params.keywords,
+      type: params.searchType === "shorts" ? "video" : params.searchType,
+      key: params.apiKey,
+      ...(params.searchType === "shorts" && { videoDuration: "short" }),
+      ...(params.language && params.language !== "any" && { relevanceLanguage: params.language })
+    }).toString()}`;
+
+    console.log("Realizando busca na API do YouTube...");
+    const searchResponse = await fetch(searchUrl);
 
     if (!searchResponse.ok) {
       const errorData = await searchResponse.json();
@@ -53,7 +56,8 @@ export const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<Vid
 
     // Enrich and filter results
     const results = enrichVideoData(searchData.items, videoStats, channelStats, params);
-
+    
+    console.log(`Processados ${results.length} resultados após filtros`);
     return results;
   } catch (error) {
     console.error("Erro detalhado ao buscar dados do YouTube:", error);
@@ -61,11 +65,18 @@ export const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<Vid
   }
 };
 
+/**
+ * Trata erros específicos da API do YouTube
+ */
 const handleApiError = (errorData: any, response: Response) => {
   console.error("Resposta de erro da API:", errorData);
   
   if (errorData.error?.errors?.some((e: any) => e.reason === "quotaExceeded")) {
     throw new Error("Quota da API do YouTube excedida. Tente novamente mais tarde ou use uma chave de API diferente.");
+  }
+  
+  if (errorData.error?.errors?.some((e: any) => e.reason === "keyInvalid")) {
+    throw new Error("Chave de API inválida. Verifique se a chave foi digitada corretamente.");
   }
   
   throw new Error(`Erro na API do YouTube: ${errorData.error?.message || response.statusText || response.status}`);

@@ -13,9 +13,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ExternalLink, AlertCircle } from "lucide-react";
+import { ExternalLink, AlertCircle, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { validateApiKey } from "@/services/youtube/api-validator";
 
 const ApiKeyDialog = () => {
   const { needsApiKey, setNeedsApiKey, youtubeApiKey, setYoutubeApiKey } = useAuth();
@@ -26,54 +27,25 @@ const ApiKeyDialog = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (youtubeApiKey) {
+    if (youtubeApiKey && needsApiKey) {
       setApiKey(youtubeApiKey);
     }
   }, [youtubeApiKey, needsApiKey]);
 
-  const validateApiKey = async (key: string): Promise<boolean> => {
-    if (!key.trim()) return false;
-    
-    try {
-      setIsValidating(true);
-      const response = await fetch(
-        `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&q=test&key=${key}`
-      );
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        return true;
-      } else if (data.error && data.error.errors) {
-        if (data.error.errors.some((e: any) => e.reason === "quotaExceeded")) {
-          setError("Aviso: A quota desta chave de API foi excedida para hoje. A chave é válida, mas você pode precisar esperar ou usar outra.");
-          return true;
-        } else if (data.error.errors.some((e: any) => e.reason === "keyInvalid")) {
-          setError("Chave de API inválida. Verifique se foi copiada corretamente.");
-          return false;
-        }
-      }
-      
-      setError("Não foi possível validar a chave de API. Verifique sua conexão de internet.");
-      return false;
-    } catch (error) {
-      console.error("Erro ao validar chave de API:", error);
-      setError("Erro ao validar a chave de API. Tente novamente mais tarde.");
-      return false;
-    } finally {
-      setIsValidating(false);
-    }
-  };
-
-  const handleSaveApiKey = async () => {
+  const handleValidateAndSaveApiKey = async () => {
     if (!apiKey.trim()) {
       setError("Por favor, insira uma chave de API");
       return;
     }
     
-    const isValid = await validateApiKey(apiKey.trim());
-    
-    if (isValid || error.includes("quota")) {
+    try {
+      setIsValidating(true);
+      setError("");
+      
+      // Usar o serviço de validação
+      await validateApiKey(apiKey.trim());
+      
+      // Se chegou aqui, a chave é válida ou tem quota excedida mas é válida
       if (rememberKey) {
         localStorage.setItem("youtubeApiKey", apiKey.trim());
       }
@@ -85,6 +57,11 @@ const ApiKeyDialog = () => {
         title: "Chave API salva",
         description: "Sua chave API do YouTube foi configurada com sucesso!",
       });
+    } catch (error) {
+      console.error("Erro ao validar chave:", error);
+      setError(error instanceof Error ? error.message : "Erro ao validar a chave de API");
+    } finally {
+      setIsValidating(false);
     }
   };
 
@@ -120,7 +97,20 @@ const ApiKeyDialog = () => {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="api-key">Chave da API do YouTube</Label>
+            <Label htmlFor="api-key" className="flex items-center justify-between">
+              Chave da API do YouTube
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-7 w-7 p-0" 
+                onClick={() => setApiKey("")}
+                disabled={isValidating || !apiKey}
+                title="Limpar"
+              >
+                <RefreshCw className="h-4 w-4" />
+                <span className="sr-only">Limpar</span>
+              </Button>
+            </Label>
             <Input 
               id="api-key" 
               value={apiKey} 
@@ -163,7 +153,7 @@ const ApiKeyDialog = () => {
         </div>
         <DialogFooter>
           <Button 
-            onClick={handleSaveApiKey} 
+            onClick={handleValidateAndSaveApiKey} 
             disabled={isValidating}
             className="w-full"
           >

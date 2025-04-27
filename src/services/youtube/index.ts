@@ -1,3 +1,3 @@
 
 export { fetchYouTubeData } from './api-service';
-export { validateApiKey } from './api-validator';
+export { validateApiKey, checkApiQuota } from './api-validator';

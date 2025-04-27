@@ -1,11 +1,11 @@
 
 import React, { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import SearchForm from '@/components/SearchForm';
 import { useYouTubeSearch } from '@/hooks/useYouTubeSearch';
 import ResultsSection from '@/components/ResultsSection';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Key } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,7 +23,9 @@ const Search = () => {
   
   const { youtubeApiKey, setNeedsApiKey } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   
+  // Efeito para lidar com parâmetros na URL
   useEffect(() => {
     // Se não houver chave de API, mostrar o diálogo
     if (!youtubeApiKey) {
@@ -38,12 +40,19 @@ const Search = () => {
       try {
         const loadedParams = JSON.parse(decodeURIComponent(paramsString));
         console.log("Parâmetros carregados da URL:", loadedParams);
+        
+        // Forçar a busca novamente ao trocar de API key
         handleSearch(loadedParams);
       } catch (error) {
         console.error("Erro ao carregar parâmetros da URL:", error);
       }
     }
   }, [location.search, youtubeApiKey]);
+
+  // Função para modificar a chave API quando necessário
+  const handleChangeApiKey = () => {
+    setNeedsApiKey(true);
+  };
 
   if (!youtubeApiKey) {
     return (
@@ -70,7 +79,23 @@ const Search = () => {
     <div className="container mx-auto px-4 py-6 max-w-[1200px]">
       <Header />
       
-      <div className="mt-8">
+      {youtubeApiKey && (
+        <div className="flex justify-between items-center mt-4">
+          <div className="text-sm text-muted-foreground">
+            Usando chave API: {youtubeApiKey.substring(0, 5)}...{youtubeApiKey.substring(youtubeApiKey.length - 4)}
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="text-xs" 
+            onClick={handleChangeApiKey}
+          >
+            <Key className="h-3 w-3 mr-1" /> Alterar chave API
+          </Button>
+        </div>
+      )}
+      
+      <div className="mt-6">
         <h2 className="text-2xl font-bold mb-6">Pesquisa Avançada</h2>
         <SearchForm onSearch={handleSearch} isLoading={isLoading} />
         
@@ -83,7 +108,7 @@ const Search = () => {
                 <Button
                   variant="link"
                   className="p-0 h-auto ml-2"
-                  onClick={() => setNeedsApiKey(true)}
+                  onClick={handleChangeApiKey}
                 >
                   Configurar chave API
                 </Button>

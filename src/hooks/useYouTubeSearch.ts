@@ -4,6 +4,7 @@ import { YoutubeSearchParams, VideoResult } from "@/types/youtube-types";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchYouTubeData } from "@/services/youtube";
+import { checkApiQuota } from "@/services/youtube/api-validator";
 
 export const useYouTubeSearch = () => {
   const [searchParams, setSearchParams] = useState<YoutubeSearchParams | null>(null);
@@ -19,6 +20,7 @@ export const useYouTubeSearch = () => {
     setSearchParams(params);
     setSelectedVideo(null);
     setError(null);
+    setResults([]);
 
     try {
       // Verificações de API key
@@ -30,6 +32,17 @@ export const useYouTubeSearch = () => {
         });
         setNeedsApiKey(true);
         throw new Error("Chave de API não fornecida");
+      }
+
+      // Verificar se a API key tem quota disponível
+      const hasQuota = await checkApiQuota(youtubeApiKey);
+      if (!hasQuota) {
+        toast({
+          title: "Quota da API excedida",
+          description: "A quota diária desta chave de API foi excedida. Por favor, use outra chave ou tente novamente mais tarde.",
+          variant: "destructive",
+        });
+        throw new Error("Quota da API do YouTube excedida");
       }
 
       // Usar a chave de API armazenada
