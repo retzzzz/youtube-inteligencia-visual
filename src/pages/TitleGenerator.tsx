@@ -138,7 +138,7 @@ const TitleGenerator = () => {
   const [titulosRecorrencia, setTitulosRecorrencia] = useState<string[]>([]);
   const [frequenciaPublicacao, setFrequenciaPublicacao] = useState("semanal");
   const [periodoCiclo, setPeriodoCiclo] = useState(4);
-  const [cronogramaPublicacao, setCronogramaPublicacao] = useState<PublicationSchedule[]>([]);
+  const [cronogramaPublicacao, setCronogramaPublicacao] = useState<RecurrencePublicationSchedule[]>([]);
   const [loadingRecorrencia, setLoadingRecorrencia] = useState(false);
   
   const [audienceProfile, setAudienceProfile] = useState<AudienceProfile | null>(null);
@@ -516,8 +516,8 @@ const TitleGenerator = () => {
       
       setTitulosAdaptados(todosAdaptados);
       
-      const cronograma = planejarCronogramaPorAudiencia(micronichos, 4, "semanal");
-      setCronogramaPublicacao(cronograma);
+      const cronogramaAud = planejarCronogramaPorAudiencia(micronichos, 4, "semanal");
+      setCronogramaAudiencia(cronogramaAud);
       
       toast({
         title: "Análise concluída!",
@@ -1176,7 +1176,7 @@ const TitleGenerator = () => {
                   audienceProfile={audienceProfile}
                   microSubnichos={microSubnichos}
                   titulosAdaptados={titulosAdaptados}
-                  cronogramaPublicacao={cronogramaPublicacao}
+                  cronogramaPublicacao={cronogramaAudiencia}
                 />
               )}
             </TabsContent>
