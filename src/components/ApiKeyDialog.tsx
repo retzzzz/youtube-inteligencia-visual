@@ -26,7 +26,6 @@ const ApiKeyDialog = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Inicializar o estado com a chave existente, se houver
     if (youtubeApiKey) {
       setApiKey(youtubeApiKey);
     }
@@ -37,7 +36,6 @@ const ApiKeyDialog = () => {
     
     try {
       setIsValidating(true);
-      // Fazer uma requisição simples para a API do YouTube para verificar se a chave é válida
       const response = await fetch(
         `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&q=test&key=${key}`
       );
@@ -48,7 +46,6 @@ const ApiKeyDialog = () => {
         return true;
       } else if (data.error && data.error.errors) {
         if (data.error.errors.some((e: any) => e.reason === "quotaExceeded")) {
-          // A chave é válida, mas a quota foi excedida
           setError("Aviso: A quota desta chave de API foi excedida para hoje. A chave é válida, mas você pode precisar esperar ou usar outra.");
           return true;
         } else if (data.error.errors.some((e: any) => e.reason === "keyInvalid")) {
@@ -91,22 +88,13 @@ const ApiKeyDialog = () => {
     }
   };
 
-  const handleSkip = () => {
-    toast({
-      title: "Modo de demonstração",
-      description: "O sistema usará dados simulados, não reais do YouTube.",
-      variant: "default",
-    });
-    setNeedsApiKey(false);
-  };
-
   return (
     <Dialog open={needsApiKey} onOpenChange={setNeedsApiKey}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Configurar API do YouTube</DialogTitle>
           <DialogDescription>
-            Para começar a usar o YTAnalyzer com dados reais, você precisa configurar sua chave de API do YouTube Data v3.
+            Para usar o YTAnalyzer, você precisa configurar sua chave de API do YouTube Data v3.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
@@ -167,25 +155,17 @@ const ApiKeyDialog = () => {
             </Label>
           </div>
           
-          <Alert>
+          <Alert variant="destructive">
             <AlertDescription className="text-xs">
-              <strong>Importante:</strong> As chaves de API do YouTube têm uma quota diária gratuita limitada. Se você exceder a quota, precisará esperar até o dia seguinte ou usar outra chave.
+              <strong>Importante:</strong> Uma chave de API do YouTube válida é OBRIGATÓRIA para usar esta ferramenta. Não é possível prosseguir sem configurar uma chave válida.
             </AlertDescription>
           </Alert>
         </div>
-        <DialogFooter className="flex flex-col sm:flex-row gap-2">
-          <Button 
-            variant="outline" 
-            type="button"
-            onClick={handleSkip}
-            className="w-full sm:w-auto"
-          >
-            Pular (Usar dados simulados)
-          </Button>
+        <DialogFooter>
           <Button 
             onClick={handleSaveApiKey} 
             disabled={isValidating}
-            className="w-full sm:w-auto"
+            className="w-full"
           >
             {isValidating ? "Validando..." : "Salvar e Continuar"}
           </Button>

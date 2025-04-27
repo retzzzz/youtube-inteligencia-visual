@@ -1,18 +1,9 @@
 
 import { useState } from "react";
 import { YoutubeSearchParams, VideoResult } from "@/types/youtube-types";
-import { searchYouTubeVideos } from "@/services/youtube-mock";
 import { useToast } from "@/hooks/use-toast";
-import {
-  filterVideosByLanguage,
-  filterVideosByPeriod,
-  filterMusicVideos,
-  filterByKeywords,
-  filterByViews,
-  filterBySubscribers
-} from "@/utils/video-filters";
-import { handleSearchResults } from "@/utils/search-results-handler";
 import { useAuth } from "@/contexts/AuthContext";
+import { fetchYouTubeData } from "@/services/youtube-mock/api-service";
 
 export const useYouTubeSearch = () => {
   const [searchParams, setSearchParams] = useState<YoutubeSearchParams | null>(null);
@@ -31,7 +22,7 @@ export const useYouTubeSearch = () => {
 
     try {
       // Verificações de API key
-      if (!params.apiKey || params.apiKey.trim() === "") {
+      if (!youtubeApiKey || youtubeApiKey.trim() === "") {
         toast({
           title: "Chave de API não fornecida",
           description: "É necessário fornecer uma chave de API válida do YouTube para buscar resultados.",
@@ -40,8 +31,11 @@ export const useYouTubeSearch = () => {
         setNeedsApiKey(true);
         throw new Error("Chave de API não fornecida");
       }
+
+      // Usar a chave de API armazenada
+      params.apiKey = youtubeApiKey;
       
-      let data = await searchYouTubeVideos(params);
+      const data = await fetchYouTubeData(params);
       
       if (data.length === 0) {
         toast({
@@ -50,40 +44,12 @@ export const useYouTubeSearch = () => {
           variant: "default",
         });
         setResults([]);
-        setIsLoading(false);
         return;
       }
-      
-      // Aplicar filtros em sequência
-      data = filterVideosByLanguage(data, params.language);
-      data = filterVideosByPeriod(data, params.period);
-      if (params.excludeMusic) {
-        data = filterMusicVideos(data);
-      }
-      data = filterByKeywords(data, params.excludeKeywords);
-      data = filterByViews(data, params.minViews, params.maxViews);
-      data = filterBySubscribers(data, params.minSubscribers, params.maxSubscribers);
-      
-      // Log para depuração
-      console.log("Dados da pesquisa:", {
-        usandoApiReal: params.apiKey && params.apiKey.trim() !== "",
-        resultadosBrutos: data.length,
-        filtrosAplicados: {
-          idioma: params.language,
-          periodo: params.period,
-          minViews: params.minViews,
-          maxViews: params.maxViews,
-          minSubscribers: params.minSubscribers,
-          maxSubscribers: params.maxSubscribers,
-          excludeMusic: params.excludeMusic,
-          excludeKeywords: params.excludeKeywords
-        }
-      });
-      
+
       setResults(data);
-      const topVideo = handleSearchResults(data);
-      if (topVideo) {
-        setSelectedVideo(topVideo);
+      if (data.length > 0) {
+        setSelectedVideo(data[0]);
       }
       
     } catch (error) {
@@ -92,7 +58,6 @@ export const useYouTubeSearch = () => {
       let errorMessage = "Erro ao buscar dados. Tente novamente mais tarde.";
       
       if (error instanceof Error) {
-        // Verificar erros específicos da API
         if (error.message.includes("quota")) {
           errorMessage = "Quota da API do YouTube excedida. Tente novamente mais tarde ou use uma chave de API diferente.";
         } else if (error.message.includes("API key")) {

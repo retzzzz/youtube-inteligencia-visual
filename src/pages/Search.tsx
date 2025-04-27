@@ -21,11 +21,16 @@ const Search = () => {
     error 
   } = useYouTubeSearch();
   
-  const { setNeedsApiKey } = useAuth();
+  const { youtubeApiKey, setNeedsApiKey } = useAuth();
   const location = useLocation();
   
-  // Carregar pesquisa a partir dos parâmetros da URL, se existirem
   useEffect(() => {
+    // Se não houver chave de API, mostrar o diálogo
+    if (!youtubeApiKey) {
+      setNeedsApiKey(true);
+      return;
+    }
+
     const query = new URLSearchParams(location.search);
     const paramsString = query.get('params');
     
@@ -38,7 +43,28 @@ const Search = () => {
         console.error("Erro ao carregar parâmetros da URL:", error);
       }
     }
-  }, [location.search]);
+  }, [location.search, youtubeApiKey]);
+
+  if (!youtubeApiKey) {
+    return (
+      <div className="container mx-auto px-4 py-6 max-w-[1200px]">
+        <Header />
+        <Alert variant="destructive" className="mt-8">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            É necessário configurar uma chave de API do YouTube para usar esta ferramenta.
+            <Button
+              variant="link"
+              className="p-0 h-auto ml-2"
+              onClick={() => setNeedsApiKey(true)}
+            >
+              Configurar chave API
+            </Button>
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-[1200px]">
