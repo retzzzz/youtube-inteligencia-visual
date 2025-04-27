@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Header from '@/components/Header';
 import { Card } from '@/components/ui/card';
@@ -10,11 +11,13 @@ import { Slider } from '@/components/ui/slider';
 import SubnicheValidationResults from '@/components/SubnicheValidationResults';
 import { useAuth } from '@/contexts/AuthContext';
 import LanguageSelector from '@/components/LanguageSelector';
+import ValidationProcess from '@/components/ValidationProcess';
 import {
   extrairSubnichos,
   calcularMetricasSubnicho,
   validarSubnicho,
-  priorizarSubniches
+  priorizarSubniches,
+  CriteriosValidacao
 } from '@/utils/subnicheValidation';
 
 const SubnicheValidator = () => {
@@ -56,22 +59,26 @@ const SubnicheValidator = () => {
     
     try {
       setCurrentStep(0);
-      const canaisPromissores = await extrairCanaisPromissores(nicho, idioma, maxCanais, youtubeApiKey);
+      // Etapa 1: Extrair canais promissores
+      const canaisPromissores = await extrairSubnichos(nicho, idioma, maxCanais, youtubeApiKey);
       
       setCurrentStep(1);
-      const subnichos = extrairSubnichosDeCanais(canaisPromissores);
+      // Etapa 2: Identificar subnichos
+      const subnichos = canaisPromissores;
       
       setCurrentStep(2);
-      const criterios = {
-        max_canais_concorrentes: 5,
-        min_visualizacoes_media: minMediaVisualizacoes,
+      // Etapa 3: Avaliar saturação dos subnichos
+      const criterios: CriteriosValidacao = {
+        min_taxa_crescimento: minTaxaCrescimento,
+        min_media_visualizacoes: minMediaVisualizacoes,
         max_idade_media_canais: maxIdadeMediaCanais
       };
       
-      const subnichos_validados = avaliarSaturacaoSubnicho(subnichos, criterios);
+      const subnichos_validados = validarSubnicho(calcularMetricasSubnicho(subnichos), criterios);
       
       setCurrentStep(3);
-      const recomendacoes = recomendarSubniches(subnichos_validados);
+      // Etapa 4: Priorizar e recomendar subnichos
+      const recomendacoes = priorizarSubniches(subnichos_validados);
       
       setSubnichesPriorizados(recomendacoes);
       
