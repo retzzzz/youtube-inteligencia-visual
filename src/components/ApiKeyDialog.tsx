@@ -1,16 +1,16 @@
 
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { RefreshCw, AlertCircle, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { validateApiKey } from "@/services/youtube";
 import { Button } from "@/components/ui/button";
+import { AlertCircle } from "lucide-react";
 import BaseDialog from "./common/BaseDialog";
 import ApiKeyInstructions from "./dialog/ApiKeyInstructions";
+import ApiKeyInput from "./dialog/ApiKeyInput";
+import ApiKeyAlerts from "./dialog/ApiKeyAlerts";
+import RememberKeyCheckbox from "./dialog/RememberKeyCheckbox";
 
 const ApiKeyDialog = () => {
   const { needsApiKey, setNeedsApiKey, youtubeApiKey, setYoutubeApiKey } = useAuth();
@@ -110,6 +110,12 @@ const ApiKeyDialog = () => {
     }
   };
 
+  const handleApiKeyChange = (value: string) => {
+    setApiKey(value);
+    setError("");
+    setWarning("");
+  };
+
   return (
     <BaseDialog
       open={needsApiKey}
@@ -142,66 +148,22 @@ const ApiKeyDialog = () => {
       <ApiKeyInstructions />
       
       <div className="space-y-2">
-        <Label htmlFor="api-key" className="flex items-center justify-between">
-          Chave da API do YouTube
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="h-7 w-7 p-0" 
-            onClick={() => setApiKey("")}
-            disabled={isValidating || !apiKey}
-            title="Limpar"
-          >
-            <RefreshCw className="h-4 w-4" />
-            <span className="sr-only">Limpar</span>
-          </Button>
-        </Label>
-        <Input 
-          id="api-key" 
-          value={apiKey} 
-          onChange={(e) => {
-            setApiKey(e.target.value);
-            setError("");
-            setWarning("");
-          }} 
-          placeholder="AIzaSyC..."
-          disabled={isValidating}
+        <ApiKeyInput 
+          apiKey={apiKey}
+          isValidating={isValidating}
+          onChange={handleApiKeyChange}
         />
         
-        {error && (
-          <Alert variant="destructive" className="py-2">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="text-xs">
-              {error}
-            </AlertDescription>
-          </Alert>
-        )}
-        
-        {warning && (
-          <Alert variant="default" className="py-2 border-yellow-500 bg-yellow-50">
-            <AlertTriangle className="h-4 w-4 text-yellow-500" />
-            <AlertDescription className="text-xs">
-              {warning}
-            </AlertDescription>
-          </Alert>
-        )}
+        <ApiKeyAlerts error={error} warning={warning} />
       </div>
 
-      <div className="flex items-center space-x-2">
-        <Checkbox 
-          id="remember" 
-          checked={rememberKey} 
-          onCheckedChange={(checked) => setRememberKey(checked as boolean)} 
-        />
-        <Label 
-          htmlFor="remember" 
-          className="text-sm cursor-pointer"
-        >
-          Lembrar minha chave API neste dispositivo
-        </Label>
-      </div>
+      <RememberKeyCheckbox 
+        checked={rememberKey}
+        onCheckedChange={setRememberKey}
+      />
       
       <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
         <AlertDescription className="text-xs">
           <strong>Importante:</strong> Uma chave de API do YouTube válida é OBRIGATÓRIA para usar esta ferramenta. Não é possível prosseguir sem configurar uma chave válida.
         </AlertDescription>
