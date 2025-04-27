@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { VideoResult } from "@/types/youtube-types";
-import { exportToCSV } from "@/services/youtube-mock-service";
+import { exportToCSV } from "@/services/youtube-mock";
 import { Download, FileSpreadsheet, File } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import html2canvas from "html2canvas";

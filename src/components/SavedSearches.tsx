@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { SavedSearch, YoutubeSearchParams } from "@/types/youtube-types";
-import { saveSearch, getSavedSearches, deleteSavedSearch } from "@/services/youtube-mock-service";
+import { saveSearch, getSavedSearches, deleteSavedSearch } from "@/services/youtube-mock";
 import { SaveIcon, Calendar, Search as SearchIcon, ArrowDown } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 

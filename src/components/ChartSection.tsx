@@ -1,7 +1,7 @@
 
 import { VideoResult } from "@/types/youtube-types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getLanguageDistributionData, getViewRangeData, getEarningsData, getTrendAnalysis } from "@/services/youtube-mock-service";
+import { getLanguageDistributionData, getViewRangeData, getEarningsData, getTrendAnalysis } from "@/services/youtube-mock";
 import { Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Pie, Cell, BarChart, PieChart, Tooltip } from "recharts";
 
 interface ChartSectionProps {
