@@ -64,7 +64,7 @@ const steps = [
     description: "Estabeleça uma base sólida antes de avaliar resultados",
     content: [
       "Meta: poste 15 vídeos focados no seu subnicho antes de avaliar performance",
-      "Varie apenas o micro-subnicho no título (aula 10), mantendo a mesma linha editorial",
+      "Varie apenas o micro-subnicho no título, mantendo a mesma linha editorial",
       "Monitore o YouTube Analytics: impressões, CTR e recomendações; ajuste títulos conforme o público"
     ]
   },
@@ -74,9 +74,9 @@ const steps = [
     description: "Continue evoluindo seu canal",
     content: [
       "Roteiro e edição: nas próximas aulas você aprenderá técnicas para enriquecer seus vídeos (são responsáveis por ≤10% do resultado)",
-      "Micro-subnicho e recorrência: implemente variações internas ao subnicho para fidelizar audiência (revisite a aula #10)",
+      "Micro-subnicho e recorrência: implemente variações internas ao subnicho para fidelizar audiência",
       "Planejamento e testes: mantenha o ritmo e pivote conforme dados de visualização",
-      "Resumo: criar um canal dark é simples, mas configuração não faz o canal bombar — o segredo está em títulos subnichados, micro-subnichos e boa estratégia de conteúdo"
+      "Resumo: criar um canal dark é simples, mas configuração não faz o canal bombar — o segredo está em títulos subnichados, micro-subnichos e boa estratégia de conteúdo. Agora é mão na massa!"
     ]
   }
 ];
