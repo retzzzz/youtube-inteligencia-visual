@@ -139,10 +139,10 @@ const calculateVideoAge = (period: YoutubeSearchParams["period"]): number => {
     case "72h": 
       // Entre 48 e 72 horas (Valores precisos em fração de dia)
       return randomBetween(48, 72) / 24;
-    case "7d": return randomBetween(3, 7); // Entre 3 e 7 dias
-    case "30d": return randomBetween(7, 30); // Entre 7 e 30 dias
-    case "90d": return randomBetween(30, 90); // Entre 30 e 90 dias
-    case "180d": return randomBetween(90, 180); // Entre 90 e 180 dias
+    case "7d": return randomBetween(1, 7); // Entre 1 e 7 dias (antes era 3-7)
+    case "30d": return randomBetween(1, 30); // Entre 1 e 30 dias (antes era 7-30)
+    case "90d": return randomBetween(1, 90); // Entre 1 e 90 dias (antes era 30-90)
+    case "180d": return randomBetween(1, 180); // Entre 1 e 180 dias (antes era 90-180)
     case "all":
     default: return randomBetween(1, 365); // Até 1 ano
   }
@@ -473,7 +473,7 @@ export const searchYouTubeVideos = async (params: YoutubeSearchParams): Promise<
     const videoAge = calculateVideoAge(params.period);
     
     // Gerar views com base na idade do vídeo para simular crescimento viral
-    const baseViews = randomBetween(100, 10000);
+    const baseViews = randomBetween(params.minViews || 100, 10000);
     const growthMultiplier = Math.max(1, 30 / Math.max(0.1, videoAge));
     const views = Math.round(baseViews * growthMultiplier);
     
@@ -499,6 +499,20 @@ export const searchYouTubeVideos = async (params: YoutubeSearchParams): Promise<
       params.minSubscribers || 100,
       params.maxSubscribers || 5000000
     );
+    
+    // Verificar se o número de inscritos está dentro dos limites definidos
+    if ((params.minSubscribers && subscribers < params.minSubscribers) || 
+        (params.maxSubscribers && subscribers > params.maxSubscribers)) {
+      i--; // Compensar a iteração para alcançar o número desejado de resultados
+      continue;
+    }
+    
+    // Verificar se o número de views está dentro dos limites definidos
+    if ((params.minViews && views < params.minViews) || 
+        (params.maxViews && views > params.maxViews)) {
+      i--; // Compensar a iteração para alcançar o número desejado de resultados
+      continue;
+    }
     
     // Calcular métricas
     const viralScore = calculateViralScore(views, engagement, videoAge, subscribers);

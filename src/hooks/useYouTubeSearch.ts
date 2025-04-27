@@ -29,15 +29,21 @@ export const useYouTubeSearch = () => {
       
       const data = await searchYouTubeVideos(params);
       
-      // Filter by selected language
-      let filteredData = params.language !== "any" 
-        ? data.filter(video => video.language === params.language)
-        : data;
+      // Garantir que os filtros sejam aplicados corretamente
+      let filteredData = data;
       
-      // Filter by selected period
+      // Filter by selected language (aplicado de forma rigorosa)
+      if (params.language !== "any") {
+        console.log(`Filtrando por idioma: ${params.language}`);
+        filteredData = filteredData.filter(video => video.language === params.language);
+      }
+      
+      // Filter by selected period (aplicado de forma rigorosa)
       if (params.period !== "all") {
+        console.log(`Filtrando por período: ${params.period}`);
         const periodDays = getPeriodInDays(params.period);
         filteredData = filteredData.filter(video => video.videoAge <= periodDays);
+        console.log(`Filtrando vídeos com idade menor ou igual a ${periodDays} dias`);
       }
       
       // Filter music videos if option is enabled
@@ -55,6 +61,24 @@ export const useYouTubeSearch = () => {
         });
       }
       
+      // Aplicar filtros de visualizações
+      if (params.minViews) {
+        filteredData = filteredData.filter(video => video.views >= params.minViews);
+      }
+      
+      if (params.maxViews) {
+        filteredData = filteredData.filter(video => video.views <= params.maxViews);
+      }
+      
+      // Aplicar filtros de inscritos
+      if (params.minSubscribers) {
+        filteredData = filteredData.filter(video => video.subscribers >= params.minSubscribers);
+      }
+      
+      if (params.maxSubscribers) {
+        filteredData = filteredData.filter(video => video.subscribers <= params.maxSubscribers);
+      }
+      
       const enrichedData = enrichVideoData(filteredData);
       setResults(enrichedData);
       
@@ -65,7 +89,18 @@ export const useYouTubeSearch = () => {
         usandoApiReal: params.apiKey && params.apiKey.trim() !== "",
         resultadosBrutos: data.length,
         resultadosFiltrados: filteredData.length,
-        resultadosEnriquecidos: enrichedData.length
+        resultadosEnriquecidos: enrichedData.length,
+        filtrosAplicados: {
+          idioma: params.language,
+          periodo: params.period,
+          periodoDias: getPeriodInDays(params.period),
+          minViews: params.minViews,
+          maxViews: params.maxViews,
+          minSubscribers: params.minSubscribers,
+          maxSubscribers: params.maxSubscribers,
+          excludeMusic: params.excludeMusic,
+          excludeKeywords: params.excludeKeywords
+        }
       });
       
     } catch (error) {
@@ -121,7 +156,7 @@ const getPeriodInDays = (period: string): number => {
     case "30d": return 30;
     case "90d": return 90;
     case "180d": return 180;
-    default: return 9999; // "all"
+    default: return Infinity; // "all" - usar Infinity em vez de um número grande para ser mais claro
   }
 };
 
