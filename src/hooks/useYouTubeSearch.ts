@@ -17,6 +17,16 @@ export const useYouTubeSearch = () => {
     setSelectedVideo(null);
 
     try {
+      // Verificar se a API key foi fornecida
+      if (!params.apiKey || params.apiKey.trim() === "") {
+        toast({
+          title: "Chave de API não fornecida",
+          description: "Você precisa fornecer uma chave de API válida do YouTube para obter resultados reais.",
+          variant: "destructive",
+        });
+        console.log("API Key não fornecida, usando dados simulados");
+      }
+      
       const data = await searchYouTubeVideos(params);
       
       // Filter by selected language
@@ -49,11 +59,20 @@ export const useYouTubeSearch = () => {
       setResults(enrichedData);
       
       handleSearchResults(enrichedData);
+      
+      // Log para depuração
+      console.log("Dados da pesquisa:", {
+        usandoApiReal: params.apiKey && params.apiKey.trim() !== "",
+        resultadosBrutos: data.length,
+        resultadosFiltrados: filteredData.length,
+        resultadosEnriquecidos: enrichedData.length
+      });
+      
     } catch (error) {
       console.error("Erro na pesquisa:", error);
       toast({
         title: "Erro na pesquisa",
-        description: "Ocorreu um erro ao buscar dados. Tente novamente.",
+        description: "Ocorreu um erro ao buscar dados. Verifique sua chave de API e tente novamente.",
         variant: "destructive",
       });
       setResults([]);

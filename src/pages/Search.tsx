@@ -1,10 +1,9 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import Header from '@/components/Header';
 import SearchForm from '@/components/SearchForm';
 import { useYouTubeSearch } from '@/hooks/useYouTubeSearch';
 import ResultsSection from '@/components/ResultsSection';
-import { VideoResult } from '@/types/youtube-types';
 
 const Search = () => {
   const { 
@@ -32,6 +31,19 @@ const Search = () => {
               onSelectVideo={setSelectedVideo} 
               searchParams={searchParams}
             />
+          </div>
+        )}
+        
+        {isLoading && (
+          <div className="flex justify-center items-center p-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+          </div>
+        )}
+        
+        {!isLoading && results && results.length === 0 && searchParams && (
+          <div className="text-center p-12">
+            <p className="text-xl font-medium">Nenhum resultado encontrado</p>
+            <p className="text-muted-foreground mt-2">Tente ajustar seus critérios de pesquisa</p>
           </div>
         )}
       </div>

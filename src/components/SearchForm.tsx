@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { YoutubeSearchParams } from "@/types/youtube-types";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -9,6 +9,7 @@ import { Slider } from "@/components/ui/slider";
 import { Search } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface SearchFormProps {
   onSearch: (params: YoutubeSearchParams) => void;
@@ -17,6 +18,7 @@ interface SearchFormProps {
 
 const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
   const { youtubeApiKey } = useAuth();
+  const { toast } = useToast();
   const [params, setParams] = useState<YoutubeSearchParams>({
     keywords: "",
     searchType: "videos",
@@ -32,8 +34,24 @@ const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
     excludeKeywords: ""
   });
 
+  useEffect(() => {
+    if (youtubeApiKey) {
+      setParams(prev => ({ ...prev, apiKey: youtubeApiKey }));
+    }
+  }, [youtubeApiKey]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Verificar se a API key foi fornecida
+    if (!params.apiKey || params.apiKey.trim() === "") {
+      toast({
+        title: "Atenção",
+        description: "Nenhuma chave de API fornecida. Serão exibidos apenas dados simulados.",
+        variant: "warning",
+      });
+    }
+    
     onSearch(params);
   };
 

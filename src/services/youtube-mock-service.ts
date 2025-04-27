@@ -1,4 +1,3 @@
-
 import { VideoResult, YoutubeSearchParams } from "@/types/youtube-types";
 
 // Função para gerar um valor aleatório dentro de um intervalo
@@ -235,19 +234,20 @@ const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<VideoResul
       q: params.keywords,
       type: params.searchType === "shorts" ? "video" : params.searchType,
       key: params.apiKey,
-      videoDuration: params.searchType === "shorts" ? "short" : "any",
     });
     
     // Para shorts, adicionar filtro específico
     if (params.searchType === "shorts") {
       searchParams.append("videoDuration", "short");
-      searchParams.append("videoType", "any");
     }
     
     // Adicionar filtro de idioma se especificado
     if (params.language && params.language !== "any") {
       searchParams.append("relevanceLanguage", params.language);
     }
+    
+    console.log("Fazendo solicitação para a API do YouTube:", 
+               `https://www.googleapis.com/youtube/v3/search?${searchParams.toString().replace(params.apiKey, "API_KEY_HIDDEN")}`);
     
     // Fazer solicitação para a API de pesquisa do YouTube
     const searchResponse = await fetch(
@@ -256,13 +256,17 @@ const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<VideoResul
     
     if (!searchResponse.ok) {
       const errorData = await searchResponse.json();
-      throw new Error(`Erro na API do YouTube: ${errorData.error?.message || searchResponse.status}`);
+      console.error("Resposta de erro da API:", errorData);
+      throw new Error(`Erro na API do YouTube: ${errorData.error?.message || searchResponse.statusText || searchResponse.status}`);
     }
     
     const searchData = await searchResponse.json();
+    console.log("Dados brutos da API do YouTube:", searchData.pageInfo);
+    
     const items = searchData.items || [];
     
     if (items.length === 0) {
+      console.log("A API do YouTube não retornou resultados");
       return [];
     }
     
@@ -428,7 +432,7 @@ const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<VideoResul
     
     return results;
   } catch (error) {
-    console.error("Erro ao buscar dados do YouTube:", error);
+    console.error("Erro detalhado ao buscar dados do YouTube:", error);
     throw error;
   }
 };
@@ -438,14 +442,22 @@ export const searchYouTubeVideos = async (params: YoutubeSearchParams): Promise<
   // Se uma chave de API foi fornecida, use a API real
   if (params.apiKey && params.apiKey.trim()) {
     try {
+      console.log("Tentando usar a API real do YouTube com a chave fornecida");
       const data = await fetchYouTubeData(params);
+      console.log(`API do YouTube retornou ${data.length} resultados`);
       return data;
     } catch (error) {
-      console.error("Erro na API do YouTube. Retornando dados simulados:", error);
+      console.error("Erro na API do YouTube:", error);
+      console.warn("Retornando para dados simulados devido ao erro na API");
+      // Se houver erro na API, não retornamos dados simulados automaticamente
+      // Em vez disso, propagamos o erro para tratamento adequado
+      throw new Error(`Erro na API do YouTube: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
     }
+  } else {
+    console.log("Nenhuma chave de API fornecida ou chave inválida. Usando dados simulados.");
   }
 
-  // Simulação de tempo de carregamento da API
+  // Simulação de tempo de carregamento
   await new Promise(resolve => setTimeout(resolve, 1500));
   
   const results: VideoResult[] = [];
