@@ -1,6 +1,6 @@
 
 import { VideoResult, YoutubeSearchParams } from "@/types/youtube-types";
-import { fetchYouTubeData } from './api-service';
+import { fetchYouTubeData } from '@/services/youtube';
 import { languages, randomBetween } from './utils';
 import { generateMockVideo } from './video-generator';
 import { SavedSearch } from './types';
