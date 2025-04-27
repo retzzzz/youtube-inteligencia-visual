@@ -37,7 +37,7 @@ const Search = () => {
     return (
       <div className="container mx-auto px-4 py-6 max-w-[1200px]">
         <Header />
-        <Alert variant="destructive" className="mt-8">
+        <Alert variant="destructive" className="mt-8 shadow-lg">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
             É necessário configurar uma chave de API do YouTube para usar esta ferramenta.
@@ -62,13 +62,17 @@ const Search = () => {
         onRetry={handleRetry}
         isLoading={isLoading}
         hasSearchParams={!!searchParams}
+        isNewKey={isNewKey}
       />
       
       <div className="mt-6">
         <h2 className="text-2xl font-bold mb-6">Pesquisa Avançada</h2>
         <SearchForm onSearch={handleSearch} isLoading={isLoading} />
         
-        <NewKeyNotice isNewKey={isNewKey} />
+        <NewKeyNotice 
+          isNewKey={isNewKey} 
+          onRetry={handleRetry}
+        />
         
         <ErrorDisplay 
           error={error}

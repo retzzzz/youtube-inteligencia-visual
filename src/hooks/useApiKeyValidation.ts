@@ -28,6 +28,12 @@ export const useApiKeyValidation = (onSuccess?: (key: string) => void) => {
         return;
       }
       
+      // Verificar se é uma chave nova
+      if (validationResult.message.includes("nova") || validationResult.message.includes("recém-criada")) {
+        setWarning("Chave API recém-criada detectada. As chaves podem levar 5-15 minutos para ficarem totalmente ativas. Você pode usá-la agora, mas pode encontrar erros temporariamente.");
+      }
+      
+      // Verificar quota excedida
       if (validationResult.quotaExceeded) {
         setWarning("Esta chave é válida, mas sua quota está excedida. Você poderá usá-la novamente quando a quota for renovada (geralmente a cada 24h).");
       }
@@ -42,7 +48,9 @@ export const useApiKeyValidation = (onSuccess?: (key: string) => void) => {
         title: "Chave API salva",
         description: validationResult.quotaExceeded 
           ? "Sua chave API foi salva, mas a quota está excedida. Considere usar outra chave."
-          : "Sua chave API do YouTube foi configurada com sucesso!",
+          : validationResult.message.includes("nova")
+            ? "Sua chave API foi salva. Lembre-se que chaves novas podem levar alguns minutos para ativar completamente."
+            : "Sua chave API do YouTube foi configurada com sucesso!",
       });
     } catch (error) {
       console.error("Erro ao validar chave:", error);
@@ -58,30 +66,16 @@ export const useApiKeyValidation = (onSuccess?: (key: string) => void) => {
       setError("");
       setWarning("");
       
-      const testUrl = `https://www.googleapis.com/youtube/v3/videos?part=id&chart=mostPopular&maxResults=1&key=${apiKey.trim()}`;
-      const testResponse = await fetch(testUrl);
-      
-      if (testResponse.ok) {
-        if (rememberKey) {
-          localStorage.setItem("youtubeApiKey", apiKey.trim());
-        }
-        
-        onSuccess?.(apiKey.trim());
-        
-        toast({
-          title: "Chave API validada",
-          description: "Sua chave API do YouTube foi configurada com sucesso!",
-        });
-      } else {
-        const errorData = await testResponse.json();
-        console.log("Segunda validação retornou:", errorData);
-        
-        if (errorData.error?.code === 403 && errorData.error?.errors?.some((e: any) => e.reason === "quotaExceeded")) {
-          setWarning("Confirmado: Esta chave está com a quota diária excedida. Você pode usá-la mesmo assim ou tentar outra chave.");
-        } else {
-          setError(`Erro na validação: ${errorData.error?.message || testResponse.statusText}`);
-        }
+      if (rememberKey) {
+        localStorage.setItem("youtubeApiKey", apiKey.trim());
       }
+      
+      onSuccess?.(apiKey.trim());
+      
+      toast({
+        title: "Chave API aceita",
+        description: "Sua chave API foi aceita. Se for uma chave nova, aguarde alguns minutos antes de usá-la.",
+      });
     } catch (error) {
       console.error("Erro na validação alternativa:", error);
       setError(error instanceof Error ? error.message : "Erro na validação");
