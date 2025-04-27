@@ -1,10 +1,8 @@
-
 import { useState } from "react";
 import { YoutubeSearchParams, VideoResult } from "@/types/youtube-types";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { fetchYouTubeData } from "@/services/youtube";
-import { validateApiKey } from "@/services/youtube/api-validator";
+import { fetchYouTubeData, validateApiKey } from "@/services/youtube";
 
 export const useYouTubeSearch = () => {
   const [searchParams, setSearchParams] = useState<YoutubeSearchParams | null>(null);

@@ -1,9 +1,8 @@
-
 import { VideoResult, YoutubeSearchParams } from "@/types/youtube-types";
 import { enrichVideoData } from './video-enricher';
 import { fetchVideoStats } from './video-stats';
 import { fetchChannelStats } from './channel-stats';
-import { validateApiKey } from './api-validator';
+import { validateApiKey } from './validators/api-validator';
 
 /**
  * Busca dados do YouTube usando a API oficial

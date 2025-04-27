@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -16,7 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ExternalLink, AlertCircle, RefreshCw, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { validateApiKey } from "@/services/youtube/api-validator";
+import { validateApiKey } from "@/services/youtube";
 
 const ApiKeyDialog = () => {
   const { needsApiKey, setNeedsApiKey, youtubeApiKey, setYoutubeApiKey } = useAuth();
@@ -77,19 +76,16 @@ const ApiKeyDialog = () => {
     }
   };
 
-  // Função para tentar outra requisição para verificar se o erro de quota é real
   const handleForceValidation = async () => {
     try {
       setIsValidating(true);
       setError("");
       setWarning("");
       
-      // Fazer uma requisição diferente para testar a quota
       const testUrl = `https://www.googleapis.com/youtube/v3/videos?part=id&chart=mostPopular&maxResults=1&key=${apiKey.trim()}`;
       const testResponse = await fetch(testUrl);
       
       if (testResponse.ok) {
-        // Se esta requisição funcionar, a chave é válida e tem quota
         if (rememberKey) {
           localStorage.setItem("youtubeApiKey", apiKey.trim());
         }
