@@ -12,6 +12,7 @@ const isEmptyKey = (apiKey: string): boolean => {
  */
 export const checkKeyAge = async (apiKey: string): Promise<number | undefined> => {
   try {
+    // Verificar usando múltiplos endpoints leves
     const endpoints = [
       `https://www.googleapis.com/youtube/v3/i18nRegions?part=snippet&key=${apiKey}`,
       `https://www.googleapis.com/youtube/v3/videoCategories?part=snippet&regionCode=BR&key=${apiKey}`,
@@ -22,14 +23,16 @@ export const checkKeyAge = async (apiKey: string): Promise<number | undefined> =
       try {
         const response = await fetch(endpoint);
         if (response.ok) {
-          return 30; // 30+ minutos
+          return 30; // Se funcionar, não é tão nova (30+ minutos)
         }
       } catch {
         // Ignorar erros individuais
       }
     }
     
-    return 5; // assumir 5 minutos como padrão para chaves novas
+    // Se todos os endpoints falharem, pode ser uma chave nova ou inválida
+    // Retornamos um valor baixo para indicar que pode ser uma chave nova
+    return 5;
   } catch {
     return undefined;
   }

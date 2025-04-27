@@ -1,3 +1,4 @@
+
 import { VideoResult, YoutubeSearchParams } from "@/types/youtube-types";
 import { enrichVideoData } from './video-enricher';
 import { fetchVideoStats } from './video-stats';
@@ -37,20 +38,50 @@ export const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<Vid
       }
     }
     
-    // Fetch initial search results
-    const searchUrl = `https://www.googleapis.com/youtube/v3/search?${new URLSearchParams({
+    // Montar a URL de busca com todos os parâmetros necessários
+    const searchParams = new URLSearchParams({
       part: "snippet",
       maxResults: params.maxResults.toString(),
       q: params.keywords,
       type: params.searchType === "shorts" ? "video" : params.searchType,
       key: params.apiKey,
-      ...(params.searchType === "shorts" && { videoDuration: "short" }),
-      ...(params.language && params.language !== "any" && { relevanceLanguage: params.language })
-    }).toString()}`;
+    });
+    
+    // Adicionar parâmetros condicionais
+    if (params.searchType === "shorts") {
+      searchParams.append("videoDuration", "short");
+    }
+    
+    if (params.language && params.language !== "any") {
+      searchParams.append("relevanceLanguage", params.language);
+    }
+    
+    // Converter período para o formato da API
+    if (params.period && params.period !== "all") {
+      const now = new Date();
+      let daysAgo = 0;
+      
+      switch (params.period) {
+        case "24h": daysAgo = 1; break;
+        case "48h": daysAgo = 2; break;
+        case "72h": daysAgo = 3; break;
+        case "7d": daysAgo = 7; break;
+        case "30d": daysAgo = 30; break;
+        case "90d": daysAgo = 90; break;
+        case "180d": daysAgo = 180; break;
+      }
+      
+      if (daysAgo > 0) {
+        const pastDate = new Date(now);
+        pastDate.setDate(now.getDate() - daysAgo);
+        searchParams.append("publishedAfter", pastDate.toISOString());
+      }
+    }
 
+    const searchUrl = `https://www.googleapis.com/youtube/v3/search?${searchParams.toString()}`;
     console.log("URL de busca:", searchUrl.replace(params.apiKey, "API_KEY_HIDDEN"));
+    
     const searchResponse = await fetch(searchUrl);
-
     console.log("Resposta da API:", searchResponse.status, searchResponse.statusText);
     
     if (!searchResponse.ok) {
@@ -84,7 +115,7 @@ export const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<Vid
       return [];
     }
 
-    // Extract IDs
+    // Extrair IDs dos vídeos e canais
     const videoIds = searchData.items
       .filter((item: any) => item.id.kind === "youtube#video")
       .map((item: any) => item.id.videoId);
@@ -98,11 +129,11 @@ export const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<Vid
 
     console.log(`Processando ${videoIds.length} vídeos e ${channelIds.length} canais`);
 
-    // Fetch additional data
+    // Buscar dados adicionais (estatísticas)
     const videoStats = await fetchVideoStats(videoIds, params.apiKey);
     const channelStats = await fetchChannelStats(channelIds, params.apiKey);
 
-    // Enrich and filter results
+    // Enriquecer e filtrar os resultados
     const results = enrichVideoData(searchData.items, videoStats, channelStats, params);
     
     console.log(`Processados ${results.length} resultados após filtros`);
@@ -131,7 +162,7 @@ const checkKeyCreationDate = async (apiKey: string): Promise<number | undefined>
         const response = await fetch(endpoint);
         if (response.ok) {
           // Se algum endpoint funcionar, consideramos que a chave está ativa
-          return 0;
+          return 30;
         }
       } catch {
         // Ignorar erros individuais

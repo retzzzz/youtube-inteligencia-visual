@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { YoutubeSearchParams, VideoResult } from "@/types/youtube-types";
 import { useToast } from "@/hooks/use-toast";
@@ -34,8 +35,10 @@ export const useYouTubeSearch = () => {
         throw new Error("Chave de API não fornecida");
       }
 
-      // Verificar a validade da chave API
+      // Verificar a validade da chave API com retentativas
+      console.log("Validando chave API antes da busca:", youtubeApiKey.substring(0, 5) + "..." + youtubeApiKey.substring(youtubeApiKey.length - 4));
       const validationResult = await validateApiKey(youtubeApiKey);
+      console.log("Resultado da validação:", validationResult);
       
       if (!validationResult.valid) {
         toast({
@@ -48,7 +51,7 @@ export const useYouTubeSearch = () => {
       }
 
       // Verificar se a mensagem indica uma chave nova
-      if (validationResult.message.includes("chave nova")) {
+      if (validationResult.message.includes("nova")) {
         setIsNewKey(true);
         toast({
           title: "Chave API nova detectada",
@@ -77,7 +80,7 @@ export const useYouTubeSearch = () => {
       params.apiKey = youtubeApiKey;
       
       // Se chegou até aqui, tenta fazer a busca
-      console.log("Iniciando busca com chave validada:", params);
+      console.log("Iniciando busca com parâmetros:", {...params, apiKey: "API_KEY_HIDDEN"});
       const data = await fetchYouTubeData(params);
       console.log("Dados recebidos da API:", data?.length || 0, "resultados");
       
@@ -145,7 +148,7 @@ export const useYouTubeSearch = () => {
     
     try {
       const params = {...searchParams, apiKey: youtubeApiKey};
-      console.log("Forçando busca com chave atual:", youtubeApiKey);
+      console.log("Forçando busca com chave atual:", youtubeApiKey.substring(0, 5) + "..." + youtubeApiKey.substring(youtubeApiKey.length - 4));
       
       const data = await fetchYouTubeData(params);
       

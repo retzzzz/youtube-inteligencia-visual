@@ -16,6 +16,7 @@ export const validateApiKey = async (apiKey: string): Promise<{valid: boolean, q
 
   try {
     console.log("Tentando validar chave com endpoint de baixa quota...");
+    // Usar primeiro um endpoint de baixo custo (1 unidade)
     const categoryResponse = await fetch(
       `https://www.googleapis.com/youtube/v3/i18nRegions?part=snippet&key=${apiKey}`
     );
@@ -30,6 +31,7 @@ export const validateApiKey = async (apiKey: string): Promise<{valid: boolean, q
     }
     
     console.log("Tentando segundo endpoint de baixa quota...");
+    // Testar outro endpoint de baixo custo (1 unidade)
     const videoCatResponse = await fetch(
       `https://www.googleapis.com/youtube/v3/videoCategories?part=snippet&regionCode=BR&key=${apiKey}`
     );
@@ -79,6 +81,7 @@ export const checkApiQuota = async (apiKey: string): Promise<boolean> => {
       return false;
     }
     
+    // Testar múltiplos endpoints para ter certeza
     const endpoints = [
       `https://www.googleapis.com/youtube/v3/i18nRegions?part=snippet&key=${apiKey}`,
       `https://www.googleapis.com/youtube/v3/videoCategories?part=snippet&regionCode=BR&key=${apiKey}`,
@@ -92,6 +95,7 @@ export const checkApiQuota = async (apiKey: string): Promise<boolean> => {
       if (!response.ok) {
         const errorData = await response.json();
         if (errorData.error?.errors?.some((e: any) => e.reason === "quotaExceeded")) {
+          // Verificar se é uma chave nova
           const keyAge = await checkKeyAge(apiKey);
           if (keyAge !== undefined && keyAge < 15) {
             return true; // Assume quota disponível para chaves novas
@@ -103,6 +107,7 @@ export const checkApiQuota = async (apiKey: string): Promise<boolean> => {
     
     return false;
   } catch {
-    return true; // Em caso de erro de rede, assume que pode haver quota
+    // Em caso de erro de rede, assumimos que pode haver quota
+    return true;
   }
 };
