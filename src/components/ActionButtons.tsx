@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { VideoResult } from "@/types/youtube-types";
 import { exportToCSV } from "@/services/youtube-mock";
 import { Download, FileSpreadsheet, File } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import 'jspdf-autotable';
@@ -65,7 +65,7 @@ const ActionButtons = ({ results }: ActionButtonsProps) => {
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
       
       // Add dashboard image to PDF
-      pdf.text("Relatório de Análise YouTube - Detetive de Tendências", 14, 10);
+      pdf.text("Relatório de Análise YouTube - YTOptimizer", 14, 10);
       pdf.setFontSize(10);
       pdf.text("Data do relatório: " + new Date().toLocaleDateString('pt-BR'), 14, 16);
       pdf.text(`Total de vídeos analisados: ${results.length}`, 14, 22);
@@ -99,8 +99,10 @@ const ActionButtons = ({ results }: ActionButtonsProps) => {
       pdf.setFontSize(8);
       pdf.text("* Exibindo até 20 resultados dos vídeos mais promissores", 14, 16);
       
-      // @ts-ignore
-      pdf.autoTable({
+      // Fix: Use the correct way to call autoTable with jsPDF
+      // @ts-ignore - Using typecasting to access autoTable
+      const autoTable = require('jspdf-autotable').default;
+      autoTable(pdf, {
         startY: 20,
         head: [tableCol],
         body: tableRows,
@@ -113,7 +115,7 @@ const ActionButtons = ({ results }: ActionButtonsProps) => {
       });
       
       // Save PDF
-      pdf.save(`youtube-detetive-${new Date().toLocaleDateString('pt-BR')}.pdf`);
+      pdf.save(`youtube-optimizer-${new Date().toLocaleDateString('pt-BR')}.pdf`);
       
       toast({
         title: "PDF gerado com sucesso",
