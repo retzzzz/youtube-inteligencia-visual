@@ -4,7 +4,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Info } from 'lucide-react';
 
 const ImportantLinks = () => {
   const importantLinks = [
@@ -57,18 +57,20 @@ const ImportantLinks = () => {
               )}
               
               {link.content && (
-                <Accordion type="single" collapsible>
-                  <AccordionItem value="dicas-importantes">
-                    <AccordionTrigger>Expandir Dicas</AccordionTrigger>
-                    <AccordionContent>
-                      <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                        {link.content.map((item, idx) => (
-                          <li key={idx}>{item}</li>
-                        ))}
-                      </ul>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
+                <div className="mt-4">
+                  <div className="flex items-center text-primary font-semibold mb-3">
+                    <Info className="mr-2 w-5 h-5" />
+                    Dicas Importantes
+                  </div>
+                  <ul className="list-disc list-inside space-y-2 text-muted-foreground">
+                    {link.content.map((item, idx) => (
+                      <li key={idx} className="flex items-start">
+                        <span className="mr-2">•</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
             </div>
           </Card>
@@ -81,3 +83,4 @@ const ImportantLinks = () => {
 };
 
 export default ImportantLinks;
+
