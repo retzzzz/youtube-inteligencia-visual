@@ -1,5 +1,5 @@
 
-import { AlertCircle, AlertTriangle, Clock } from "lucide-react";
+import { AlertCircle, AlertTriangle, Clock, Key } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
@@ -17,30 +17,34 @@ const ErrorDisplay = ({ error, onForceSearch, onRetry, onChangeApiKey }: ErrorDi
                         error.includes("alguns minutos para ficar") ||
                         error.includes("recém-criada") ||
                         error.includes("ativar completamente");
+                        
+  const isQuotaError = error.includes("quota") || error.includes("Quota");
 
   return (
     <Alert 
       variant={isNewKeyError ? "default" : "destructive"} 
-      className={`mt-6 ${isNewKeyError ? "bg-blue-50 border-blue-300" : ""} shadow-md`}
+      className={`mt-6 ${isNewKeyError ? "bg-blue-50 border-blue-300" : isQuotaError ? "bg-orange-50 border-orange-300" : ""} shadow-md`}
     >
       {isNewKeyError ? (
         <Clock className="h-5 w-5 text-blue-600" />
+      ) : isQuotaError ? (
+        <AlertTriangle className="h-5 w-5 text-orange-600" />
       ) : (
         <AlertCircle className="h-5 w-5" />
       )}
       <AlertDescription className="flex justify-between items-center w-full">
-        <div className={isNewKeyError ? "text-blue-700 font-medium" : ""}>
+        <div className={`${isNewKeyError ? "text-blue-700" : isQuotaError ? "text-orange-700" : ""} font-medium`}>
           <span>{error}</span>
         </div>
         <div className="flex gap-2">
-          {error.includes("quota") && (
+          {isQuotaError && (
             <Button
               variant="outline"
               size="sm"
               onClick={onForceSearch}
-              className="ml-2 whitespace-nowrap"
+              className="ml-2 whitespace-nowrap border-orange-300 text-orange-700 hover:bg-orange-100"
             >
-              <AlertTriangle className="h-3 w-3 mr-1 text-yellow-500" />
+              <AlertTriangle className="h-3 w-3 mr-1 text-orange-500" />
               Tentar mesmo assim
             </Button>
           )}
@@ -61,6 +65,7 @@ const ErrorDisplay = ({ error, onForceSearch, onRetry, onChangeApiKey }: ErrorDi
             onClick={onChangeApiKey}
             className="ml-2 whitespace-nowrap"
           >
+            <Key className="h-3 w-3 mr-1" />
             Configurar nova chave
           </Button>
         </div>

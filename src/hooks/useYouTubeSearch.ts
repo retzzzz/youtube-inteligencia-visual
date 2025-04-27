@@ -81,16 +81,16 @@ export const useYouTubeSearch = () => {
 
       // Verificar se a chave tem quota disponível
       if (validationResult.quotaExceeded) {
+        console.log("Quota excedida, exibindo erro ao usuário");
+        setError("Quota da API do YouTube excedida. Por favor, use outra chave API ou tente novamente após 24 horas quando a quota for renovada.");
+        
         toast({
           title: "Quota da API excedida",
           description: "A quota diária desta chave de API foi excedida. Por favor, use outra chave ou tente novamente mais tarde.",
           variant: "destructive",
         });
         
-        // Permitir que o usuário continue tentando, mas mostrar o erro
-        setError("Quota da API do YouTube excedida. Por favor, use outra chave API.");
-        
-        // Não interromper completamente o fluxo - usuário pode optar por manter esta chave
+        // Não interromper completamente o fluxo - usuário pode optar por manter esta chave ou usar o botão de forçar busca
         setIsLoading(false);
         return;
       }
@@ -169,21 +169,30 @@ export const useYouTubeSearch = () => {
       const params = {...searchParams, apiKey: youtubeApiKey};
       console.log("Forçando busca com chave atual:", youtubeApiKey.substring(0, 5) + "..." + youtubeApiKey.substring(youtubeApiKey.length - 4));
       
-      const data = await fetchYouTubeData(params, true);
+      // Tentar fazer a busca diretamente com a API, ignorando validações prévias
+      console.log("Buscando dados com força, ignorando validação de quota");
       
-      if (!data || data.length === 0) {
-        toast({
-          title: "Nenhum resultado encontrado",
-          description: "Tente ajustar seus critérios de pesquisa ou usar outras palavras-chave.",
-          variant: "default",
-        });
-        setResults([]);
-        return;
-      }
+      // Adicionar marcadores de console para depuração
+      try {
+        const data = await fetchYouTubeData(params, true);
+        
+        if (!data || data.length === 0) {
+          toast({
+            title: "Nenhum resultado encontrado",
+            description: "Tente ajustar seus critérios de pesquisa ou usar outras palavras-chave.",
+            variant: "default",
+          });
+          setResults([]);
+          return;
+        }
 
-      setResults(data);
-      if (data.length > 0) {
-        setSelectedVideo(data[0]);
+        setResults(data);
+        if (data.length > 0) {
+          setSelectedVideo(data[0]);
+        }
+      } catch (fetchError) {
+        console.error("Erro específico ao forçar busca:", fetchError);
+        throw fetchError;
       }
       
     } catch (error) {
@@ -192,7 +201,11 @@ export const useYouTubeSearch = () => {
       
       toast({
         title: "Erro na pesquisa",
-        description: error instanceof Error ? error.message : "Erro desconhecido ao buscar dados",
+        description: error instanceof Error 
+          ? (error.message.includes("quota") 
+             ? "Mesmo forçando a busca, a quota da API está realmente excedida. Por favor, use outra chave API." 
+             : error.message) 
+          : "Erro desconhecido ao buscar dados",
         variant: "destructive",
       });
     } finally {

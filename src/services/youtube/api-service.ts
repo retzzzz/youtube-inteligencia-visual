@@ -4,6 +4,7 @@ import { enrichVideoData } from './video-enricher';
 import { fetchVideoStats } from './video-stats';
 import { fetchChannelStats } from './channel-stats';
 import { validateApiKey } from './validators/api-validator';
+import { markKeyAsNotNew } from './validators/key-validator';
 
 /**
  * Busca dados do YouTube usando a API oficial
@@ -18,6 +19,12 @@ export const fetchYouTubeData = async (params: YoutubeSearchParams, forceNotNew:
   try {
     console.log("Iniciando requisição à API do YouTube com a chave:", params.apiKey.substring(0, 5) + "..." + params.apiKey.substring(params.apiKey.length - 4));
     
+    // Se forçar como não nova, marcar explicitamente
+    if (forceNotNew) {
+      console.log("Marcando chave como não nova (forceNotNew=true)");
+      markKeyAsNotNew(params.apiKey);
+    }
+    
     // Verificar se a chave já foi marcada como não nova
     const keyMarker = localStorage.getItem(`apiKey_${params.apiKey.substring(0, 8)}_added`);
     if (keyMarker) {
@@ -27,10 +34,6 @@ export const fetchYouTubeData = async (params: YoutubeSearchParams, forceNotNew:
         console.log("Chave API marcada como não nova (idade em minutos):", keyAge);
       }
     }
-    
-    // Verifica se a chave é nova (criada recentemente)
-    const keyInfo = await validateApiKey(params.apiKey, forceNotNew);
-    console.log("Informações da chave API:", keyInfo);
     
     // Montar a URL de busca com todos os parâmetros necessários
     const searchParams = new URLSearchParams({
@@ -75,50 +78,83 @@ export const fetchYouTubeData = async (params: YoutubeSearchParams, forceNotNew:
     const searchUrl = `https://www.googleapis.com/youtube/v3/search?${searchParams.toString()}`;
     console.log("URL de busca:", searchUrl.replace(params.apiKey, "API_KEY_HIDDEN"));
     
-    const searchResponse = await fetch(searchUrl);
-    console.log("Resposta da API:", searchResponse.status, searchResponse.statusText);
+    let maxRetries = forceNotNew ? 2 : 1;
+    let currentRetry = 0;
     
-    if (!searchResponse.ok) {
-      const errorData = await searchResponse.json();
-      console.error("Dados de erro da API:", errorData);
-      handleApiError(errorData, searchResponse);
+    while (currentRetry <= maxRetries) {
+      try {
+        currentRetry++;
+        console.log(`Tentativa de busca ${currentRetry}/${maxRetries + 1}`);
+        
+        const searchResponse = await fetch(searchUrl);
+        console.log("Resposta da API:", searchResponse.status, searchResponse.statusText);
+        
+        if (!searchResponse.ok) {
+          const errorData = await searchResponse.json();
+          console.error("Dados de erro da API:", errorData);
+          
+          // Se for problema de quota e estamos forçando como não nova, tentar uma vez mais
+          if (forceNotNew && 
+              errorData.error?.errors?.some((e: any) => e.reason === "quotaExceeded") && 
+              currentRetry <= maxRetries) {
+            console.log("Erro de quota detectado, mas forceNotNew=true. Tentando novamente...");
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Esperar 1 segundo entre tentativas
+            continue;
+          }
+          
+          handleApiError(errorData, searchResponse);
+        }
+
+        const searchData = await searchResponse.json();
+        console.log("Resposta bem-sucedida:", {
+          totalResults: searchData.pageInfo?.totalResults,
+          resultsPerPage: searchData.pageInfo?.resultsPerPage,
+          itemsCount: searchData.items?.length
+        });
+
+        if (!searchData.items?.length) {
+          console.log("A API do YouTube não retornou resultados");
+          return [];
+        }
+
+        // Extrair IDs dos vídeos e canais
+        const videoIds = searchData.items
+          .filter((item: any) => item.id.kind === "youtube#video")
+          .map((item: any) => item.id.videoId);
+        
+        if (videoIds.length === 0) {
+          console.log("Nenhum vídeo encontrado nos resultados da pesquisa");
+          return [];
+        }
+        
+        const channelIds = searchData.items.map((item: any) => item.snippet.channelId);
+
+        console.log(`Processando ${videoIds.length} vídeos e ${channelIds.length} canais`);
+
+        // Buscar dados adicionais (estatísticas)
+        const videoStats = await fetchVideoStats(videoIds, params.apiKey);
+        const channelStats = await fetchChannelStats(channelIds, params.apiKey);
+
+        // Enriquecer e filtrar os resultados
+        const results = enrichVideoData(searchData.items, videoStats, channelStats, params);
+        
+        console.log(`Processados ${results.length} resultados após filtros`);
+        return results;
+      } catch (retryError) {
+        console.error(`Erro na tentativa ${currentRetry}:`, retryError);
+        
+        // Se estamos na última tentativa, propagar o erro
+        if (currentRetry > maxRetries) {
+          throw retryError;
+        }
+        
+        // Esperar antes da próxima tentativa
+        await new Promise(resolve => setTimeout(resolve, 1500));
+      }
     }
-
-    const searchData = await searchResponse.json();
-    console.log("Resposta bem-sucedida:", {
-      totalResults: searchData.pageInfo?.totalResults,
-      resultsPerPage: searchData.pageInfo?.resultsPerPage,
-      itemsCount: searchData.items?.length
-    });
-
-    if (!searchData.items?.length) {
-      console.log("A API do YouTube não retornou resultados");
-      return [];
-    }
-
-    // Extrair IDs dos vídeos e canais
-    const videoIds = searchData.items
-      .filter((item: any) => item.id.kind === "youtube#video")
-      .map((item: any) => item.id.videoId);
     
-    if (videoIds.length === 0) {
-      console.log("Nenhum vídeo encontrado nos resultados da pesquisa");
-      return [];
-    }
-    
-    const channelIds = searchData.items.map((item: any) => item.snippet.channelId);
-
-    console.log(`Processando ${videoIds.length} vídeos e ${channelIds.length} canais`);
-
-    // Buscar dados adicionais (estatísticas)
-    const videoStats = await fetchVideoStats(videoIds, params.apiKey);
-    const channelStats = await fetchChannelStats(channelIds, params.apiKey);
-
-    // Enriquecer e filtrar os resultados
-    const results = enrichVideoData(searchData.items, videoStats, channelStats, params);
-    
-    console.log(`Processados ${results.length} resultados após filtros`);
-    return results;
+    // Se chegamos aqui, todas as tentativas falharam
+    throw new Error("Todas as tentativas de busca falharam");
   } catch (error) {
     console.error("Erro detalhado ao buscar dados do YouTube:", error);
     throw error;

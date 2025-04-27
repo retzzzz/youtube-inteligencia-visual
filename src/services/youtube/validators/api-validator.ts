@@ -60,23 +60,39 @@ export const validateApiKey = async (apiKey: string, forceNotNew: boolean = fals
       markKeyAsNotNew(apiKey);
     }
     
-    const validationResult = await analyzeApiResponse(videoCatResponse);
-    
-    // Para chaves com erro de quota, verificar se são novas
-    if (validationResult.quotaExceeded) {
-      const keyAge = await checkKeyAge(apiKey, forceNotNew);
-      console.log("Idade estimada da chave (minutos):", keyAge);
+    // Analisar resposta para detectar tipo de erro (quota excedida, chave inválida, etc)
+    try {
+      const validationResult = await analyzeApiResponse(videoCatResponse);
       
-      if (!forceNotNew && keyAge !== undefined && keyAge < 15) {
-        return {
-          valid: true,
-          quotaExceeded: false,
-          message: "Chave API nova detectada. As chaves de API recém-criadas podem levar 5-15 minutos para ficarem totalmente ativas."
-        };
+      // Para chaves com erro de quota, verificar se são novas
+      if (validationResult.quotaExceeded) {
+        console.log("Quota excedida detectada. Verificando se é uma chave nova...");
+        const keyAge = await checkKeyAge(apiKey, forceNotNew);
+        console.log("Idade estimada da chave (minutos):", keyAge);
+        
+        if (!forceNotNew && keyAge !== undefined && keyAge < 15) {
+          console.log("Chave parece ser nova (menos de 15 minutos)");
+          return {
+            valid: true,
+            quotaExceeded: false,
+            message: "Chave API nova detectada. As chaves de API recém-criadas podem levar 5-15 minutos para ficarem totalmente ativas."
+          };
+        }
+        
+        // Se não for nova ou forceNotNew for true, retorna o erro de quota excedida
+        console.log("Confirmando erro de quota excedida");
+        validationResult.message = "Quota da API excedida. A quota diária desta chave foi excedida. Por favor, tente novamente após 24 horas ou use outra chave.";
       }
+      
+      return validationResult;
+    } catch (analysisError) {
+      console.error("Erro ao analisar resposta da API:", analysisError);
+      return {
+        valid: false,
+        quotaExceeded: false,
+        message: "Erro ao analisar resposta da API do YouTube"
+      };
     }
-    
-    return validationResult;
   } catch (error) {
     console.error("Erro ao validar chave API:", error);
     return {
@@ -111,30 +127,44 @@ export const checkApiQuota = async (apiKey: string, forceNotNew: boolean = false
     ];
     
     for (const endpoint of endpoints) {
-      const response = await fetch(endpoint);
-      if (response.ok) {
-        markKeyAsNotNew(apiKey);
-        return true;
-      }
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        if (errorData.error?.errors?.some((e: any) => e.reason === "quotaExceeded")) {
-          // Verificar se é uma chave nova
-          if (!forceNotNew) {
-            const keyAge = await checkKeyAge(apiKey);
-            if (keyAge !== undefined && keyAge < 15) {
-              return true; // Assume quota disponível para chaves novas
-            }
-          }
-          continue; // Tenta o próximo endpoint
+      try {
+        console.log(`Verificando quota com endpoint: ${endpoint.replace(apiKey, "API_KEY_HIDDEN")}`);
+        const response = await fetch(endpoint);
+        
+        if (response.ok) {
+          console.log("Endpoint retornou OK, quota disponível");
+          markKeyAsNotNew(apiKey);
+          return true;
         }
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.log("Resposta de erro ao verificar quota:", errorData);
+          
+          if (errorData.error?.errors?.some((e: any) => e.reason === "quotaExceeded")) {
+            // Verificar se é uma chave nova
+            if (!forceNotNew) {
+              const keyAge = await checkKeyAge(apiKey);
+              if (keyAge !== undefined && keyAge < 15) {
+                console.log("Chave nova detectada (< 15 min), assumindo quota disponível");
+                return true; // Assume quota disponível para chaves novas
+              }
+            }
+            console.log("Quota excedida confirmada neste endpoint, tentando próximo...");
+            continue; // Tenta o próximo endpoint
+          }
+        }
+      } catch (endpointError) {
+        console.warn("Erro ao verificar quota com endpoint:", endpointError);
+        // Continua para o próximo endpoint em caso de erro
       }
     }
     
+    console.log("Todos os endpoints falharam, assumindo quota esgotada");
     return false;
-  } catch {
-    // Em caso de erro de rede, assumimos que pode haver quota
+  } catch (error) {
+    console.error("Erro geral ao verificar quota:", error);
+    // Em caso de erro inesperado, assumimos que pode haver quota
     return true;
   }
 };
