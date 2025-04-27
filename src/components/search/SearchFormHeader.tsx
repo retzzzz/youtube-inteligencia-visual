@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import { Search, Filter } from "lucide-react";
 
 interface SearchFormHeaderProps {
   isLoading: boolean;
@@ -10,7 +10,9 @@ interface SearchFormHeaderProps {
 const SearchFormHeader = ({ isLoading, onSubmit }: SearchFormHeaderProps) => {
   return (
     <div className="flex justify-between items-center mb-4">
-      <h2 className="text-xl font-bold">Pesquisar Conteúdo</h2>
+      <h2 className="text-xl font-bold flex items-center">
+        <Filter className="w-5 h-5 mr-2" /> Pesquisar Conteúdo
+      </h2>
       <Button type="submit" disabled={isLoading}>
         {isLoading ? (
           <>Pesquisando...</>

@@ -60,6 +60,28 @@ const BasicSearchFields = ({ params, onParamChange }: BasicSearchFieldsProps) =>
           </SelectContent>
         </Select>
       </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="period">Período</Label>
+        <Select
+          value={params.period}
+          onValueChange={(value) => onParamChange("period", value)}
+        >
+          <SelectTrigger id="period">
+            <SelectValue placeholder="Selecione o período" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="24h">Últimas 24 horas</SelectItem>
+            <SelectItem value="48h">Últimas 48 horas</SelectItem>
+            <SelectItem value="72h">Últimas 72 horas</SelectItem>
+            <SelectItem value="7d">Última semana</SelectItem>
+            <SelectItem value="30d">Último mês</SelectItem>
+            <SelectItem value="90d">Últimos 3 meses</SelectItem>
+            <SelectItem value="180d">Últimos 6 meses</SelectItem>
+            <SelectItem value="all">Todos os tempos</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
     </>
   );
 };
