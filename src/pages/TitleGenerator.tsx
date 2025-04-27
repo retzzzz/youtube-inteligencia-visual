@@ -15,8 +15,15 @@ import {
   extrairTitulosConcorrentes,
   simularExtrairTitulosConcorrentes,
   avaliarEPriorizarTitulos,
+  extrairTitulosVirais,
+  simularExtrairTitulosVirais,
+  identificarPadroesTitulos,
+  gerarTitulosVirais,
+  gerarTitulosMultilingues,
   TitleData,
-  TitleWithScore
+  TitleWithScore,
+  TitlePattern,
+  MultilingualTitle
 } from '@/utils/titleAnalysis';
 import {
   gerarVariacoesTitulo,
@@ -26,6 +33,9 @@ import {
 } from '@/utils/titleGeneration';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import LanguageSelector from "@/components/LanguageSelector";
 
 export interface TitleVariation {
   text: string;
@@ -98,6 +108,19 @@ const TitleGenerator = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { youtubeApiKey } = useAuth();
+  
+  // Novos estados para recursos avançados
+  const [nicho, setNicho] = useState("");
+  const [subnicho, setSubnicho] = useState("");
+  const [minViews, setMinViews] = useState(1000000);
+  const [maxVideos, setMaxVideos] = useState(30);
+  const [titulosVirais, setTitulosVirais] = useState<TitleData[]>([]);
+  const [padroesTitulos, setPadroesTitulos] = useState<TitlePattern[]>([]);
+  const [termosChave, setTermosChave] = useState("");
+  const [titulosGerados, setTitulosGerados] = useState<string[]>([]);
+  const [idiomasDestino, setIdiomasDestino] = useState<string[]>(["inglês", "espanhol", "português"]);
+  const [titulosMultilingues, setTitulosMultilingues] = useState<MultilingualTitle[]>([]);
+  const [loadingVirais, setLoadingVirais] = useState(false);
 
   // Handlers unificados
   const handleGenerateTitles = async (
@@ -207,6 +230,127 @@ const TitleGenerator = () => {
     });
   };
 
+  // Novos handlers para processos avançados
+  const handleExtrairTitulosVirais = async () => {
+    if (!nicho || !subnicho) {
+      toast({
+        title: "Nicho e subnicho necessários",
+        description: "Por favor, preencha ambos os campos.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoadingVirais(true);
+
+    try {
+      let titulos: TitleData[];
+      
+      if (youtubeApiKey) {
+        titulos = await extrairTitulosVirais(
+          nicho,
+          subnicho,
+          idiomasDestino[0] || "inglês",
+          minViews,
+          maxVideos,
+          youtubeApiKey
+        );
+      } else {
+        titulos = simularExtrairTitulosVirais(
+          nicho,
+          subnicho,
+          idiomasDestino[0] || "inglês",
+          minViews,
+          maxVideos
+        );
+      }
+      
+      setTitulosVirais(titulos);
+      
+      toast({
+        title: "Títulos virais extraídos",
+        description: `Foram encontrados ${titulos.length} vídeos com pelo menos ${minViews.toLocaleString()} visualizações.`,
+      });
+      
+    } catch (error) {
+      console.error("Erro ao extrair títulos virais:", error);
+      toast({
+        title: "Erro na extração",
+        description: "Não foi possível extrair os títulos virais.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingVirais(false);
+    }
+  };
+
+  const handleIdentificarPadroes = () => {
+    if (titulosVirais.length === 0) {
+      toast({
+        title: "Sem títulos para analisar",
+        description: "Extraia títulos virais primeiro.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const padroes = identificarPadroesTitulos(titulosVirais);
+    setPadroesTitulos(padroes);
+    
+    toast({
+      title: "Padrões identificados",
+      description: `Foram identificados ${padroes.length} padrões nos títulos virais.`,
+    });
+  };
+
+  const handleGerarTitulosVirais = () => {
+    if (padroesTitulos.length === 0) {
+      toast({
+        title: "Sem padrões para basear",
+        description: "Identifique padrões em títulos virais primeiro.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!termosChave) {
+      toast({
+        title: "Termos-chave necessários",
+        description: "Por favor, informe pelo menos um termo-chave.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const termos = termosChave.split(',').map(termo => termo.trim());
+    const titulos = gerarTitulosVirais(padroesTitulos, termos, 10);
+    setTitulosGerados(titulos);
+    
+    toast({
+      title: "Títulos virais gerados",
+      description: `Foram gerados ${titulos.length} títulos com base nos padrões encontrados.`,
+    });
+  };
+
+  const handleGerarMultilingues = () => {
+    if (titulosGerados.length === 0) {
+      toast({
+        title: "Sem títulos para traduzir",
+        description: "Gere títulos virais primeiro.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const multilingues = gerarTitulosMultilingues(titulosGerados, idiomasDestino);
+    setTitulosMultilingues(multilingues);
+    
+    toast({
+      title: "Traduções geradas",
+      description: `Foram gerados ${multilingues.length} títulos adaptados para outros idiomas.`,
+    });
+  };
+
   return (
     <div className="container mx-auto px-4 py-6 max-w-[1400px]">
       <Header />
@@ -220,11 +364,15 @@ const TitleGenerator = () => {
           </p>
           
           <Tabs defaultValue="generate" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="generate">1. Gerar Títulos</TabsTrigger>
-              <TabsTrigger value="analyze">2. Analisar Concorrência</TabsTrigger>
-              <TabsTrigger value="variations">3. Variações</TabsTrigger>
-              <TabsTrigger value="evaluate">4. Avaliar Títulos</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-8">
+              <TabsTrigger value="generate">Gerar Títulos</TabsTrigger>
+              <TabsTrigger value="analyze">Analisar</TabsTrigger>
+              <TabsTrigger value="variations">Variações</TabsTrigger>
+              <TabsTrigger value="evaluate">Avaliar</TabsTrigger>
+              <TabsTrigger value="viral">Títulos Virais</TabsTrigger>
+              <TabsTrigger value="patterns">Padrões</TabsTrigger>
+              <TabsTrigger value="innovative">Inovadores</TabsTrigger>
+              <TabsTrigger value="multilingual">Multilíngues</TabsTrigger>
             </TabsList>
             
             <TabsContent value="generate" className="space-y-4">
@@ -315,6 +463,265 @@ const TitleGenerator = () => {
                         <div className="text-sm text-muted-foreground">
                           <span>Repetições detectadas: {titulo.repeticoes}</span>
                         </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="viral" className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="nicho">Nicho Principal</Label>
+                    <Input 
+                      id="nicho" 
+                      placeholder="Ex: histórias, finanças, saúde"
+                      value={nicho}
+                      onChange={(e) => setNicho(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="subnicho">Subnicho</Label>
+                    <Input 
+                      id="subnicho" 
+                      placeholder="Ex: histórias de milionários, bitcoin"
+                      value={subnicho}
+                      onChange={(e) => setSubnicho(e.target.value)}
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="minViews">Visualizações Mínimas: {minViews.toLocaleString()}</Label>
+                    <input
+                      type="range"
+                      id="minViews"
+                      min="100000"
+                      max="10000000"
+                      step="100000"
+                      className="w-full"
+                      value={minViews}
+                      onChange={(e) => setMinViews(parseInt(e.target.value))}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="maxVideos">Máximo de Vídeos: {maxVideos}</Label>
+                    <input
+                      type="range"
+                      id="maxVideos"
+                      min="10"
+                      max="100"
+                      step="5"
+                      className="w-full"
+                      value={maxVideos}
+                      onChange={(e) => setMaxVideos(parseInt(e.target.value))}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="idiomaViral">Idioma Principal</Label>
+                    <LanguageSelector 
+                      value={idiomasDestino[0] || "inglês"}
+                      onChange={(value) => setIdiomasDestino([value, ...idiomasDestino.slice(1)])}
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex justify-end">
+                <Button 
+                  onClick={handleExtrairTitulosVirais}
+                  disabled={loadingVirais}
+                >
+                  {loadingVirais ? "Extraindo..." : "Extrair Títulos Virais"}
+                </Button>
+              </div>
+              
+              {titulosVirais.length > 0 && (
+                <div className="mt-6">
+                  <h3 className="text-lg font-medium mb-2">Títulos Virais ({titulosVirais.length})</h3>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Título</TableHead>
+                        <TableHead>Canal</TableHead>
+                        <TableHead className="text-right">Visualizações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {titulosVirais.slice(0, 10).map((titulo, index) => (
+                        <TableRow key={`viral-${index}`}>
+                          <TableCell className="font-medium">{titulo.titulo}</TableCell>
+                          <TableCell>{titulo.canal}</TableCell>
+                          <TableCell className="text-right">{titulo.visualizacoes.toLocaleString()}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="patterns" className="space-y-4">
+              <div className="flex justify-end">
+                <Button 
+                  onClick={handleIdentificarPadroes}
+                  disabled={titulosVirais.length === 0}
+                >
+                  Identificar Padrões
+                </Button>
+              </div>
+              
+              {padroesTitulos.length > 0 && (
+                <div className="mt-6">
+                  <h3 className="text-lg font-medium mb-2">Padrões Identificados</h3>
+                  <div className="space-y-4">
+                    {padroesTitulos.map((padrao, index) => (
+                      <div 
+                        key={`padrao-${index}`}
+                        className="p-4 rounded-md bg-muted/50 hover:bg-muted/80 transition-colors border"
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-semibold">{padrao.descricao_curta}</h4>
+                          <Badge variant={padrao.frequencia > 50 ? "secondary" : "outline"}>
+                            {padrao.frequencia}%
+                          </Badge>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          <span>Exemplo: "{padrao.padrao_exemplo}"</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="innovative" className="space-y-4">
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="termosChave">Termos-Chave (separados por vírgula)</Label>
+                  <Input 
+                    id="termosChave" 
+                    placeholder="Ex: milionário, segredo, dinheiro, rico"
+                    value={termosChave}
+                    onChange={(e) => setTermosChave(e.target.value)}
+                  />
+                </div>
+                
+                <div className="flex justify-end">
+                  <Button 
+                    onClick={handleGerarTitulosVirais}
+                    disabled={padroesTitulos.length === 0 || !termosChave}
+                  >
+                    Gerar Títulos Inovadores
+                  </Button>
+                </div>
+              </div>
+              
+              {titulosGerados.length > 0 && (
+                <div className="mt-6">
+                  <h3 className="text-lg font-medium mb-2">Títulos Inovadores Gerados</h3>
+                  <div className="space-y-2">
+                    {titulosGerados.map((titulo, index) => (
+                      <div 
+                        key={`inovador-${index}`}
+                        className="p-3 rounded-md bg-muted/50 hover:bg-muted/80 transition-colors flex justify-between items-center group"
+                      >
+                        <span>{titulo}</span>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          className="opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => {
+                            navigator.clipboard.writeText(titulo);
+                            toast({
+                              title: "Copiado!",
+                              description: "Título copiado para área de transferência."
+                            });
+                          }}
+                        >
+                          Copiar
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="multilingual" className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label>Selecione os Idiomas Alvo</Label>
+                  <div className="space-y-2 mt-2">
+                    {["inglês", "português", "espanhol", "francês", "alemão"].map(idioma => (
+                      <div key={idioma} className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id={`idioma-${idioma}`}
+                          checked={idiomasDestino.includes(idioma)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setIdiomasDestino([...idiomasDestino, idioma]);
+                            } else {
+                              setIdiomasDestino(idiomasDestino.filter(i => i !== idioma));
+                            }
+                          }}
+                          className="mr-2"
+                        />
+                        <Label htmlFor={`idioma-${idioma}`}>{idioma.charAt(0).toUpperCase() + idioma.slice(1)}</Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex justify-end">
+                <Button 
+                  onClick={handleGerarMultilingues}
+                  disabled={titulosGerados.length === 0 || idiomasDestino.length === 0}
+                >
+                  Gerar Versões Multilíngues
+                </Button>
+              </div>
+              
+              {titulosMultilingues.length > 0 && (
+                <div className="mt-6">
+                  <h3 className="text-lg font-medium mb-2">Títulos Multilíngues</h3>
+                  <div className="space-y-6">
+                    {idiomasDestino.map(idioma => (
+                      <div key={`idioma-group-${idioma}`} className="space-y-2">
+                        <h4 className="font-medium">{idioma.charAt(0).toUpperCase() + idioma.slice(1)}</h4>
+                        {titulosMultilingues
+                          .filter(item => item.idioma === idioma)
+                          .map((item, index) => (
+                            <div 
+                              key={`multilingue-${idioma}-${index}`}
+                              className="p-3 rounded-md bg-muted/50 hover:bg-muted/80 transition-colors flex justify-between items-center group"
+                            >
+                              <span>{item.titulo_adaptado}</span>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(item.titulo_adaptado);
+                                  toast({
+                                    title: "Copiado!",
+                                    description: "Título copiado para área de transferência."
+                                  });
+                                }}
+                              >
+                                Copiar
+                              </Button>
+                            </div>
+                          ))}
                       </div>
                     ))}
                   </div>
