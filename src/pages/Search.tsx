@@ -4,7 +4,6 @@ import Header from '@/components/Header';
 import SearchForm from '@/components/SearchForm';
 import { useYouTubeSearch } from '@/hooks/useYouTubeSearch';
 import ResultsSection from '@/components/ResultsSection';
-import SavedSearches from '@/components/SavedSearches';
 
 const Search = () => {
   const { 
@@ -23,14 +22,6 @@ const Search = () => {
       <div className="mt-8">
         <h2 className="text-2xl font-bold mb-6">Pesquisa Avançada</h2>
         <SearchForm onSearch={handleSearch} isLoading={isLoading} />
-        
-        <div className="mt-6">
-          <SavedSearches 
-            currentSearch={searchParams} 
-            onLoadSearch={handleSearch} 
-            hideCurrentSaveButton={true} 
-          />
-        </div>
         
         {results && results.length > 0 && (
           <div className="mt-8">
