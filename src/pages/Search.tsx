@@ -5,7 +5,7 @@ import Header from '@/components/Header';
 import SearchForm from '@/components/SearchForm';
 import { useYouTubeSearch } from '@/hooks/useYouTubeSearch';
 import ResultsSection from '@/components/ResultsSection';
-import { AlertCircle, Key, RefreshCw, AlertTriangle } from 'lucide-react';
+import { AlertCircle, Key, RefreshCw, AlertTriangle, Clock } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,6 +19,7 @@ const Search = () => {
     selectedVideo, 
     setSelectedVideo,
     error,
+    isNewKey,
     tryWithNewKey,
     forceSearchWithCurrentKey
   } = useYouTubeSearch();
@@ -124,6 +125,16 @@ const Search = () => {
         <h2 className="text-2xl font-bold mb-6">Pesquisa Avançada</h2>
         <SearchForm onSearch={handleSearch} isLoading={isLoading} />
         
+        {isNewKey && (
+          <Alert className="mt-6 bg-blue-50 border-blue-300">
+            <Clock className="h-4 w-4 text-blue-500" />
+            <AlertDescription className="text-blue-700">
+              <strong>Chave API recém-criada detectada!</strong> As chaves do Google Cloud podem levar alguns minutos para ativação completa. 
+              Se estiver recebendo erros, aguarde 5-10 minutos e tente novamente.
+            </AlertDescription>
+          </Alert>
+        )}
+        
         {error && (
           <Alert variant="destructive" className="mt-6">
             <AlertCircle className="h-4 w-4" />
@@ -141,6 +152,17 @@ const Search = () => {
                   >
                     <AlertTriangle className="h-3 w-3 mr-1 text-yellow-500" />
                     Tentar mesmo assim
+                  </Button>
+                )}
+                {error.includes("chave foi criada recentemente") && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleRetry}
+                    className="ml-2 whitespace-nowrap"
+                  >
+                    <Clock className="h-3 w-3 mr-1 text-blue-500" />
+                    Tentar novamente
                   </Button>
                 )}
                 <Button

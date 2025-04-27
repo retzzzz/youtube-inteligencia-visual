@@ -12,6 +12,7 @@ export const useYouTubeSearch = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<VideoResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isNewKey, setIsNewKey] = useState(false);
   const { toast } = useToast();
   const { youtubeApiKey, setYoutubeApiKey, setNeedsApiKey } = useAuth();
 
@@ -21,6 +22,7 @@ export const useYouTubeSearch = () => {
     setSelectedVideo(null);
     setError(null);
     setResults([]);
+    setIsNewKey(false);
 
     try {
       // Verificações de API key
@@ -45,6 +47,16 @@ export const useYouTubeSearch = () => {
         });
         setNeedsApiKey(true);
         throw new Error(validationResult.message);
+      }
+
+      // Verificar se a mensagem indica uma chave nova
+      if (validationResult.message.includes("chave nova")) {
+        setIsNewKey(true);
+        toast({
+          title: "Chave API nova detectada",
+          description: "Chaves recém-criadas podem levar alguns minutos para ficarem totalmente ativas. Prosseguindo com a busca.",
+          variant: "default",
+        });
       }
 
       // Verificar se a chave tem quota disponível
@@ -92,7 +104,14 @@ export const useYouTubeSearch = () => {
       let errorMessage = "Erro ao buscar dados. Tente novamente mais tarde.";
       
       if (error instanceof Error) {
-        if (error.message.includes("quota")) {
+        // Verificar se é um erro relacionado a chave nova
+        if (error.message.includes("chave foi criada recentemente") || 
+            error.message.includes("alguns minutos para ficar")) {
+          setIsNewKey(true);
+          errorMessage = error.message;
+        } 
+        // Verificar outros erros comuns
+        else if (error.message.includes("quota")) {
           errorMessage = "Quota da API do YouTube excedida. Tente novamente mais tarde ou use uma chave de API diferente.";
         } else if (error.message.includes("API key")) {
           errorMessage = "Chave de API inválida. Verifique se a chave foi digitada corretamente.";
@@ -169,6 +188,7 @@ export const useYouTubeSearch = () => {
     setSelectedVideo,
     handleSearch,
     error,
+    isNewKey,
     tryWithNewKey,
     forceSearchWithCurrentKey
   };

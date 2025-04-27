@@ -16,6 +16,10 @@ export const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<Vid
   try {
     console.log("Iniciando requisição à API do YouTube com a chave:", params.apiKey.substring(0, 5) + "..." + params.apiKey.substring(params.apiKey.length - 4));
     
+    // Verifica se a chave é nova (criada recentemente)
+    const keyInfo = await validateApiKey(params.apiKey);
+    console.log("Informações da chave API:", keyInfo);
+    
     // Fetch initial search results
     const searchUrl = `https://www.googleapis.com/youtube/v3/search?${new URLSearchParams({
       part: "snippet",
@@ -35,6 +39,16 @@ export const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<Vid
     if (!searchResponse.ok) {
       const errorData = await searchResponse.json();
       console.error("Dados de erro da API:", errorData);
+      
+      // Verificar se é uma chave nova com falso positivo de quota excedida
+      if (errorData.error?.errors?.some((e: any) => e.reason === "quotaExceeded")) {
+        const keyAge = await checkKeyCreationDate(params.apiKey);
+        if (keyAge !== undefined && keyAge < 10) {
+          // Possivelmente um falso positivo em chave nova
+          throw new Error("Esta chave foi criada recentemente e pode levar alguns minutos para ficar totalmente ativa. Por favor, aguarde alguns minutos e tente novamente.");
+        }
+      }
+      
       handleApiError(errorData, searchResponse);
     }
 
@@ -76,6 +90,26 @@ export const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<Vid
   } catch (error) {
     console.error("Erro detalhado ao buscar dados do YouTube:", error);
     throw error;
+  }
+};
+
+/**
+ * Tenta determinar se a chave API é nova
+ */
+const checkKeyCreationDate = async (apiKey: string): Promise<number | undefined> => {
+  try {
+    const response = await fetch(
+      `https://www.googleapis.com/youtube/v3/i18nRegions?part=snippet&key=${apiKey}`
+    );
+    
+    // Se conseguir acessar, retorna 0 (chave funcionando)
+    if (response.ok) {
+      return 0;
+    }
+    
+    return undefined;
+  } catch {
+    return undefined;
   }
 };
 
