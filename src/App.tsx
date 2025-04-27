@@ -11,6 +11,7 @@ import MicroSubnicheAnalyzer from './pages/MicroSubnicheAnalyzer';
 import FAQ from './pages/FAQ';
 import Tutorial from './pages/Tutorial';
 import ScriptTutorial from './pages/ScriptTutorial';
+import ImportantLinks from './pages/ImportantLinks';
 import { AuthProvider } from './contexts/AuthContext';
 import { Toaster } from './components/ui/toaster';
 import Footer from './components/Footer';
@@ -33,6 +34,7 @@ function App() {
             <Route path="/tutorial" element={<Tutorial />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/script-tutorial" element={<ScriptTutorial />} />
+            <Route path="/important-links" element={<ImportantLinks />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
