@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
@@ -28,7 +29,10 @@ const TitleVariationsList = ({
   const [sortBy, setSortBy] = useState<string>("emotion");
 
   const copyToClipboard = (text: string, id: string) => {
-    navigator.clipboard.writeText(text);
+    // Remove language prefix when copying
+    const cleanText = text.replace(/^\[.*?\]\s*/, '');
+    
+    navigator.clipboard.writeText(cleanText);
     setCopiedId(id);
     toast({
       title: "Copiado!",
