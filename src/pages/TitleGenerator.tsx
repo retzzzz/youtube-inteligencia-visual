@@ -56,6 +56,7 @@ import { Label } from "@/components/ui/label";
 import LanguageSelector from "@/components/LanguageSelector";
 import AudienceAnalysisForm from "@/components/AudienceAnalysisForm";
 import AudienceAnalysisResults from "@/components/AudienceAnalysisResults";
+import CompetitionAnalysis from "@/components/CompetitionAnalysis";
 
 export interface TitleVariation {
   text: string;
@@ -550,7 +551,7 @@ const TitleGenerator = () => {
           </p>
           
           <Tabs defaultValue="generate" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-11">
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-12">
               <TabsTrigger value="generate">Gerar</TabsTrigger>
               <TabsTrigger value="analyze">Analisar</TabsTrigger>
               <TabsTrigger value="variations">Variações</TabsTrigger>
@@ -562,6 +563,7 @@ const TitleGenerator = () => {
               <TabsTrigger value="recurrence">Recorrência</TabsTrigger>
               <TabsTrigger value="schedule">Cronograma</TabsTrigger>
               <TabsTrigger value="audience">Audiência</TabsTrigger>
+              <TabsTrigger value="competition">Concorrência</TabsTrigger>
             </TabsList>
             
             <TabsContent value="generate" className="space-y-4">
@@ -1181,6 +1183,10 @@ const TitleGenerator = () => {
                   cronogramaPublicacao={cronogramaAudiencia}
                 />
               )}
+            </TabsContent>
+            
+            <TabsContent value="competition" className="space-y-4">
+              <CompetitionAnalysis youtubeApiKey={youtubeApiKey} />
             </TabsContent>
           </Tabs>
         </Card>

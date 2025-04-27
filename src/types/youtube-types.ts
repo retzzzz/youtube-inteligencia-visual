@@ -1,3 +1,4 @@
+
 export interface YoutubeSearchParams {
   keywords: string;
   searchType: "videos" | "shorts" | "channels" | "playlists";
@@ -120,4 +121,41 @@ export interface VideoAnalysis {
   supportImagePrompts: string[];
   subNicheIdeas: SubNicheIdea[];
   saturation?: SaturationAnalysis;
+}
+
+export interface Canal {
+  nome_do_canal: string;
+  data_de_criacao: string;
+  total_videos: number;
+  total_inscritos: number;
+  titulos_recentes: string[];
+}
+
+export interface Subnicho {
+  subnicho: string;
+  canais_exemplos: Canal[];
+}
+
+export interface CompetitionData {
+  idioma: string;
+  subnicho: string;
+  num_canais_concorrentes: number;
+  idade_media_canais: number;
+  media_visualizacoes_dos_top: number;
+  canais_exemplos: string[];
+}
+
+export interface EntryTimingData {
+  idioma: string;
+  status_entrada: "porta_aberta" | "porta_fechada";
+  dias_restantes_para_porta_fechada: number;
+  recomendacao_acao: string;
+}
+
+export interface ComparisonData extends CompetitionData, EntryTimingData {}
+
+export interface RecommendationData {
+  idioma_recomendado: string;
+  prazo_sugerido: string;
+  estrategia_titulo: string;
 }
