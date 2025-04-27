@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom';
 
 const Footer = () => {
   const links = [
-    { name: 'Tutorial', path: '/tutorial' },
+    { name: 'Tutorial Canal Dark', path: '/tutorial' },
+    { name: 'Tutorial Roteiros', path: '/script-tutorial' },
     { name: 'FAQ', path: '/faq' },
     { name: 'Micro-Subnichos', path: '/micro-subnicho-analyzer' },
     { name: 'Pesquisar', path: '/search' },
