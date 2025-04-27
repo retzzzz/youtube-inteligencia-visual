@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -540,7 +539,7 @@ const TitleGeneratorContainer = ({
   };
 
   const toggleLanguage = (language: string) => {
-    setIdiomasDestino(prev => 
+    setIdiomasDestino((prev: string[]) => 
       prev.includes(language)
         ? prev.filter(lang => lang !== language)
         : [...prev, language]
@@ -1099,12 +1098,12 @@ const TitleGeneratorContainer = ({
         <TabsContent value="audience" className="space-y-4">
           <AudienceAnalysisForm 
             onAnalyze={handleAnalyzeAudience} 
-            loading={loadingAudiencia} 
+            isLoading={loadingAudiencia} 
           />
           
           {audienceProfile && (
             <AudienceAnalysisResults 
-              profile={audienceProfile}
+              audienceProfile={audienceProfile}
               microSubnichos={microSubnichos}
               titulosAdaptados={titulosAdaptados}
               cronograma={cronogramaAudiencia}

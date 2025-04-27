@@ -1,10 +1,12 @@
-
 /**
  * Interface para estruturas de recorrência identificadas
  */
 export interface RecurrenceStructure {
+  tipo_estrutura: string;
   estrutura_titulo: string;
   frequencia: number;
+  descricao: string;
+  exemplo_titulo: string;
   canais_exemplos: string[];
 }
 
@@ -13,8 +15,10 @@ export interface RecurrenceStructure {
  */
 export interface RecurrenceTrigger {
   gatilho: string;
+  tipo_gatilho: string;
   descricao: string;
   peso: number;
+  eficacia: string;
 }
 
 /**
@@ -22,7 +26,8 @@ export interface RecurrenceTrigger {
  */
 export interface PublicationSchedule {
   titulo: string;
-  data_publicacao: Date;
+  data_publicacao: string;
+  elemento_recorrente: string;
 }
 
 /**
@@ -66,38 +71,59 @@ export const simularExtrairEstruturasRecorrencia = (
 ): RecurrenceStructure[] => {
   const estruturasComuns: RecurrenceStructure[] = [
     {
+      tipo_estrutura: "Episódio",
       estrutura_titulo: "Episódio X: [Tema]",
       frequencia: 78,
+      descricao: "Indicação clara de continuidade usando numeração de episódios",
+      exemplo_titulo: "Ep. 1: [Tema]",
       canais_exemplos: ["Canal Storytelling", "Histórias Incríveis", "Contos da Vida Real"]
     },
     {
+      tipo_estrutura: "Parte",
       estrutura_titulo: "Parte X - [Tema]",
       frequencia: 65,
+      descricao: "Segmentação de conteúdo em partes numeradas",
+      exemplo_titulo: "Parte 1 - [Tema]",
       canais_exemplos: ["Viagens Pelo Mundo", "Exploradores", "Lugares Incríveis"]
     },
     {
+      tipo_estrutura: "Título",
       estrutura_titulo: "[Tema] #X",
       frequencia: 55,
+      descricao: "Uso de hashtag com número para indicar sequência",
+      exemplo_titulo: "#1 [Tema]",
       canais_exemplos: ["Tutorial Master", "Aprenda Comigo", "Dicas e Truques"]
     },
     {
+      tipo_estrutura: "Série",
       estrutura_titulo: "Série: [Tema] - Capítulo X",
       frequencia: 48,
+      descricao: "Estrutura de livro/história aplicada a vídeos",
+      exemplo_titulo: "Série: [Tema] - Capítulo 1",
       canais_exemplos: ["Documentários HD", "História Real", "Investigação Profunda"]
     },
     {
+      tipo_estrutura: "Temporada",
       estrutura_titulo: "[Tema] (Temporada X, Ep. Y)",
       frequencia: 42,
+      descricao: "Organização de conteúdo em formato de programa de TV",
+      exemplo_titulo: "[Tema] (Temporada 1, Ep. 1)",
       canais_exemplos: ["Conteúdo Premium", "Shows da Semana", "Top Entretenimento"]
     },
     {
+      tipo_estrutura: "Dias",
       estrutura_titulo: "X Dias de [Tema]: Dia Y",
       frequencia: 38,
+      descricao: "Formato de desafio com prazo definido",
+      exemplo_titulo: "5 Dias de [Tema]: Dia 1",
       canais_exemplos: ["Desafios Semanais", "Projetos DIY", "Transformação Total"]
     },
     {
+      tipo_estrutura: "Continuação",
       estrutura_titulo: "CONTINUAÇÃO: [Tema] X",
       frequencia: 35,
+      descricao: "Indicador explícito de que o conteúdo é continuação",
+      exemplo_titulo: "CONTINUAÇÃO: [Tema] 1",
       canais_exemplos: ["Notícias de Última Hora", "Atualidades", "Fatos Recentes"]
     }
   ];
@@ -121,48 +147,66 @@ export const identificarGatilhosRecorrencia = (
   const gatilhos: RecurrenceTrigger[] = [
     {
       gatilho: "Episódio X",
+      tipo_gatilho: "Episódio",
       descricao: "Indicação clara de continuidade usando numeração de episódios",
-      peso: 0.9
+      peso: 0.9,
+      eficacia: "Alta"
     },
     {
       gatilho: "Parte X",
+      tipo_gatilho: "Parte",
       descricao: "Segmentação de conteúdo em partes numeradas",
-      peso: 0.85
+      peso: 0.85,
+      eficacia: "Alta"
     },
     {
       gatilho: "Capítulo X",
+      tipo_gatilho: "Título",
       descricao: "Estrutura de livro/história aplicada a vídeos",
-      peso: 0.8
+      peso: 0.8,
+      eficacia: "Alta"
     },
     {
       gatilho: "Série:",
+      tipo_gatilho: "Série",
       descricao: "Indicador explícito de que o conteúdo faz parte de uma série",
-      peso: 0.75
+      peso: 0.75,
+      eficacia: "Alta"
     },
     {
       gatilho: "Temporada X",
+      tipo_gatilho: "Temporada",
       descricao: "Organização de conteúdo em formato de programa de TV",
-      peso: 0.7
+      peso: 0.7,
+      eficacia: "Alta"
     },
     {
       gatilho: "#X",
+      tipo_gatilho: "Título",
       descricao: "Uso de hashtag com número para indicar sequência",
-      peso: 0.65
+      peso: 0.65,
+      eficacia: "Alta"
     },
     {
       gatilho: "Dia X de Y",
+      tipo_gatilho: "Dias",
       descricao: "Formato de desafio com prazo definido",
-      peso: 0.6
+      peso: 0.6,
+      eficacia: "Alta"
     },
     {
       gatilho: "CONTINUAÇÃO:",
+      tipo_gatilho: "Continuação",
       descricao: "Indicador explícito de que o conteúdo é continuação",
-      peso: 0.55
+      peso: 0.55,
+      eficacia: "Alta"
     },
     {
       gatilho: "Atualização:",
+      tipo_gatilho: "Continuação",
       descricao: "Indica novidades sobre um tópico anterior",
-      peso: 0.5
+      peso: 0.5,
+      eficacia: "Alta"
     }
   ];
 
@@ -321,7 +365,8 @@ export const planejarCicloRecorrencia = (
     
     cronograma.push({
       titulo: tituloAjustado,
-      data_publicacao: dataMelhor
+      data_publicacao: dataMelhor.toISOString(),
+      elemento_recorrente: gatilhos.find(g => g.gatilho === tituloAjustado.split(' ')[0])?.tipo_gatilho || ""
     });
   }
   
