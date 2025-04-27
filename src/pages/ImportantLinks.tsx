@@ -4,6 +4,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 const ImportantLinks = () => {
   const importantLinks = [
@@ -56,11 +57,18 @@ const ImportantLinks = () => {
               )}
               
               {link.content && (
-                <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                  {link.content.map((item, idx) => (
-                    <li key={idx}>{item}</li>
-                  ))}
-                </ul>
+                <Accordion type="single" collapsible>
+                  <AccordionItem value="dicas-importantes">
+                    <AccordionTrigger>Expandir Dicas</AccordionTrigger>
+                    <AccordionContent>
+                      <ul className="list-disc list-inside space-y-2 text-muted-foreground">
+                        {link.content.map((item, idx) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
               )}
             </div>
           </Card>
