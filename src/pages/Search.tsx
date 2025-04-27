@@ -5,7 +5,7 @@ import Header from '@/components/Header';
 import SearchForm from '@/components/SearchForm';
 import { useYouTubeSearch } from '@/hooks/useYouTubeSearch';
 import ResultsSection from '@/components/ResultsSection';
-import { AlertCircle, Key, RefreshCw } from 'lucide-react';
+import { AlertCircle, Key, RefreshCw, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,7 +19,8 @@ const Search = () => {
     selectedVideo, 
     setSelectedVideo,
     error,
-    tryWithNewKey
+    tryWithNewKey,
+    forceSearchWithCurrentKey
   } = useYouTubeSearch();
   
   const { youtubeApiKey, setNeedsApiKey } = useAuth();
@@ -60,6 +61,11 @@ const Search = () => {
     if (searchParams) {
       handleSearch(searchParams);
     }
+  };
+  
+  // Função para forçar a busca ignorando avisos de quota
+  const handleForceSearch = () => {
+    forceSearchWithCurrentKey();
   };
 
   if (!youtubeApiKey) {
@@ -122,17 +128,30 @@ const Search = () => {
           <Alert variant="destructive" className="mt-6">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription className="flex justify-between items-center w-full">
-              <span>{error}</span>
-              {error.includes("API") && (
+              <div>
+                <span>{error}</span>
+              </div>
+              <div className="flex gap-2">
+                {error.includes("quota") && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleForceSearch}
+                    className="ml-2 whitespace-nowrap"
+                  >
+                    <AlertTriangle className="h-3 w-3 mr-1 text-yellow-500" />
+                    Tentar mesmo assim
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleChangeApiKey}
-                  className="ml-2"
+                  className="ml-2 whitespace-nowrap"
                 >
-                  Configurar nova chave API
+                  Configurar nova chave
                 </Button>
-              )}
+              </div>
             </AlertDescription>
           </Alert>
         )}

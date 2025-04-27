@@ -13,12 +13,14 @@ export const validateApiKey = async (apiKey: string): Promise<{valid: boolean, q
   }
 
   try {
+    // Use um parâmetro de consulta simples para minimizar o uso da API
     const testResponse = await fetch(
-      `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&q=test&key=${apiKey}`
+      `https://www.googleapis.com/youtube/v3/search?part=id&maxResults=1&q=test&key=${apiKey}`
     );
 
     if (!testResponse.ok) {
       const errorData = await testResponse.json();
+      console.log("Resposta de erro da API do YouTube:", errorData);
       
       if (errorData.error?.errors?.some((e: any) => e.reason === "keyInvalid")) {
         return {
@@ -27,11 +29,19 @@ export const validateApiKey = async (apiKey: string): Promise<{valid: boolean, q
           message: "Chave de API inválida. Verifique se a chave foi digitada corretamente."
         };
       } else if (errorData.error?.errors?.some((e: any) => e.reason === "quotaExceeded")) {
-        console.warn("Aviso: Quota da API excedida para esta chave");
+        // Se o erro for específicamente sobre quota excedida
+        console.log("Quota excedida detectada na resposta da API");
         return {
           valid: true, // A chave é válida, apenas sem quota
           quotaExceeded: true,
           message: "Quota da API excedida. Esta chave é válida, mas sua cota diária foi atingida."
+        };
+      } else if (errorData.error?.code === 403) {
+        // Outros erros 403 não relacionados à quota
+        return {
+          valid: false,
+          quotaExceeded: false,
+          message: `Erro de acesso: ${errorData.error?.message || testResponse.statusText}`
         };
       }
       
@@ -67,8 +77,9 @@ export const checkApiQuota = async (apiKey: string): Promise<boolean> => {
       return false;
     }
     
+    // Usando uma consulta mínima para verificar a quota
     const testResponse = await fetch(
-      `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&q=test&key=${apiKey}`
+      `https://www.googleapis.com/youtube/v3/search?part=id&maxResults=1&q=test&key=${apiKey}`
     );
     
     // Se resposta for bem-sucedida, quota está disponível
@@ -77,6 +88,7 @@ export const checkApiQuota = async (apiKey: string): Promise<boolean> => {
     }
     
     const errorData = await testResponse.json();
+    console.log("Resposta ao verificar quota:", errorData);
     
     // Se erro for diferente de quota excedida, a chave pode ter outros problemas
     if (!errorData.error?.errors?.some((e: any) => e.reason === "quotaExceeded")) {

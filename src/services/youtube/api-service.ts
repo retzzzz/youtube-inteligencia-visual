@@ -14,15 +14,7 @@ export const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<Vid
   }
 
   try {
-    // Verificação básica da chave antes de prosseguir
-    const validationResult = await validateApiKey(params.apiKey);
-    if (!validationResult.valid) {
-      throw new Error(validationResult.message);
-    }
-    
-    if (validationResult.quotaExceeded) {
-      throw new Error("Quota da API do YouTube excedida. Tente novamente mais tarde ou use uma chave de API diferente.");
-    }
+    console.log("Iniciando requisição à API do YouTube com a chave:", params.apiKey.substring(0, 5) + "..." + params.apiKey.substring(params.apiKey.length - 4));
     
     // Fetch initial search results
     const searchUrl = `https://www.googleapis.com/youtube/v3/search?${new URLSearchParams({
@@ -35,16 +27,23 @@ export const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<Vid
       ...(params.language && params.language !== "any" && { relevanceLanguage: params.language })
     }).toString()}`;
 
-    console.log("Realizando busca na API do YouTube...");
+    console.log("URL de busca:", searchUrl.replace(params.apiKey, "API_KEY_HIDDEN"));
     const searchResponse = await fetch(searchUrl);
 
+    console.log("Resposta da API:", searchResponse.status, searchResponse.statusText);
+    
     if (!searchResponse.ok) {
       const errorData = await searchResponse.json();
+      console.error("Dados de erro da API:", errorData);
       handleApiError(errorData, searchResponse);
     }
 
     const searchData = await searchResponse.json();
-    console.log("Dados brutos da API do YouTube:", searchData.pageInfo);
+    console.log("Resposta bem-sucedida:", {
+      totalResults: searchData.pageInfo?.totalResults,
+      resultsPerPage: searchData.pageInfo?.resultsPerPage,
+      itemsCount: searchData.items?.length
+    });
 
     if (!searchData.items?.length) {
       console.log("A API do YouTube não retornou resultados");
@@ -56,7 +55,14 @@ export const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<Vid
       .filter((item: any) => item.id.kind === "youtube#video")
       .map((item: any) => item.id.videoId);
     
+    if (videoIds.length === 0) {
+      console.log("Nenhum vídeo encontrado nos resultados da pesquisa");
+      return [];
+    }
+    
     const channelIds = searchData.items.map((item: any) => item.snippet.channelId);
+
+    console.log(`Processando ${videoIds.length} vídeos e ${channelIds.length} canais`);
 
     // Fetch additional data
     const videoStats = await fetchVideoStats(videoIds, params.apiKey);
@@ -77,15 +83,26 @@ export const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<Vid
  * Trata erros específicos da API do YouTube
  */
 const handleApiError = (errorData: any, response: Response) => {
-  console.error("Resposta de erro da API:", errorData);
+  console.error("Resposta de erro da API do YouTube:", errorData);
   
-  if (errorData.error?.errors?.some((e: any) => e.reason === "quotaExceeded")) {
-    throw new Error("Quota da API do YouTube excedida. Tente novamente mais tarde ou use uma chave de API diferente.");
+  // Verificar se há erros específicos
+  if (errorData.error?.errors) {
+    // Verificar quota excedida
+    if (errorData.error.errors.some((e: any) => e.reason === "quotaExceeded")) {
+      throw new Error("Quota da API do YouTube excedida. Tente novamente mais tarde ou use uma chave de API diferente.");
+    }
+    
+    // Verificar chave inválida
+    if (errorData.error.errors.some((e: any) => e.reason === "keyInvalid")) {
+      throw new Error("Chave de API inválida. Verifique se a chave foi digitada corretamente.");
+    }
+    
+    // Verificar API desabilitada
+    if (errorData.error.errors.some((e: any) => e.reason === "accessNotConfigured")) {
+      throw new Error("A API do YouTube não está habilitada para esta chave. Acesse o Google Cloud Console e ative a YouTube Data API v3.");
+    }
   }
   
-  if (errorData.error?.errors?.some((e: any) => e.reason === "keyInvalid")) {
-    throw new Error("Chave de API inválida. Verifique se a chave foi digitada corretamente.");
-  }
-  
+  // Erro genérico
   throw new Error(`Erro na API do YouTube: ${errorData.error?.message || response.statusText || response.status}`);
 };

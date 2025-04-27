@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -44,6 +45,7 @@ const ApiKeyDialog = () => {
       setWarning("");
       
       const validationResult = await validateApiKey(apiKey.trim());
+      console.log("Resultado da validação:", validationResult);
       
       if (!validationResult.valid) {
         setError(validationResult.message);
@@ -70,6 +72,48 @@ const ApiKeyDialog = () => {
     } catch (error) {
       console.error("Erro ao validar chave:", error);
       setError(error instanceof Error ? error.message : "Erro ao validar a chave de API");
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
+  // Função para tentar outra requisição para verificar se o erro de quota é real
+  const handleForceValidation = async () => {
+    try {
+      setIsValidating(true);
+      setError("");
+      setWarning("");
+      
+      // Fazer uma requisição diferente para testar a quota
+      const testUrl = `https://www.googleapis.com/youtube/v3/videos?part=id&chart=mostPopular&maxResults=1&key=${apiKey.trim()}`;
+      const testResponse = await fetch(testUrl);
+      
+      if (testResponse.ok) {
+        // Se esta requisição funcionar, a chave é válida e tem quota
+        if (rememberKey) {
+          localStorage.setItem("youtubeApiKey", apiKey.trim());
+        }
+        
+        setYoutubeApiKey(apiKey.trim());
+        setNeedsApiKey(false);
+        
+        toast({
+          title: "Chave API validada",
+          description: "Sua chave API do YouTube foi configurada com sucesso!",
+        });
+      } else {
+        const errorData = await testResponse.json();
+        console.log("Segunda validação retornou:", errorData);
+        
+        if (errorData.error?.code === 403 && errorData.error?.errors?.some((e: any) => e.reason === "quotaExceeded")) {
+          setWarning("Confirmado: Esta chave está com a quota diária excedida. Você pode usá-la mesmo assim ou tentar outra chave.");
+        } else {
+          setError(`Erro na validação: ${errorData.error?.message || testResponse.statusText}`);
+        }
+      }
+    } catch (error) {
+      console.error("Erro na validação alternativa:", error);
+      setError(error instanceof Error ? error.message : "Erro na validação");
     } finally {
       setIsValidating(false);
     }
@@ -172,14 +216,25 @@ const ApiKeyDialog = () => {
             </AlertDescription>
           </Alert>
         </div>
-        <DialogFooter>
+        <DialogFooter className="flex flex-col sm:flex-row gap-2">
           <Button 
             onClick={handleValidateAndSaveApiKey} 
             disabled={isValidating}
             className="w-full"
           >
-            {isValidating ? "Validando..." : "Salvar e Continuar"}
+            {isValidating ? "Validando..." : "Validar e Salvar"}
           </Button>
+          
+          {warning && warning.includes("quota") && (
+            <Button 
+              onClick={handleForceValidation}
+              disabled={isValidating}
+              variant="outline"
+              className="w-full"
+            >
+              Verificar novamente
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
