@@ -384,7 +384,7 @@ const TitleAnalyzer = () => {
                       >
                         <div className="flex items-center justify-between mb-2">
                           <h4 className="font-semibold">{titulo.titulo}</h4>
-                          <Badge variant={titulo.score_inovacao > 0.7 ? "success" : "secondary"}>
+                          <Badge variant={titulo.score_inovacao > 0.7 ? "secondary" : "outline"}>
                             Score: {(titulo.score_inovacao * 100).toFixed(0)}%
                           </Badge>
                         </div>
