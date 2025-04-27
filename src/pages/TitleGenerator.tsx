@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import Header from "@/components/Header";
 import { Card } from "@/components/ui/card";
@@ -339,7 +340,7 @@ const TitleGenerator = () => {
     });
   };
 
-  // Adding the missing handler functions
+  // Handler functions for the new tabs
   const handleExtrairTitulosVirais = async () => {
     if (!nicho) {
       toast({
@@ -871,3 +872,227 @@ const TitleGenerator = () => {
                   </div>
                   
                   <div>
+                    <Label htmlFor="formato-canal">Formato do Canal</Label>
+                    <Select 
+                      value={formatoCanal}
+                      onValueChange={setFormatoCanal}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o formato" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="vídeo">Vídeos</SelectItem>
+                        <SelectItem value="shorts">Shorts</SelectItem>
+                        <SelectItem value="livestream">Livestream</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="assunto-recorrencia">Assunto para Títulos</Label>
+                    <Input 
+                      id="assunto-recorrencia" 
+                      placeholder="Ex: lugares misteriosos, técnicas de programação"
+                      value={assuntoRecorrencia}
+                      onChange={(e) => setAssuntoRecorrencia(e.target.value)}
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <Label>Frequência de Publicação</Label>
+                    <Select 
+                      value={frequenciaPublicacao}
+                      onValueChange={setFrequenciaPublicacao}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione a frequência" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="diária">Diária</SelectItem>
+                        <SelectItem value="semanal">Semanal</SelectItem>
+                        <SelectItem value="quinzenal">Quinzenal</SelectItem>
+                        <SelectItem value="mensal">Mensal</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="periodo">Período do Ciclo: {periodoCiclo}</Label>
+                    <input
+                      type="range"
+                      id="periodo"
+                      min="2"
+                      max="12"
+                      step="1"
+                      className="w-full"
+                      value={periodoCiclo}
+                      onChange={(e) => setPeriodoCiclo(parseInt(e.target.value))}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-end space-x-2 pt-4">
+                    <Button 
+                      onClick={handleExtrairEstruturasRecorrencia}
+                      disabled={loadingRecorrencia || !nicho}
+                      variant="outline"
+                    >
+                      {loadingRecorrencia ? "Extraindo..." : "Extrair Estruturas"}
+                    </Button>
+                    
+                    <Button
+                      onClick={handleIdentificarGatilhos}
+                      disabled={estruturasRecorrencia.length === 0}
+                      variant="outline"
+                    >
+                      Identificar Gatilhos
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <div>
+                  {estruturasRecorrencia.length > 0 && (
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-medium">Estruturas Identificadas</h3>
+                      <div className="max-h-80 overflow-y-auto space-y-3 pr-2">
+                        {estruturasRecorrencia.map((estrutura, index) => (
+                          <div 
+                            key={`estrutura-${index}`}
+                            className="p-3 rounded-md bg-muted/50 border"
+                          >
+                            <div className="flex justify-between items-center mb-1">
+                              <h4 className="font-medium">{estrutura.estrutura_titulo}</h4>
+                              <Badge>{estrutura.frequencia}%</Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              Exemplos em: {estrutura.canais_exemplos.join(", ")}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <div>
+                  {gatilhosRecorrencia.length > 0 && (
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-medium">Gatilhos de Recorrência</h3>
+                      <div className="max-h-80 overflow-y-auto space-y-3 pr-2">
+                        {gatilhosRecorrencia.map((gatilho, index) => (
+                          <div 
+                            key={`gatilho-${index}`}
+                            className="p-3 rounded-md bg-muted/50 border"
+                          >
+                            <div className="flex justify-between items-center mb-1">
+                              <h4 className="font-medium">{gatilho.gatilho}</h4>
+                              <Badge variant={gatilho.peso > 0.7 ? "secondary" : "outline"}>
+                                Peso: {(gatilho.peso * 100).toFixed(0)}%
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              {gatilho.descricao}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      <div className="flex justify-end">
+                        <Button 
+                          onClick={handleGerarTitulosRecorrencia}
+                          disabled={gatilhosRecorrencia.length === 0 || !assuntoRecorrencia}
+                        >
+                          Gerar Títulos com Recorrência
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {titulosRecorrencia.length > 0 && (
+                <div className="mt-6 p-4 rounded-md bg-muted/30 border">
+                  <div className="flex justify-between items-center mb-3">
+                    <h3 className="text-lg font-medium">Títulos com Elementos de Recorrência</h3>
+                    <Button 
+                      onClick={handlePlanejarCiclo} 
+                      size="sm"
+                      disabled={titulosRecorrencia.length === 0}
+                    >
+                      Planejar Ciclo de Publicação
+                    </Button>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    {titulosRecorrencia.map((titulo, index) => (
+                      <div 
+                        key={`recorrencia-${index}`}
+                        className="p-3 rounded-md bg-card hover:bg-muted/80 transition-colors flex justify-between items-center"
+                      >
+                        <span>{titulo}</span>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => {
+                            navigator.clipboard.writeText(titulo);
+                            toast({
+                              title: "Copiado!",
+                              description: "Título copiado para área de transferência."
+                            });
+                          }}
+                        >
+                          Copiar
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="schedule" className="space-y-4">
+              {cronogramaPublicacao.length > 0 ? (
+                <div>
+                  <h3 className="text-xl font-bold mb-4">Cronograma de Publicação</h3>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Título</TableHead>
+                        <TableHead>Data Sugerida</TableHead>
+                        <TableHead>Dia da Semana</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {cronogramaPublicacao.map((item, index) => (
+                        <TableRow key={`cronograma-${index}`}>
+                          <TableCell className="font-medium">{item.titulo}</TableCell>
+                          <TableCell>{new Date(item.data_publicacao).toLocaleDateString()}</TableCell>
+                          <TableCell>
+                            {new Date(item.data_publicacao).toLocaleDateString('pt-BR', {weekday: 'long'})}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <div className="text-center py-10">
+                  <h3 className="text-lg font-medium mb-2">Nenhum cronograma gerado</h3>
+                  <p className="text-muted-foreground">
+                    Gere títulos com recorrência na aba anterior e depois planeje o ciclo 
+                    de publicação para criar um cronograma.
+                  </p>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+export default TitleGenerator;
