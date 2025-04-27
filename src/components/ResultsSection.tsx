@@ -8,7 +8,6 @@ import { Card } from "@/components/ui/card";
 import ResultsTable from "@/components/ResultsTable";
 import RemodelingIdeas from "@/components/RemodelingIdeas";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import ZapierIntegration from "@/components/ZapierIntegration";
 
 interface ResultsSectionProps {
   results: VideoResult[];
@@ -33,7 +32,6 @@ const ResultsSection = ({ results, selectedVideo, onSelectVideo, searchParams }:
         <TabsList>
           <TabsTrigger value="resultados">Tabela de Resultados</TabsTrigger>
           <TabsTrigger value="remodelagem">Sugestões de Remodelagem</TabsTrigger>
-          <TabsTrigger value="alertas">Alertas e Notificações</TabsTrigger>
         </TabsList>
         
         <TabsContent value="resultados" className="mt-4">
@@ -75,10 +73,6 @@ const ResultsSection = ({ results, selectedVideo, onSelectVideo, searchParams }:
               <p>Selecione um vídeo para ver sugestões de remodelagem.</p>
             </div>
           )}
-        </TabsContent>
-        
-        <TabsContent value="alertas" className="mt-4">
-          <ZapierIntegration currentSearch={searchParams} />
         </TabsContent>
       </Tabs>
     </>
