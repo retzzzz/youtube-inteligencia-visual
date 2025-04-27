@@ -1,9 +1,10 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut } from 'lucide-react';
+import { LogOut, Zap, Youtube } from 'lucide-react';
 
 const Header = () => {
   const location = useLocation();
@@ -11,33 +12,40 @@ const Header = () => {
   
   return (
     <header className="flex flex-col mb-16 relative">
-      <div className="mb-4">
-        <h1 className="text-3xl font-bold tracking-tight">
-          <Link to="/">
-            YT<span className="text-primary">Optimizer</span>
-          </Link>
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          Ferramenta de pesquisa e análise de YouTube
-        </p>
-        
-        <div className="flex items-center justify-end space-x-4 mt-2">
-          <span className="text-muted-foreground text-sm">
-            Bem vindo, {user?.name || 'Usuário'}
-          </span>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={logout}
-            className="flex items-center gap-2"
-          >
-            <LogOut className="h-4 w-4" />
-            Sair
-          </Button>
+      <div className="p-4 rounded-xl glass-effect mb-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold tracking-tight flex items-center">
+            <Link to="/" className="flex items-center gap-2">
+              <div className="p-2 bg-gradient-to-br from-red-600 to-red-400 rounded-lg shadow-lg">
+                <Youtube className="h-6 w-6 text-white" />
+              </div>
+              YT<span className="text-primary">Optimizer</span>
+            </Link>
+          </h1>
+          
+          <div className="flex items-center gap-3">
+            <span className="text-muted-foreground text-sm hidden md:inline">
+              Bem vindo, {user?.name || 'Usuário'}
+            </span>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={logout}
+              className="flex items-center gap-2 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300"
+            >
+              <LogOut className="h-4 w-4" />
+              Sair
+            </Button>
+          </div>
         </div>
+        
+        <p className="text-muted-foreground mt-2 flex items-center gap-2 justify-center">
+          <Zap className="h-4 w-4 text-yellow-400" />
+          Ferramenta avançada de pesquisa e análise de YouTube
+        </p>
       </div>
       
-      <nav className="flex gap-3 flex-wrap">
+      <nav className="flex gap-3 flex-wrap p-2 rounded-xl bg-muted/30 backdrop-blur-sm">
         <NavLink to="/" currentPath={location.pathname}>
           Início
         </NavLink>
@@ -75,8 +83,10 @@ const NavLink = ({ to, currentPath, children }: NavLinkProps) => {
       asChild
       variant={isActive ? "default" : "outline"}
       className={cn(
-        "transition-all",
-        isActive ? "shadow-md" : "hover:bg-muted"
+        "transition-all duration-300",
+        isActive 
+          ? "shadow-lg bg-gradient-to-r from-primary to-primary/80 text-white" 
+          : "hover:bg-muted backdrop-blur-sm bg-white/50 dark:bg-black/20"
       )}
     >
       <Link to={to}>{children}</Link>

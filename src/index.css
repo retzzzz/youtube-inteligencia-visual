@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -32,7 +33,7 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 0 80% 50%; /* YouTube red */
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -47,6 +48,11 @@
     --explosive: 0 90% 60%;
     --emerging: 142 70% 45%;
     --latent: 217 91% 60%;
+    
+    /* Glass effect */
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.5);
+    --glass-shadow: rgba(0, 0, 0, 0.1);
   }
 
   .dark {
@@ -91,15 +97,8 @@
     --explosive: 0 90% 65%;
     --emerging: 142 76% 45%;
     --latent: 217 91% 65%;
-  }
-
-  :root {
-    --glass-bg: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.5);
-    --glass-shadow: rgba(0, 0, 0, 0.1);
-  }
-
-  .dark {
+    
+    /* Glass effect */
     --glass-bg: rgba(23, 23, 23, 0.7);
     --glass-border: rgba(255, 255, 255, 0.1);
     --glass-shadow: rgba(0, 0, 0, 0.2);
@@ -112,7 +111,28 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground bg-gradient-to-br from-background via-background to-muted/30;
+    background-attachment: fixed;
+  }
+  
+  /* Scrollbar estilizada */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+    border-radius: 5px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary) / 0.6);
+    border-radius: 5px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.8);
   }
 }
 
@@ -120,14 +140,14 @@
   .dashboard-card {
     @apply bg-card rounded-xl border border-border/50 shadow-lg 
            backdrop-blur-sm transition-all duration-300 ease-in-out
-           hover:shadow-xl hover:border-border/80;
+           hover:shadow-xl hover:border-border/80 hover:translate-y-[-5px];
   }
   
   .glass-panel {
     @apply bg-[var(--glass-bg)] backdrop-blur-md 
            border border-[var(--glass-border)]
            shadow-[0_8px_32px_0_var(--glass-shadow)]
-           rounded-xl;
+           rounded-xl transition-all duration-300 hover:shadow-lg;
   }
 
   .data-table {
@@ -148,7 +168,7 @@
   
   .stat-value {
     @apply text-2xl font-bold bg-clip-text text-transparent 
-           bg-gradient-to-r from-primary to-primary/80;
+           bg-gradient-to-r from-primary to-amber-500;
   }
   
   .stat-label {
@@ -184,5 +204,54 @@
   
   .animate-fade-in {
     animation: fade-in 0.3s ease-out forwards;
+  }
+  
+  /* Efeitos 3D */
+  .card-3d-effect {
+    @apply transition-all duration-500 hover:shadow-xl;
+    transform-style: preserve-3d;
+    perspective: 1000px;
+  }
+  
+  .card-3d-effect:hover {
+    transform: rotateX(5deg) rotateY(5deg) scale(1.02);
+  }
+  
+  /* Bordas brilhantes */
+  .glowing-border {
+    position: relative;
+  }
+  
+  .glowing-border::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: inherit;
+    background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+    background-size: 400%;
+    z-index: -1;
+    filter: blur(5px);
+    animation: glowing 20s linear infinite;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+  }
+  
+  .glowing-border:hover::before {
+    opacity: 1;
+  }
+  
+  @keyframes glowing {
+    0% {
+      background-position: 0 0;
+    }
+    50% {
+      background-position: 400% 0;
+    }
+    100% {
+      background-position: 0 0;
+    }
   }
 }
