@@ -339,6 +339,135 @@ const TitleGenerator = () => {
     });
   };
 
+  // Adding the missing handler functions
+  const handleExtrairTitulosVirais = async () => {
+    if (!nicho) {
+      toast({
+        title: "Nicho necessário",
+        description: "Por favor, informe o nicho para análise.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoadingVirais(true);
+
+    try {
+      let titulos;
+      if (youtubeApiKey) {
+        titulos = await extrairTitulosVirais(
+          nicho,
+          subnicho,
+          idiomasDestino[0] || "português",
+          minViews,
+          maxVideos,
+          youtubeApiKey
+        );
+      } else {
+        titulos = simularExtrairTitulosVirais(
+          nicho, 
+          subnicho, 
+          idiomasDestino[0] || "português",
+          minViews,
+          maxVideos
+        );
+      }
+      
+      setTitulosVirais(titulos);
+      
+      toast({
+        title: "Títulos virais extraídos",
+        description: `Foram encontrados ${titulos.length} títulos virais.`,
+      });
+      
+    } catch (error) {
+      console.error("Erro ao extrair títulos virais:", error);
+      toast({
+        title: "Erro na extração",
+        description: "Não foi possível extrair os títulos virais.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingVirais(false);
+    }
+  };
+
+  const handleIdentificarPadroes = () => {
+    if (titulosVirais.length === 0) {
+      toast({
+        title: "Sem títulos para analisar",
+        description: "Extraia títulos virais primeiro.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const padroes = identificarPadroesTitulos(titulosVirais);
+    setPadroesTitulos(padroes);
+    
+    toast({
+      title: "Padrões identificados",
+      description: `Foram identificados ${padroes.length} padrões em títulos virais.`,
+    });
+  };
+
+  const handleGerarTitulosVirais = () => {
+    if (padroesTitulos.length === 0) {
+      toast({
+        title: "Sem padrões para basear",
+        description: "Identifique padrões de títulos primeiro.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!termosChave) {
+      toast({
+        title: "Termos-chave necessários",
+        description: "Por favor, informe os termos-chave para os títulos.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const termos = termosChave.split(',').map(termo => termo.trim());
+    const titulos = gerarTitulosVirais(padroesTitulos, termos, 10);
+    setTitulosGerados(titulos);
+    
+    toast({
+      title: "Títulos virais gerados",
+      description: `Foram gerados ${titulos.length} títulos virais.`,
+    });
+  };
+
+  const handleGerarMultilingues = () => {
+    if (titulosGerados.length === 0) {
+      toast({
+        title: "Sem títulos para adaptar",
+        description: "Gere títulos virais primeiro.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (idiomasDestino.length === 0) {
+      toast({
+        title: "Selecione idiomas",
+        description: "Por favor, selecione pelo menos um idioma de destino.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const titulos = gerarTitulosMultilingues(titulosGerados, idiomasDestino);
+    setTitulosMultilingues(titulos);
+    
+    toast({
+      title: "Títulos multilíngues gerados",
+      description: `Foram gerados ${titulos.length} títulos em diferentes idiomas.`,
+    });
+  };
+
   return (
     <div className="container mx-auto px-4 py-6 max-w-[1400px]">
       <Header />
@@ -742,265 +871,3 @@ const TitleGenerator = () => {
                   </div>
                   
                   <div>
-                    <Label htmlFor="formato-canal">Formato do Canal</Label>
-                    <select 
-                      id="formato-canal"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                      value={formatoCanal}
-                      onChange={(e) => setFormatoCanal(e.target.value)}
-                    >
-                      <option value="vídeo">Vídeo</option>
-                      <option value="vlog">Vlog</option>
-                      <option value="gameplay">Gameplay</option>
-                      <option value="tutorial">Tutorial</option>
-                      <option value="documentário">Documentário</option>
-                      <option value="podcast">Podcast</option>
-                    </select>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="idioma-recorrencia">Idioma Principal</Label>
-                    <LanguageSelector 
-                      value={idiomasDestino[0] || "português"}
-                      onChange={(value) => setIdiomasDestino([value, ...idiomasDestino.slice(1)])}
-                    />
-                  </div>
-                  
-                  <div className="flex justify-end items-end h-full">
-                    <Button 
-                      onClick={handleExtrairEstruturasRecorrencia}
-                      disabled={loadingRecorrencia}
-                    >
-                      {loadingRecorrencia ? "Extraindo..." : "Extrair Estruturas de Recorrência"}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-              
-              {estruturasRecorrencia.length > 0 && (
-                <div className="mt-6">
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-lg font-medium">Estruturas de Recorrência Identificadas</h3>
-                    <Button 
-                      onClick={handleIdentificarGatilhos}
-                      size="sm"
-                    >
-                      Identificar Gatilhos
-                    </Button>
-                  </div>
-                  
-                  <div className="mt-2 space-y-4">
-                    {estruturasRecorrencia.slice(0, 5).map((estrutura, index) => (
-                      <div 
-                        key={`estrutura-${index}`}
-                        className="p-4 rounded-md bg-muted/50 hover:bg-muted/80 transition-colors border"
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-semibold">{estrutura.estrutura_titulo}</h4>
-                          <Badge variant="secondary">
-                            {estrutura.frequencia}%
-                          </Badge>
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          <span>Exemplos: {estrutura.canais_exemplos.join(", ")}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {gatilhosRecorrencia.length > 0 && (
-                <div className="mt-6">
-                  <h3 className="text-lg font-medium mb-2">Gatilhos de Recorrência</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {gatilhosRecorrencia.slice(0, 6).map((gatilho, index) => (
-                      <div 
-                        key={`gatilho-${index}`}
-                        className="p-4 rounded-md bg-muted/50 hover:bg-muted/80 transition-colors border"
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-semibold">{gatilho.gatilho}</h4>
-                          <Badge variant={gatilho.peso > 0.8 ? "secondary" : "outline"}>
-                            Peso: {(gatilho.peso * 100).toFixed(0)}%
-                          </Badge>
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          <span>{gatilho.descricao}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="assunto-recorrencia">Assunto Principal</Label>
-                        <Input 
-                          id="assunto-recorrencia" 
-                          placeholder="Ex: lugares misteriosos, dicas de economia"
-                          value={assuntoRecorrencia}
-                          onChange={(e) => setAssuntoRecorrencia(e.target.value)}
-                        />
-                      </div>
-                      
-                      <div className="flex justify-end">
-                        <Button 
-                          onClick={handleGerarTitulosRecorrencia}
-                          disabled={!assuntoRecorrencia || gatilhosRecorrencia.length === 0}
-                        >
-                          Gerar Títulos de Recorrência
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              {titulosRecorrencia.length > 0 && (
-                <div className="mt-6">
-                  <h3 className="text-lg font-medium mb-2">Títulos com Elementos de Recorrência</h3>
-                  <div className="space-y-2">
-                    {titulosRecorrencia.map((titulo, index) => (
-                      <div 
-                        key={`recorrencia-${index}`}
-                        className="p-3 rounded-md bg-muted/50 hover:bg-muted/80 transition-colors flex justify-between items-center group"
-                      >
-                        <span>{titulo}</span>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          className="opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={() => {
-                            navigator.clipboard.writeText(titulo);
-                            toast({
-                              title: "Copiado!",
-                              description: "Título copiado para área de transferência."
-                            });
-                          }}
-                        >
-                          Copiar
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </TabsContent>
-            
-            <TabsContent value="schedule" className="space-y-4">
-              <Alert>
-                <Info className="h-4 w-4" />
-                <AlertTitle>Cronograma de Publicação</AlertTitle>
-                <AlertDescription>
-                  Planeja um ciclo de publicação para seus títulos de série, maximizando a recorrência de audiência.
-                  Defina a frequência ideal e veja o cronograma recomendado.
-                </AlertDescription>
-              </Alert>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="frequencia-publicacao">Frequência de Publicação</Label>
-                    <select 
-                      id="frequencia-publicacao"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                      value={frequenciaPublicacao}
-                      onChange={(e) => setFrequenciaPublicacao(e.target.value)}
-                    >
-                      <option value="diária">Diária</option>
-                      <option value="semanal">Semanal</option>
-                      <option value="quinzenal">Quinzenal</option>
-                      <option value="mensal">Mensal</option>
-                    </select>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="periodo-ciclo">Período do Ciclo: {periodoCiclo} publicações</Label>
-                    <input
-                      type="range"
-                      id="periodo-ciclo"
-                      min="3"
-                      max="12"
-                      step="1"
-                      className="w-full"
-                      value={periodoCiclo}
-                      onChange={(e) => setPeriodoCiclo(parseInt(e.target.value))}
-                    />
-                  </div>
-                  
-                  <div className="flex justify-end">
-                    <Button 
-                      onClick={handlePlanejarCiclo}
-                      disabled={titulosRecorrencia.length === 0}
-                    >
-                      Gerar Cronograma
-                    </Button>
-                  </div>
-                </div>
-              </div>
-              
-              {cronogramaPublicacao.length > 0 && (
-                <div className="mt-6">
-                  <h3 className="text-lg font-medium mb-2">Cronograma de Publicação</h3>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>#</TableHead>
-                        <TableHead>Título</TableHead>
-                        <TableHead>Data Recomendada</TableHead>
-                        <TableHead>Dia da Semana</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {cronogramaPublicacao.map((item, index) => {
-                        const data = new Date(item.data_publicacao);
-                        const diasSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-                        const diaSemana = diasSemana[data.getDay()];
-                        
-                        return (
-                          <TableRow key={`cronograma-${index}`}>
-                            <TableCell>{index + 1}</TableCell>
-                            <TableCell className="font-medium">{item.titulo}</TableCell>
-                            <TableCell>{data.toLocaleDateString()}</TableCell>
-                            <TableCell>{diaSemana}</TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                  
-                  <div className="mt-4 flex justify-end">
-                    <Button 
-                      variant="outline"
-                      onClick={() => {
-                        const textoCalendario = cronogramaPublicacao.map((item, index) => {
-                          const data = new Date(item.data_publicacao);
-                          return `${index + 1}. ${item.titulo} - ${data.toLocaleDateString()}`;
-                        }).join('\n');
-                        
-                        navigator.clipboard.writeText(textoCalendario);
-                        toast({
-                          title: "Cronograma copiado!",
-                          description: "Cronograma copiado para área de transferência."
-                        });
-                      }}
-                    >
-                      Copiar Cronograma
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
-        </Card>
-      </div>
-    </div>
-  );
-};
-
-export default TitleGenerator;
