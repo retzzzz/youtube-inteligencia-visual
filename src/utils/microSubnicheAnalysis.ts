@@ -1,4 +1,3 @@
-
 import { YoutubeSearchParams, VideoResult } from "@/types/youtube-types";
 
 export interface MicroSubnicho {
@@ -230,7 +229,7 @@ export const planejarCicloMicroSubnicho = (
     dataPublicacao.setHours(18, 0, 0, 0);
     
     cronograma.push({
-      microsubnicho,
+      microsubnicho: microSubnicho,
       titulo_sugerido: titulosGerados[0],
       data_publicacao: dataPublicacao.toISOString()
     });
