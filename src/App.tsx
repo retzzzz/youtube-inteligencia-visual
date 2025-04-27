@@ -7,6 +7,7 @@ import VideoAnalyzer from './pages/VideoAnalyzer';
 import TitleGenerator from './pages/TitleGenerator';
 import ScriptGenerator from './pages/ScriptGenerator';
 import SubnicheValidator from './pages/SubnicheValidator';
+import MicroSubnicheAnalyzer from './pages/MicroSubnicheAnalyzer';
 import FAQ from './pages/FAQ';
 import { AuthProvider } from './contexts/AuthContext';
 import { Toaster } from './components/ui/toaster';
@@ -25,6 +26,7 @@ function App() {
             <Route path="/title-generator" element={<TitleGenerator />} />
             <Route path="/script-generator" element={<ScriptGenerator />} />
             <Route path="/subnicho-validator" element={<SubnicheValidator />} />
+            <Route path="/micro-subnicho-analyzer" element={<MicroSubnicheAnalyzer />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

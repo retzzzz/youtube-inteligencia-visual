@@ -17,6 +17,12 @@ const Footer = () => {
             >
               FAQ
             </Link>
+            <Link 
+              to="/micro-subnicho-analyzer" 
+              className="text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
+              Micro-Subnichos
+            </Link>
           </nav>
         </div>
       </div>
