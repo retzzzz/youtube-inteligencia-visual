@@ -1,4 +1,3 @@
-
 import { analyzeSaturation } from "@/utils/formatters";
 
 /**
@@ -47,25 +46,85 @@ export interface CriteriosValidacao {
  * @param nicho_principal O nicho principal a ser analisado
  * @param idioma O idioma dos canais a serem analisados
  * @param max_canais Número máximo de canais a serem analisados
+ * @param apiKey Chave de API para acessar a API do YouTube
  * @returns Lista de subnichos identificados com os canais de exemplo
  */
 export const extrairSubnichos = async (
   nicho_principal: string,
   idioma: string,
-  max_canais: number
+  max_canais: number,
+  apiKey: string
 ): Promise<Subnicho[]> => {
   try {
-    // Simulação de dados - em uma implementação real, isso viria da API do YouTube
-    // Aqui estamos simulando a busca no YouTube e a coleta de dados
-    const canaisSimulados: Canal[] = gerarCanaisSimulados(nicho_principal, idioma, max_canais);
+    // Buscar canais usando a API do YouTube
+    const searchQuery = `${nicho_principal} ${idioma}`;
+    const searchResponse = await fetch(
+      `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(searchQuery)}&type=channel&maxResults=${max_canais}&key=${apiKey}`
+    );
     
-    // Extração de palavras-chave dos títulos para identificar subnichos recorrentes
-    const subnichos = extrairPalavrasChave(canaisSimulados);
+    if (!searchResponse.ok) {
+      throw new Error('Falha ao buscar canais');
+    }
     
-    return subnichos;
+    const searchData = await searchResponse.json();
+    const channelIds = searchData.items.map((item: any) => item.snippet.channelId);
+    
+    // Buscar detalhes dos canais
+    const channelsResponse = await fetch(
+      `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,contentDetails&id=${channelIds.join(',')}&key=${apiKey}`
+    );
+    
+    if (!channelsResponse.ok) {
+      throw new Error('Falha ao buscar detalhes dos canais');
+    }
+    
+    const channelsData = await channelsResponse.json();
+    
+    // Processar dados dos canais
+    const canais: Canal[] = await Promise.all(
+      channelsData.items.map(async (channel: any) => {
+        // Buscar vídeos recentes do canal
+        const videosResponse = await fetch(
+          `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channel.id}&order=date&type=video&maxResults=10&key=${apiKey}`
+        );
+        
+        if (!videosResponse.ok) {
+          throw new Error('Falha ao buscar vídeos do canal');
+        }
+        
+        const videosData = await videosResponse.json();
+        
+        return {
+          nome_do_canal: channel.snippet.title,
+          data_de_criacao: channel.snippet.publishedAt,
+          total_videos: parseInt(channel.statistics.videoCount),
+          total_inscritos: parseInt(channel.statistics.subscriberCount),
+          titulos_recentes: videosData.items.map((video: any) => video.snippet.title)
+        };
+      })
+    );
+    
+    // Agrupar canais por subnichos usando os títulos dos vídeos
+    const subnichoMap = new Map<string, Canal[]>();
+    
+    canais.forEach(canal => {
+      const palavrasChave = extrairPalavrasChave(canal.titulos_recentes);
+      palavrasChave.forEach(subnicho => {
+        if (!subnichoMap.has(subnicho)) {
+          subnichoMap.set(subnicho, []);
+        }
+        subnichoMap.get(subnicho)?.push(canal);
+      });
+    });
+    
+    return Array.from(subnichoMap.entries()).map(([subnicho, canais]) => ({
+      subnicho,
+      canais_exemplos: canais
+    }));
+    
   } catch (error) {
     console.error("Erro ao extrair subnichos:", error);
-    throw new Error(`Falha ao extrair subnichos: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+    throw error;
   }
 };
 
@@ -166,38 +225,22 @@ function obterSubnichosPorNicho(nicho_principal: string): string[] {
 /**
  * Simula a extração de palavras-chave para identificar subnichos
  */
-function extrairPalavrasChave(canais: Canal[]): Subnicho[] {
-  // Agrupar canais por possíveis subnichos usando os títulos dos vídeos
-  const subnichoMap: Map<string, Canal[]> = new Map();
+function extrairPalavrasChave(titulos: string[]): string[] {
+  // Implementação básica - em produção, usar uma biblioteca de NLP
+  const palavras = titulos.join(' ').toLowerCase().split(' ');
+  const stopwords = ['o', 'a', 'os', 'as', 'um', 'uma', 'e', 'de', 'do', 'da', 'dos', 'das'];
+  const frequencia = new Map<string, number>();
   
-  canais.forEach(canal => {
-    // Simulação: usamos o primeiro título como identificador de subnicho
-    // Em um cenário real, usaríamos um algoritmo de extração de palavras-chave
-    const primeiroTitulo = canal.titulos_recentes[0] || '';
-    const palavras = primeiroTitulo.split(' ');
-    
-    // Consideramos a terceira palavra como o subnicho (simplificação)
-    // Em uma implementação real, isso seria muito mais sofisticado
-    const subnicho = palavras.length > 2 ? palavras[2] : 'geral';
-    
-    if (!subnichoMap.has(subnicho)) {
-      subnichoMap.set(subnicho, []);
-    }
-    
-    subnichoMap.get(subnicho)?.push(canal);
-  });
-  
-  // Converter o mapa para a lista de objetos Subnicho
-  const resultado: Subnicho[] = [];
-  
-  subnichoMap.forEach((canaisDoSubnicho, nomeSubnicho) => {
-    resultado.push({
-      subnicho: nomeSubnicho,
-      canais_exemplos: canaisDoSubnicho
+  palavras
+    .filter(palavra => !stopwords.includes(palavra) && palavra.length > 3)
+    .forEach(palavra => {
+      frequencia.set(palavra, (frequencia.get(palavra) || 0) + 1);
     });
-  });
   
-  return resultado;
+  return Array.from(frequencia.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([palavra]) => palavra);
 }
 
 /**

@@ -6,18 +6,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import SubnicheValidationResults from '@/components/SubnicheValidationResults';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   extrairSubnichos,
   calcularMetricasSubnicho,
   validarSubnicho,
-  priorizarSubniches,
-  Subnicho,
-  MetricasSubnicho,
-  SubnichoValidado,
-  SubnichoPriorizado,
-  CriteriosValidacao
+  priorizarSubniches
 } from '@/utils/subnicheValidation';
 
 const SubnicheValidator = () => {
@@ -25,14 +22,14 @@ const SubnicheValidator = () => {
   const [idioma, setIdioma] = useState<string>('português');
   const [maxCanais, setMaxCanais] = useState<number>(20);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [subnichesPriorizados, setSubnichesPriorizados] = useState<SubnichoPriorizado[]>([]);
+  const [subnichesPriorizados, setSubnichesPriorizados] = useState([]);
   
-  // Critérios de validação
   const [minTaxaCrescimento, setMinTaxaCrescimento] = useState<number>(10);
   const [minMediaVisualizacoes, setMinMediaVisualizacoes] = useState<number>(5000);
-  const [maxIdadeMediaCanais, setMaxIdadeMediaCanais] = useState<number>(12);
+  const [maxIdadeMediaCanais, setMaxIdadeMediaCanais] = useState<number>(30); // Padrão: 30 dias
   
   const { toast } = useToast();
+  const { youtubeApiKey } = useAuth();
 
   const handleValidateSubniches = async () => {
     if (!nicho) {
@@ -44,11 +41,19 @@ const SubnicheValidator = () => {
       return;
     }
 
+    if (!youtubeApiKey) {
+      toast({
+        title: "API Key necessária",
+        description: "Configure sua chave da API do YouTube nas configurações.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     
     try {
-      // Etapa 1: Extrair subnichos
-      const subnichos: Subnicho[] = await extrairSubnichos(nicho, idioma, maxCanais);
+      const subnichos = await extrairSubnichos(nicho, idioma, maxCanais, youtubeApiKey);
       
       if (subnichos.length === 0) {
         toast({
@@ -60,20 +65,16 @@ const SubnicheValidator = () => {
         return;
       }
       
-      // Etapa 2: Calcular métricas
-      const metricas: MetricasSubnicho[] = calcularMetricasSubnicho(subnichos);
+      const metricas = calcularMetricasSubnicho(subnichos);
       
-      // Etapa 3: Validar subnichos
-      const criterios: CriteriosValidacao = {
+      const criterios = {
         min_taxa_crescimento: minTaxaCrescimento,
         min_media_visualizacoes: minMediaVisualizacoes,
         max_idade_media_canais: maxIdadeMediaCanais
       };
       
-      const subnichos_validados: SubnichoValidado[] = validarSubnicho(metricas, criterios);
-      
-      // Etapa 4: Priorizar subnichos
-      const priorizados: SubnichoPriorizado[] = priorizarSubniches(subnichos_validados);
+      const subnichos_validados = validarSubnicho(metricas, criterios);
+      const priorizados = priorizarSubniches(subnichos_validados);
       
       setSubnichesPriorizados(priorizados);
       
@@ -92,6 +93,16 @@ const SubnicheValidator = () => {
       setIsLoading(false);
     }
   };
+
+  const idadeOptions = [
+    { value: "7", label: "7 dias" },
+    { value: "14", label: "14 dias" },
+    { value: "30", label: "30 dias" },
+    { value: "60", label: "60 dias" },
+    { value: "90", label: "90 dias" },
+    { value: "180", label: "180 dias" },
+    { value: "365", label: "1 ano" }
+  ];
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-[1400px]">
@@ -174,17 +185,22 @@ const SubnicheValidator = () => {
                 </div>
                 
                 <div className="space-y-3">
-                  <Label htmlFor="maxIdade">
-                    Idade máxima (meses): {maxIdadeMediaCanais}
-                  </Label>
-                  <Slider
-                    id="maxIdade"
-                    value={[maxIdadeMediaCanais]}
-                    min={3}
-                    max={36}
-                    step={1}
-                    onValueChange={(value) => setMaxIdadeMediaCanais(value[0])}
-                  />
+                  <Label htmlFor="maxIdade">Idade máxima dos canais</Label>
+                  <Select 
+                    value={maxIdadeMediaCanais.toString()} 
+                    onValueChange={(value) => setMaxIdadeMediaCanais(Number(value))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione a idade máxima" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {idadeOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>

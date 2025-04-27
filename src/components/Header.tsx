@@ -51,6 +51,9 @@ const Header = () => {
         <NavLink to="/script-generator" currentPath={location.pathname}>
           Roteirizador Automático
         </NavLink>
+        <NavLink to="/subnicho-validator" currentPath={location.pathname}>
+          Validador de Subnichos
+        </NavLink>
       </nav>
     </header>
   );
