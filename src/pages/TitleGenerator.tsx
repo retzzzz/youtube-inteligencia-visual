@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import Header from "@/components/Header";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
@@ -36,6 +37,55 @@ export interface TitleVariation {
     language: "pt" | "es" | "en" | "fr";
   }[];
 }
+
+// Add the missing generateTitleVariations function
+const generateTitleVariations = (
+  keyword: string,
+  language: string = "auto", 
+  emotion: string = "mix", 
+  count: number = 15
+): TitleVariation[] => {
+  // Get base variations from the utility function
+  const baseVariations = gerarVariacoesTitulo(keyword, count);
+  
+  // Map them to our TitleVariation interface format
+  const titleVariations: TitleVariation[] = baseVariations.map((text, index) => {
+    // Determine type based on emotion parameter or cycle through types
+    let type: "dor" | "esperanca" | "curiosidade";
+    if (emotion === "mix") {
+      // Cycle through the emotion types
+      const types: ("dor" | "esperanca" | "curiosidade")[] = ["dor", "esperanca", "curiosidade"];
+      type = types[index % types.length];
+    } else if (["dor", "esperanca", "curiosidade"].includes(emotion)) {
+      type = emotion as "dor" | "esperanca" | "curiosidade";
+    } else {
+      // Default to curiosidade if invalid emotion type
+      type = "curiosidade";
+    }
+    
+    // Determine saturation level
+    const saturations: ("low" | "medium" | "high")[] = ["low", "medium", "high"];
+    const saturation = saturations[Math.floor(Math.random() * saturations.length)];
+    
+    // Determine language based on parameter
+    let titleLanguage: "pt" | "es" | "en" | "fr" = "pt";
+    if (language === "auto") {
+      const languages: ("pt" | "es" | "en" | "fr")[] = ["pt", "es", "en", "fr"];
+      titleLanguage = languages[Math.floor(Math.random() * languages.length)];
+    } else if (["pt", "es", "en", "fr"].includes(language)) {
+      titleLanguage = language as "pt" | "es" | "en" | "fr";
+    }
+    
+    return {
+      text,
+      type,
+      saturation,
+      language: titleLanguage
+    };
+  });
+  
+  return titleVariations;
+};
 
 const TitleGenerator = () => {
   // Estados compartilhados
