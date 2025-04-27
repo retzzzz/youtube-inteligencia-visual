@@ -3,7 +3,7 @@ import React from 'react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
-import { SubnichoPriorizado } from '@/utils/subnicheValidation';
+import { SubnichoPriorizado } from '@/utils/subnicho-analysis';
 import { Button } from './ui/button';
 import { useToast } from './ui/use-toast';
 

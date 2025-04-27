@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Header from '@/components/Header';
 import { Card } from '@/components/ui/card';
@@ -18,7 +17,7 @@ import {
   validarSubnicho,
   priorizarSubniches,
   CriteriosValidacao
-} from '@/utils/subnicheValidation';
+} from '@/utils/subnicho-analysis';
 
 const SubnicheValidator = () => {
   const [nicho, setNicho] = useState<string>('');
