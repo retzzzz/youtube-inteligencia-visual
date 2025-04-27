@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Header from "@/components/Header";
 import { Card } from "@/components/ui/card";
@@ -31,6 +30,15 @@ import {
   subnichearTitulos,
   TitleVariations as TitleVariationsType
 } from '@/utils/titleGeneration';
+import {
+  extrairEstruturasRecorrencia,
+  identificarGatilhosRecorrencia,
+  gerarTitulosRecorrencia,
+  planejarCicloRecorrencia,
+  RecurrenceStructure,
+  RecurrenceTrigger,
+  PublicationSchedule
+} from '@/utils/titleRecurrence';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -48,36 +56,28 @@ export interface TitleVariation {
   }[];
 }
 
-// Add the missing generateTitleVariations function
 const generateTitleVariations = (
   keyword: string,
   language: string = "auto", 
   emotion: string = "mix", 
   count: number = 15
 ): TitleVariation[] => {
-  // Get base variations from the utility function
   const baseVariations = gerarVariacoesTitulo(keyword, count);
   
-  // Map them to our TitleVariation interface format
   const titleVariations: TitleVariation[] = baseVariations.map((text, index) => {
-    // Determine type based on emotion parameter or cycle through types
     let type: "dor" | "esperanca" | "curiosidade";
     if (emotion === "mix") {
-      // Cycle through the emotion types
       const types: ("dor" | "esperanca" | "curiosidade")[] = ["dor", "esperanca", "curiosidade"];
       type = types[index % types.length];
     } else if (["dor", "esperanca", "curiosidade"].includes(emotion)) {
       type = emotion as "dor" | "esperanca" | "curiosidade";
     } else {
-      // Default to curiosidade if invalid emotion type
       type = "curiosidade";
     }
     
-    // Determine saturation level
     const saturations: ("low" | "medium" | "high")[] = ["low", "medium", "high"];
     const saturation = saturations[Math.floor(Math.random() * saturations.length)];
     
-    // Determine language based on parameter
     let titleLanguage: "pt" | "es" | "en" | "fr" = "pt";
     if (language === "auto") {
       const languages: ("pt" | "es" | "en" | "fr")[] = ["pt", "es", "en", "fr"];
@@ -98,7 +98,6 @@ const generateTitleVariations = (
 };
 
 const TitleGenerator = () => {
-  // Estados compartilhados
   const [keyword, setKeyword] = useState("");
   const [variations, setVariations] = useState<TitleVariation[]>([]);
   const [titulosConcorrentes, setTitulosConcorrentes] = useState<TitleData[]>([]);
@@ -109,7 +108,6 @@ const TitleGenerator = () => {
   const { toast } = useToast();
   const { youtubeApiKey } = useAuth();
   
-  // Novos estados para recursos avançados
   const [nicho, setNicho] = useState("");
   const [subnicho, setSubnicho] = useState("");
   const [minViews, setMinViews] = useState(1000000);
@@ -121,8 +119,17 @@ const TitleGenerator = () => {
   const [idiomasDestino, setIdiomasDestino] = useState<string[]>(["inglês", "espanhol", "português"]);
   const [titulosMultilingues, setTitulosMultilingues] = useState<MultilingualTitle[]>([]);
   const [loadingVirais, setLoadingVirais] = useState(false);
+  
+  const [formatoCanal, setFormatoCanal] = useState("vídeo");
+  const [estruturasRecorrencia, setEstruturasRecorrencia] = useState<RecurrenceStructure[]>([]);
+  const [gatilhosRecorrencia, setGatilhosRecorrencia] = useState<RecurrenceTrigger[]>([]);
+  const [assuntoRecorrencia, setAssuntoRecorrencia] = useState("");
+  const [titulosRecorrencia, setTitulosRecorrencia] = useState<string[]>([]);
+  const [frequenciaPublicacao, setFrequenciaPublicacao] = useState("semanal");
+  const [periodoCiclo, setPeriodoCiclo] = useState(4);
+  const [cronogramaPublicacao, setCronogramaPublicacao] = useState<PublicationSchedule[]>([]);
+  const [loadingRecorrencia, setLoadingRecorrencia] = useState(false);
 
-  // Handlers unificados
   const handleGenerateTitles = async (
     keyword: string,
     language: string,
@@ -132,15 +139,12 @@ const TitleGenerator = () => {
     setKeyword(keyword);
 
     try {
-      // Gerar variações básicas
       const basicVariations = generateTitleVariations(keyword, language, emotion);
       setVariations(basicVariations);
       
-      // Gerar variações estruturadas
       const structuredVariations = gerarVariacoesEstruturadas(keyword);
       setVariacoesTitulo(structuredVariations);
       
-      // Extrair títulos concorrentes
       let titulos;
       if (youtubeApiKey) {
         titulos = await extrairTitulosConcorrentes(keyword, language, 30, youtubeApiKey);
@@ -204,7 +208,6 @@ const TitleGenerator = () => {
       return;
     }
     
-    // Combinar todos os títulos gerados para avaliação
     let todosTitulos: string[] = [...titulosSubnicho];
     
     if (variacoesTitulo) {
@@ -230,124 +233,109 @@ const TitleGenerator = () => {
     });
   };
 
-  // Novos handlers para processos avançados
-  const handleExtrairTitulosVirais = async () => {
-    if (!nicho || !subnicho) {
+  const handleExtrairEstruturasRecorrencia = async () => {
+    if (!nicho) {
       toast({
-        title: "Nicho e subnicho necessários",
-        description: "Por favor, preencha ambos os campos.",
+        title: "Nicho necessário",
+        description: "Por favor, informe o nicho para análise.",
         variant: "destructive",
       });
       return;
     }
 
-    setLoadingVirais(true);
+    setLoadingRecorrencia(true);
 
     try {
-      let titulos: TitleData[];
+      const estruturas = await extrairEstruturasRecorrencia(
+        nicho,
+        formatoCanal,
+        idiomasDestino[0] || "português",
+        30,
+        youtubeApiKey
+      );
       
-      if (youtubeApiKey) {
-        titulos = await extrairTitulosVirais(
-          nicho,
-          subnicho,
-          idiomasDestino[0] || "inglês",
-          minViews,
-          maxVideos,
-          youtubeApiKey
-        );
-      } else {
-        titulos = simularExtrairTitulosVirais(
-          nicho,
-          subnicho,
-          idiomasDestino[0] || "inglês",
-          minViews,
-          maxVideos
-        );
-      }
-      
-      setTitulosVirais(titulos);
+      setEstruturasRecorrencia(estruturas);
       
       toast({
-        title: "Títulos virais extraídos",
-        description: `Foram encontrados ${titulos.length} vídeos com pelo menos ${minViews.toLocaleString()} visualizações.`,
+        title: "Estruturas de recorrência extraídas",
+        description: `Foram encontradas ${estruturas.length} estruturas de recorrência.`,
       });
       
     } catch (error) {
-      console.error("Erro ao extrair títulos virais:", error);
+      console.error("Erro ao extrair estruturas de recorrência:", error);
       toast({
         title: "Erro na extração",
-        description: "Não foi possível extrair os títulos virais.",
+        description: "Não foi possível extrair as estruturas de recorrência.",
         variant: "destructive",
       });
     } finally {
-      setLoadingVirais(false);
+      setLoadingRecorrencia(false);
     }
   };
 
-  const handleIdentificarPadroes = () => {
-    if (titulosVirais.length === 0) {
+  const handleIdentificarGatilhos = () => {
+    if (estruturasRecorrencia.length === 0) {
       toast({
-        title: "Sem títulos para analisar",
-        description: "Extraia títulos virais primeiro.",
+        title: "Sem estruturas para analisar",
+        description: "Extraia estruturas de recorrência primeiro.",
         variant: "destructive",
       });
       return;
     }
     
-    const padroes = identificarPadroesTitulos(titulosVirais);
-    setPadroesTitulos(padroes);
+    const gatilhos = identificarGatilhosRecorrencia(estruturasRecorrencia);
+    setGatilhosRecorrencia(gatilhos);
     
     toast({
-      title: "Padrões identificados",
-      description: `Foram identificados ${padroes.length} padrões nos títulos virais.`,
+      title: "Gatilhos identificados",
+      description: `Foram identificados ${gatilhos.length} gatilhos de recorrência.`,
     });
   };
 
-  const handleGerarTitulosVirais = () => {
-    if (padroesTitulos.length === 0) {
+  const handleGerarTitulosRecorrencia = () => {
+    if (gatilhosRecorrencia.length === 0) {
       toast({
-        title: "Sem padrões para basear",
-        description: "Identifique padrões em títulos virais primeiro.",
+        title: "Sem gatilhos para basear",
+        description: "Identifique gatilhos de recorrência primeiro.",
         variant: "destructive",
       });
       return;
     }
     
-    if (!termosChave) {
+    if (!assuntoRecorrencia) {
       toast({
-        title: "Termos-chave necessários",
-        description: "Por favor, informe pelo menos um termo-chave.",
+        title: "Assunto necessário",
+        description: "Por favor, informe um assunto para os títulos.",
         variant: "destructive",
       });
       return;
     }
     
-    const termos = termosChave.split(',').map(termo => termo.trim());
-    const titulos = gerarTitulosVirais(padroesTitulos, termos, 10);
-    setTitulosGerados(titulos);
+    const titulos = gerarTitulosRecorrencia(gatilhosRecorrencia, assuntoRecorrencia, 5);
+    setTitulosRecorrencia(titulos);
     
     toast({
-      title: "Títulos virais gerados",
-      description: `Foram gerados ${titulos.length} títulos com base nos padrões encontrados.`,
+      title: "Títulos de recorrência gerados",
+      description: `Foram gerados ${titulos.length} títulos com elementos de recorrência.`,
     });
   };
 
-  const handleGerarMultilingues = () => {
-    if (titulosGerados.length === 0) {
+  const handlePlanejarCiclo = () => {
+    if (titulosRecorrencia.length === 0) {
       toast({
-        title: "Sem títulos para traduzir",
-        description: "Gere títulos virais primeiro.",
+        title: "Sem títulos para planejar",
+        description: "Gere títulos de recorrência primeiro.",
         variant: "destructive",
       });
       return;
     }
     
-    const multilingues = gerarTitulosMultilingues(titulosGerados, idiomasDestino);
-    setTitulosMultilingues(multilingues);
+    const cronograma = planejarCicloRecorrencia(titulosRecorrencia, frequenciaPublicacao, periodoCiclo);
+    setCronogramaPublicacao(cronograma);
     
     toast({
-      title: "Traduções geradas",
-      description: `Foram gerados ${multilingues.length} títulos adaptados para outros idiomas.`,
+      title: "Cronograma gerado",
+      description: `Foi gerado um cronograma com ${cronograma.length} publicações.`,
     });
   };
 
@@ -364,15 +352,17 @@ const TitleGenerator = () => {
           </p>
           
           <Tabs defaultValue="generate" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-8">
-              <TabsTrigger value="generate">Gerar Títulos</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-10">
+              <TabsTrigger value="generate">Gerar</TabsTrigger>
               <TabsTrigger value="analyze">Analisar</TabsTrigger>
               <TabsTrigger value="variations">Variações</TabsTrigger>
               <TabsTrigger value="evaluate">Avaliar</TabsTrigger>
-              <TabsTrigger value="viral">Títulos Virais</TabsTrigger>
+              <TabsTrigger value="viral">Virais</TabsTrigger>
               <TabsTrigger value="patterns">Padrões</TabsTrigger>
               <TabsTrigger value="innovative">Inovadores</TabsTrigger>
               <TabsTrigger value="multilingual">Multilíngues</TabsTrigger>
+              <TabsTrigger value="recurrence">Recorrência</TabsTrigger>
+              <TabsTrigger value="schedule">Cronograma</TabsTrigger>
             </TabsList>
             
             <TabsContent value="generate" className="space-y-4">
@@ -724,6 +714,284 @@ const TitleGenerator = () => {
                           ))}
                       </div>
                     ))}
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="recurrence" className="space-y-4">
+              <Alert>
+                <Info className="h-4 w-4" />
+                <AlertTitle>Títulos com Recorrência</AlertTitle>
+                <AlertDescription>
+                  Crie títulos que incentivem a audiência a retornar para conteúdo em série.
+                  Identifique estruturas de série, gatilhos de retorno e gere títulos otimizados para recorrência.
+                </AlertDescription>
+              </Alert>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="nicho-recorrencia">Nicho</Label>
+                    <Input 
+                      id="nicho-recorrencia" 
+                      placeholder="Ex: viagens, games, educação"
+                      value={nicho}
+                      onChange={(e) => setNicho(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="formato-canal">Formato do Canal</Label>
+                    <select 
+                      id="formato-canal"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      value={formatoCanal}
+                      onChange={(e) => setFormatoCanal(e.target.value)}
+                    >
+                      <option value="vídeo">Vídeo</option>
+                      <option value="vlog">Vlog</option>
+                      <option value="gameplay">Gameplay</option>
+                      <option value="tutorial">Tutorial</option>
+                      <option value="documentário">Documentário</option>
+                      <option value="podcast">Podcast</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="idioma-recorrencia">Idioma Principal</Label>
+                    <LanguageSelector 
+                      value={idiomasDestino[0] || "português"}
+                      onChange={(value) => setIdiomasDestino([value, ...idiomasDestino.slice(1)])}
+                    />
+                  </div>
+                  
+                  <div className="flex justify-end items-end h-full">
+                    <Button 
+                      onClick={handleExtrairEstruturasRecorrencia}
+                      disabled={loadingRecorrencia}
+                    >
+                      {loadingRecorrencia ? "Extraindo..." : "Extrair Estruturas de Recorrência"}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              
+              {estruturasRecorrencia.length > 0 && (
+                <div className="mt-6">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-medium">Estruturas de Recorrência Identificadas</h3>
+                    <Button 
+                      onClick={handleIdentificarGatilhos}
+                      size="sm"
+                    >
+                      Identificar Gatilhos
+                    </Button>
+                  </div>
+                  
+                  <div className="mt-2 space-y-4">
+                    {estruturasRecorrencia.slice(0, 5).map((estrutura, index) => (
+                      <div 
+                        key={`estrutura-${index}`}
+                        className="p-4 rounded-md bg-muted/50 hover:bg-muted/80 transition-colors border"
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-semibold">{estrutura.estrutura_titulo}</h4>
+                          <Badge variant="secondary">
+                            {estrutura.frequencia}%
+                          </Badge>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          <span>Exemplos: {estrutura.canais_exemplos.join(", ")}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {gatilhosRecorrencia.length > 0 && (
+                <div className="mt-6">
+                  <h3 className="text-lg font-medium mb-2">Gatilhos de Recorrência</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {gatilhosRecorrencia.slice(0, 6).map((gatilho, index) => (
+                      <div 
+                        key={`gatilho-${index}`}
+                        className="p-4 rounded-md bg-muted/50 hover:bg-muted/80 transition-colors border"
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-semibold">{gatilho.gatilho}</h4>
+                          <Badge variant={gatilho.peso > 0.8 ? "secondary" : "outline"}>
+                            Peso: {(gatilho.peso * 100).toFixed(0)}%
+                          </Badge>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          <span>{gatilho.descricao}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="assunto-recorrencia">Assunto Principal</Label>
+                        <Input 
+                          id="assunto-recorrencia" 
+                          placeholder="Ex: lugares misteriosos, dicas de economia"
+                          value={assuntoRecorrencia}
+                          onChange={(e) => setAssuntoRecorrencia(e.target.value)}
+                        />
+                      </div>
+                      
+                      <div className="flex justify-end">
+                        <Button 
+                          onClick={handleGerarTitulosRecorrencia}
+                          disabled={!assuntoRecorrencia || gatilhosRecorrencia.length === 0}
+                        >
+                          Gerar Títulos de Recorrência
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {titulosRecorrencia.length > 0 && (
+                <div className="mt-6">
+                  <h3 className="text-lg font-medium mb-2">Títulos com Elementos de Recorrência</h3>
+                  <div className="space-y-2">
+                    {titulosRecorrencia.map((titulo, index) => (
+                      <div 
+                        key={`recorrencia-${index}`}
+                        className="p-3 rounded-md bg-muted/50 hover:bg-muted/80 transition-colors flex justify-between items-center group"
+                      >
+                        <span>{titulo}</span>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          className="opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => {
+                            navigator.clipboard.writeText(titulo);
+                            toast({
+                              title: "Copiado!",
+                              description: "Título copiado para área de transferência."
+                            });
+                          }}
+                        >
+                          Copiar
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="schedule" className="space-y-4">
+              <Alert>
+                <Info className="h-4 w-4" />
+                <AlertTitle>Cronograma de Publicação</AlertTitle>
+                <AlertDescription>
+                  Planeja um ciclo de publicação para seus títulos de série, maximizando a recorrência de audiência.
+                  Defina a frequência ideal e veja o cronograma recomendado.
+                </AlertDescription>
+              </Alert>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="frequencia-publicacao">Frequência de Publicação</Label>
+                    <select 
+                      id="frequencia-publicacao"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      value={frequenciaPublicacao}
+                      onChange={(e) => setFrequenciaPublicacao(e.target.value)}
+                    >
+                      <option value="diária">Diária</option>
+                      <option value="semanal">Semanal</option>
+                      <option value="quinzenal">Quinzenal</option>
+                      <option value="mensal">Mensal</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="periodo-ciclo">Período do Ciclo: {periodoCiclo} publicações</Label>
+                    <input
+                      type="range"
+                      id="periodo-ciclo"
+                      min="3"
+                      max="12"
+                      step="1"
+                      className="w-full"
+                      value={periodoCiclo}
+                      onChange={(e) => setPeriodoCiclo(parseInt(e.target.value))}
+                    />
+                  </div>
+                  
+                  <div className="flex justify-end">
+                    <Button 
+                      onClick={handlePlanejarCiclo}
+                      disabled={titulosRecorrencia.length === 0}
+                    >
+                      Gerar Cronograma
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              
+              {cronogramaPublicacao.length > 0 && (
+                <div className="mt-6">
+                  <h3 className="text-lg font-medium mb-2">Cronograma de Publicação</h3>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>#</TableHead>
+                        <TableHead>Título</TableHead>
+                        <TableHead>Data Recomendada</TableHead>
+                        <TableHead>Dia da Semana</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {cronogramaPublicacao.map((item, index) => {
+                        const data = new Date(item.data_publicacao);
+                        const diasSemana = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+                        const diaSemana = diasSemana[data.getDay()];
+                        
+                        return (
+                          <TableRow key={`cronograma-${index}`}>
+                            <TableCell>{index + 1}</TableCell>
+                            <TableCell className="font-medium">{item.titulo}</TableCell>
+                            <TableCell>{data.toLocaleDateString()}</TableCell>
+                            <TableCell>{diaSemana}</TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                  
+                  <div className="mt-4 flex justify-end">
+                    <Button 
+                      variant="outline"
+                      onClick={() => {
+                        const textoCalendario = cronogramaPublicacao.map((item, index) => {
+                          const data = new Date(item.data_publicacao);
+                          return `${index + 1}. ${item.titulo} - ${data.toLocaleDateString()}`;
+                        }).join('\n');
+                        
+                        navigator.clipboard.writeText(textoCalendario);
+                        toast({
+                          title: "Cronograma copiado!",
+                          description: "Cronograma copiado para área de transferência."
+                        });
+                      }}
+                    >
+                      Copiar Cronograma
+                    </Button>
                   </div>
                 </div>
               )}
