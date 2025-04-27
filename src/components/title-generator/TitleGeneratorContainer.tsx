@@ -540,11 +540,13 @@ const TitleGeneratorContainer = ({
   };
 
   const toggleLanguage = (language: string) => {
-    const updatedLanguages = idiomasDestino.includes(language)
-      ? idiomasDestino.filter(lang => lang !== language)
-      : [...idiomasDestino, language];
-    
-    setIdiomasDestino(updatedLanguages);
+    setIdiomasDestino((prev) => {
+      if (prev.includes(language)) {
+        return prev.filter(lang => lang !== language);
+      } else {
+        return [...prev, language];
+      }
+    });
   };
 
   return (
@@ -1003,14 +1005,14 @@ const TitleGeneratorContainer = ({
                     className="p-4 rounded-md bg-muted/50 hover:bg-muted/80 transition-colors border"
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-semibold">{estrutura.tipo}</h4>
+                      <h4 className="font-semibold">{estrutura.tipo_estrutura}</h4>
                       <Badge>
                         Frequência: {estrutura.frequencia}%
                       </Badge>
                     </div>
                     <div className="text-sm text-muted-foreground">
                       <p>Descrição: {estrutura.descricao}</p>
-                      <p className="mt-1">Exemplo: "{estrutura.exemplo}"</p>
+                      <p className="mt-1">Exemplo: "{estrutura.exemplo_titulo}"</p>
                     </div>
                   </div>
                 ))}
@@ -1028,7 +1030,7 @@ const TitleGeneratorContainer = ({
                     className="p-4 rounded-md bg-muted/50 hover:bg-muted/80 transition-colors border"
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-semibold">{gatilho.tipo}</h4>
+                      <h4 className="font-semibold">{gatilho.tipo_gatilho}</h4>
                       <Badge variant={gatilho.eficacia > 0.7 ? "secondary" : "outline"}>
                         Eficácia: {(gatilho.eficacia * 100).toFixed(0)}%
                       </Badge>
@@ -1095,8 +1097,8 @@ const TitleGeneratorContainer = ({
                           year: 'numeric'
                         })}
                       </TableCell>
-                      <TableCell>{item.tipo_recorrencia}</TableCell>
-                      <TableCell>{item.titulo_sugerido}</TableCell>
+                      <TableCell>{item.elemento_recorrente}</TableCell>
+                      <TableCell>{item.titulo}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -1129,8 +1131,7 @@ const TitleGeneratorContainer = ({
         
         <TabsContent value="competition" className="space-y-4">
           <CompetitionAnalysis 
-            titulosConcorrentes={titulosConcorrentes}
-            keyword={keyword}
+            youtubeApiKey={youtubeApiKey}
           />
         </TabsContent>
       </Tabs>

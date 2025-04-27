@@ -18,7 +18,7 @@ export interface RecurrenceTrigger {
   tipo_gatilho: string;
   descricao: string;
   peso: number;
-  eficacia: string;
+  eficacia: number;
 }
 
 /**
@@ -28,6 +28,8 @@ export interface PublicationSchedule {
   titulo: string;
   data_publicacao: string;
   elemento_recorrente: string;
+  tipo_recorrencia?: string;
+  titulo_sugerido?: string;
 }
 
 /**
@@ -150,63 +152,63 @@ export const identificarGatilhosRecorrencia = (
       tipo_gatilho: "Episódio",
       descricao: "Indicação clara de continuidade usando numeração de episódios",
       peso: 0.9,
-      eficacia: "Alta"
+      eficacia: 0.9
     },
     {
       gatilho: "Parte X",
       tipo_gatilho: "Parte",
       descricao: "Segmentação de conteúdo em partes numeradas",
       peso: 0.85,
-      eficacia: "Alta"
+      eficacia: 0.85
     },
     {
       gatilho: "Capítulo X",
       tipo_gatilho: "Título",
       descricao: "Estrutura de livro/história aplicada a vídeos",
       peso: 0.8,
-      eficacia: "Alta"
+      eficacia: 0.8
     },
     {
       gatilho: "Série:",
       tipo_gatilho: "Série",
       descricao: "Indicador explícito de que o conteúdo faz parte de uma série",
       peso: 0.75,
-      eficacia: "Alta"
+      eficacia: 0.75
     },
     {
       gatilho: "Temporada X",
       tipo_gatilho: "Temporada",
       descricao: "Organização de conteúdo em formato de programa de TV",
       peso: 0.7,
-      eficacia: "Alta"
+      eficacia: 0.7
     },
     {
       gatilho: "#X",
       tipo_gatilho: "Título",
       descricao: "Uso de hashtag com número para indicar sequência",
       peso: 0.65,
-      eficacia: "Alta"
+      eficacia: 0.65
     },
     {
       gatilho: "Dia X de Y",
       tipo_gatilho: "Dias",
       descricao: "Formato de desafio com prazo definido",
       peso: 0.6,
-      eficacia: "Alta"
+      eficacia: 0.6
     },
     {
       gatilho: "CONTINUAÇÃO:",
       tipo_gatilho: "Continuação",
       descricao: "Indicador explícito de que o conteúdo é continuação",
       peso: 0.55,
-      eficacia: "Alta"
+      eficacia: 0.55
     },
     {
       gatilho: "Atualização:",
       tipo_gatilho: "Continuação",
       descricao: "Indica novidades sobre um tópico anterior",
       peso: 0.5,
-      eficacia: "Alta"
+      eficacia: 0.5
     }
   ];
 
@@ -363,13 +365,15 @@ export const planejarCicloRecorrencia = (
       tituloAjustado = `Ep. ${i+1}: ${tituloAjustado}`;
     }
     
-    // Fix: Define the element if available in the title or use a default value
+    // Define the element if available in the title or use a default value
     const elementoRecorrente = tituloAjustado.split(' ')[0] || "Episódio";
     
     cronograma.push({
       titulo: tituloAjustado,
       data_publicacao: dataMelhor.toISOString(),
-      elemento_recorrente: elementoRecorrente
+      elemento_recorrente: elementoRecorrente,
+      tipo_recorrencia: "Série",
+      titulo_sugerido: tituloAjustado
     });
   }
   
