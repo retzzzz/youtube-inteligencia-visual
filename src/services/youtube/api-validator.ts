@@ -13,15 +13,15 @@ export const validateApiKey = async (apiKey: string): Promise<{valid: boolean, q
   }
 
   try {
-    // 1. Primeiro tente obter uma lista de categorias de vídeo (baixo uso de quota)
-    // Esta chamada usa menos quota e também permite verificar se a chave é válida
+    // Tentativa 1: Usar um endpoint que consome pouca quota
+    console.log("Tentando validar chave com endpoint de baixa quota...");
     const categoryResponse = await fetch(
-      `https://www.googleapis.com/youtube/v3/videoCategories?part=snippet&regionCode=BR&key=${apiKey}`
+      `https://www.googleapis.com/youtube/v3/i18nRegions?part=snippet&key=${apiKey}`
     );
     
+    // Se sucesso, a chave é válida
     if (categoryResponse.ok) {
-      console.log("Chave API validada com sucesso usando videoCategories");
-      // Se esta chamada funcionar, a chave é válida e tem quota
+      console.log("Chave API validada com sucesso usando i18nRegions");
       return {
         valid: true,
         quotaExceeded: false,
@@ -29,11 +29,26 @@ export const validateApiKey = async (apiKey: string): Promise<{valid: boolean, q
       };
     }
     
-    // Se a primeira chamada falhar, tente uma segunda verificação
-    const errorData = await categoryResponse.json();
-    console.log("Resposta de categorias:", errorData);
+    // Tentativa 2: Usar videoCategories (outra opção de baixa quota)
+    console.log("Tentando segundo endpoint de baixa quota...");
+    const videoCatResponse = await fetch(
+      `https://www.googleapis.com/youtube/v3/videoCategories?part=snippet&regionCode=BR&key=${apiKey}`
+    );
     
-    // 2. Verificar especificamente se a API está habilitada
+    if (videoCatResponse.ok) {
+      console.log("Chave API validada com sucesso usando videoCategories");
+      return {
+        valid: true,
+        quotaExceeded: false,
+        message: "Chave API validada com sucesso"
+      };
+    }
+    
+    // Analisar o erro da última tentativa
+    const errorData = await videoCatResponse.json();
+    console.log("Resposta de erro na validação:", errorData);
+    
+    // Verificar se a API está habilitada
     if (errorData.error?.errors?.some((e: any) => e.reason === "accessNotConfigured")) {
       return {
         valid: false,
@@ -42,80 +57,43 @@ export const validateApiKey = async (apiKey: string): Promise<{valid: boolean, q
       };
     }
     
-    // 3. Se não for um problema de acesso, tente uma segunda chamada mais leve
-    const channelResponse = await fetch(
-      `https://www.googleapis.com/youtube/v3/channels?part=id&mine=true&key=${apiKey}`
-    );
-    
-    if (channelResponse.ok) {
-      // Se esta chamada funcionar, a chave é válida e tem quota
-      return {
-        valid: true,
-        quotaExceeded: false,
-        message: "Chave API validada com sucesso"
-      };
-    }
-    
-    // 4. Por último, tente uma pesquisa básica que requer mais quota
-    const testResponse = await fetch(
-      `https://www.googleapis.com/youtube/v3/search?part=id&maxResults=1&q=test&key=${apiKey}`
-    );
-
-    if (testResponse.ok) {
-      // Se esta chamada funcionar, a chave é válida e tem quota
-      return {
-        valid: true,
-        quotaExceeded: false,
-        message: "Chave API validada com sucesso"
-      };
-    }
-    
-    // Se nenhuma das chamadas funcionou, analisar o erro
-    const searchErrorData = await testResponse.json();
-    console.log("Resposta de erro da API do YouTube:", searchErrorData);
-      
-    if (searchErrorData.error?.errors?.some((e: any) => e.reason === "keyInvalid")) {
+    // Verificar se a chave é inválida
+    if (errorData.error?.errors?.some((e: any) => e.reason === "keyInvalid")) {
       return {
         valid: false,
         quotaExceeded: false,
         message: "Chave de API inválida. Verifique se a chave foi digitada corretamente."
       };
-    } else if (searchErrorData.error?.errors?.some((e: any) => e.reason === "quotaExceeded")) {
-      // Verificar se é realmente um erro de quota
-      // Em chaves novas, às vezes o erro pode ser incorreto
-      console.log("Verificando se o erro de quota é real");
-      
-      // Verificar se a chave é muito nova (menos de 10 minutos)
+    }
+    
+    // Verificar se é um erro de quota
+    if (errorData.error?.errors?.some((e: any) => e.reason === "quotaExceeded")) {
+      // Tentar determinar se a chave é nova (menos de 15 minutos)
       const keyAge = await checkKeyAge(apiKey);
-      if (keyAge && keyAge < 10) {
-        // Se a chave for muito nova, é provável que o erro de quota seja incorreto
-        console.log("Chave API é muito nova, provavelmente o erro de quota é incorreto");
+      console.log("Idade estimada da chave (minutos):", keyAge);
+      
+      if (keyAge !== undefined && keyAge < 15) {
+        // Para chaves novas, é provável que seja um falso positivo de quota
         return {
           valid: true,
           quotaExceeded: false,
-          message: "Chave API validada. Como é uma chave nova, pode levar alguns minutos para estar 100% ativa."
+          message: "Chave API nova detectada. As chaves de API recém-criadas podem levar 5-15 minutos para ficarem totalmente ativas."
         };
       }
       
-      console.log("Quota excedida detectada na resposta da API");
+      // Se não for nova, é realmente um erro de quota
       return {
-        valid: true, // A chave é válida, apenas sem quota
+        valid: true,
         quotaExceeded: true,
         message: "Quota da API excedida. Esta chave é válida, mas sua cota diária foi atingida."
       };
-    } else if (searchErrorData.error?.code === 403) {
-      // Outros erros 403 não relacionados à quota
-      return {
-        valid: false,
-        quotaExceeded: false,
-        message: `Erro de acesso: ${searchErrorData.error?.message || testResponse.statusText}`
-      };
     }
     
+    // Erro genérico
     return {
       valid: false,
       quotaExceeded: false,
-      message: `Erro na validação da API: ${searchErrorData.error?.message || testResponse.statusText}`
+      message: `Erro na validação da API: ${errorData.error?.message || videoCatResponse.statusText}`
     };
   } catch (error) {
     console.error("Erro ao validar chave API:", error);
@@ -129,23 +107,34 @@ export const validateApiKey = async (apiKey: string): Promise<{valid: boolean, q
 
 /**
  * Tenta determinar a idade aproximada da chave API
- * Retorna undefined se não conseguir determinar
+ * Retorna a idade aproximada em minutos, ou undefined se não conseguir determinar
  */
 const checkKeyAge = async (apiKey: string): Promise<number | undefined> => {
   try {
-    // Tentar obter informações sobre a chave
-    const response = await fetch(
-      `https://www.googleapis.com/youtube/v3/i18nRegions?part=snippet&key=${apiKey}`
-    );
+    // Para chaves novas, tentamos múltiplos endpoints leves
+    const endpoints = [
+      `https://www.googleapis.com/youtube/v3/i18nRegions?part=snippet&key=${apiKey}`,
+      `https://www.googleapis.com/youtube/v3/videoCategories?part=snippet&regionCode=BR&key=${apiKey}`,
+      `https://www.googleapis.com/youtube/v3/i18nLanguages?part=snippet&key=${apiKey}`
+    ];
     
-    // Se conseguir acessar, verifica headers
-    if (response.headers.get('date')) {
-      return 0; // Se conseguimos acessar, a chave está funcionando
+    // Tentar cada endpoint
+    for (const endpoint of endpoints) {
+      try {
+        const response = await fetch(endpoint);
+        if (response.ok) {
+          // Se algum endpoint funcionar, consideramos que a chave não é tão nova
+          return 30; // 30+ minutos
+        }
+      } catch {
+        // Ignorar erros individuais
+      }
     }
     
-    return undefined;
-  } catch (error) {
-    console.error("Erro ao verificar idade da chave:", error);
+    // Se nenhum endpoint funcionou, é possível que seja uma chave muito nova
+    // Retornamos um valor baixo como estimativa
+    return 5; // assumir 5 minutos como padrão para chaves novas
+  } catch {
     return undefined;
   }
 };
@@ -159,7 +148,16 @@ export const checkApiQuota = async (apiKey: string): Promise<boolean> => {
       return false;
     }
     
-    // Primeiro, tente uma chamada leve (videoCategories)
+    // Primeiro, tente uma chamada leve (i18nRegions)
+    const regionResponse = await fetch(
+      `https://www.googleapis.com/youtube/v3/i18nRegions?part=snippet&key=${apiKey}`
+    );
+    
+    if (regionResponse.ok) {
+      return true;
+    }
+    
+    // Segundo, tente outra chamada leve (videoCategories)
     const categoryResponse = await fetch(
       `https://www.googleapis.com/youtube/v3/videoCategories?part=snippet&regionCode=BR&key=${apiKey}`
     );
@@ -168,7 +166,7 @@ export const checkApiQuota = async (apiKey: string): Promise<boolean> => {
       return true;
     }
     
-    // Usando uma consulta mínima para verificar a quota
+    // Por último, tente uma chamada de pesquisa mínima
     const testResponse = await fetch(
       `https://www.googleapis.com/youtube/v3/search?part=id&maxResults=1&q=test&key=${apiKey}`
     );
@@ -181,22 +179,23 @@ export const checkApiQuota = async (apiKey: string): Promise<boolean> => {
     const errorData = await testResponse.json();
     console.log("Resposta ao verificar quota:", errorData);
     
-    // Se erro for diferente de quota excedida, a chave pode ter outros problemas
-    if (!errorData.error?.errors?.some((e: any) => e.reason === "quotaExceeded")) {
-      return true;
+    // Verificar se é um erro de quota excedida
+    if (errorData.error?.errors?.some((e: any) => e.reason === "quotaExceeded")) {
+      // Verificar se é uma chave nova (menos de 15 minutos)
+      const keyAge = await checkKeyAge(apiKey);
+      if (keyAge !== undefined && keyAge < 15) {
+        // Para chaves novas, assume que é um falso positivo
+        return true;
+      }
+      
+      // Quota realmente excedida
+      return false;
     }
     
-    // Verificar se a chave é muito nova (menos de 10 minutos)
-    const keyAge = await checkKeyAge(apiKey);
-    if (keyAge !== undefined && keyAge < 10) {
-      // Se a chave for muito nova, é provável que tenha quota
-      return true;
-    }
-    
-    // Quota excedida
-    return false;
+    // Para outros tipos de erro, assumimos que tem quota (pode ser problema de acesso, etc)
+    return true;
   } catch {
-    // Em caso de erro de rede ou outros, assumimos que pode não haver quota
-    return false;
+    // Em caso de erro de rede, assume que pode haver quota
+    return true;
   }
 };

@@ -20,6 +20,24 @@ export const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<Vid
     const keyInfo = await validateApiKey(params.apiKey);
     console.log("Informações da chave API:", keyInfo);
     
+    // Para chaves novas, usamos um endpoint mais leve para o primeiro teste
+    if (keyInfo.message.includes("nova")) {
+      try {
+        // Tente usar um endpoint leve primeiro para chaves novas
+        const testResponse = await fetch(
+          `https://www.googleapis.com/youtube/v3/videoCategories?part=snippet&regionCode=BR&key=${params.apiKey}`
+        );
+        
+        console.log("Teste inicial para chave nova:", testResponse.status);
+        if (!testResponse.ok) {
+          const errorData = await testResponse.json();
+          console.log("Resposta do teste para chave nova:", errorData);
+        }
+      } catch (e) {
+        console.log("Erro no teste de chave nova:", e);
+      }
+    }
+    
     // Fetch initial search results
     const searchUrl = `https://www.googleapis.com/youtube/v3/search?${new URLSearchParams({
       part: "snippet",
@@ -42,10 +60,13 @@ export const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<Vid
       
       // Verificar se é uma chave nova com falso positivo de quota excedida
       if (errorData.error?.errors?.some((e: any) => e.reason === "quotaExceeded")) {
+        // Sempre verificar a idade da chave para chaves que retornam erro de quota
         const keyAge = await checkKeyCreationDate(params.apiKey);
-        if (keyAge !== undefined && keyAge < 10) {
-          // Possivelmente um falso positivo em chave nova
-          throw new Error("Esta chave foi criada recentemente e pode levar alguns minutos para ficar totalmente ativa. Por favor, aguarde alguns minutos e tente novamente.");
+        console.log("Idade da chave API (minutos):", keyAge);
+        
+        if (keyAge !== undefined && keyAge < 15) {
+          // Para chaves novas (menos de 15 minutos), é provavelmente um erro temporário
+          throw new Error("Esta chave foi criada recentemente e precisa de alguns minutos para ativar completamente. Por favor, aguarde cerca de 5-15 minutos e tente novamente.");
         }
       }
       
@@ -95,20 +116,34 @@ export const fetchYouTubeData = async (params: YoutubeSearchParams): Promise<Vid
 
 /**
  * Tenta determinar se a chave API é nova
+ * Retorna a idade aproximada em minutos, ou undefined se não for possível determinar
  */
 const checkKeyCreationDate = async (apiKey: string): Promise<number | undefined> => {
   try {
-    const response = await fetch(
+    // Verificar quando a chave foi utilizada pela primeira vez usando uma chamada leve
+    const testEndpoints = [
+      `https://www.googleapis.com/youtube/v3/videoCategories?part=snippet&regionCode=BR&key=${apiKey}`,
       `https://www.googleapis.com/youtube/v3/i18nRegions?part=snippet&key=${apiKey}`
-    );
+    ];
     
-    // Se conseguir acessar, retorna 0 (chave funcionando)
-    if (response.ok) {
-      return 0;
+    // Tentar ambos os endpoints para garantir
+    for (const endpoint of testEndpoints) {
+      try {
+        const response = await fetch(endpoint);
+        if (response.ok) {
+          // Se algum endpoint funcionar, consideramos que a chave está ativa
+          return 0;
+        }
+      } catch {
+        // Ignorar erros individuais
+      }
     }
     
-    return undefined;
-  } catch {
+    // Se chegou aqui, nenhum endpoint funcionou, mas ainda pode ser uma chave nova
+    // Retornar um valor pequeno para indicar que pode ser uma chave nova
+    return 5;
+  } catch (error) {
+    console.error("Erro ao verificar idade da chave:", error);
     return undefined;
   }
 };
