@@ -48,6 +48,9 @@ const Header = () => {
         <NavLink to="/title-generator" currentPath={location.pathname}>
           Gerar Títulos
         </NavLink>
+        <NavLink to="/title-analyzer" currentPath={location.pathname}>
+          Analisar Títulos
+        </NavLink>
         <NavLink to="/script-generator" currentPath={location.pathname}>
           Roteirizador Automático
         </NavLink>
