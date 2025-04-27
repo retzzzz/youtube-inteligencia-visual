@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { saveSearch } from "@/services/youtube-mock";
+import { useAuth } from "@/contexts/AuthContext"; // Import useAuth
 
 interface ActionButtonsProps {
   results: VideoResult[];
@@ -23,6 +24,7 @@ const ActionButtons = ({ results, searchParams }: ActionButtonsProps) => {
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [searchName, setSearchName] = useState("");
   const { toast } = useToast();
+  const { user } = useAuth(); // Get the current user from context
   
   // Se não houver resultados, não renderizar botões
   if (!results.length) return null;
@@ -75,8 +77,11 @@ const ActionButtons = ({ results, searchParams }: ActionButtonsProps) => {
       return;
     }
 
-    // Salvar busca
-    saveSearch(searchName, searchParams);
+    // Get userId from authenticated user or use a fallback
+    const userId = user?.id || 'anonymous';
+    
+    // Salvar busca with userId
+    saveSearch(searchName, searchParams, userId);
     setIsSaveDialogOpen(false);
     setSearchName("");
 
