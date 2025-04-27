@@ -517,13 +517,13 @@ export const recomendarSubniches = (
   );
   
   // Normalize metrics for scoring
-  const maxVisualizacoes = Math.max(...subnichesFiltrados.map(s => s.media_visualizacoes));
+  const maxVisualizacoes = Math.max(...subnichesFiltrados.map(s => s.media_visualizacoes_por_video));
   const maxIdade = Math.max(...subnichesFiltrados.map(s => s.idade_media_canais));
   
   // Calculate composite score
   const subnichesPontuados = subnichesFiltrados.map(subnicho => {
     const numCanaisNorm = 1 / (subnicho.canais_exemplos.length || 1);
-    const visualizacoesNorm = subnicho.media_visualizacoes / (maxVisualizacoes || 1);
+    const visualizacoesNorm = subnicho.media_visualizacoes_por_video / (maxVisualizacoes || 1);
     const idadeNorm = 1 - (subnicho.idade_media_canais / (maxIdade || 1));
     
     const pontuacao = (numCanaisNorm + visualizacoesNorm + idadeNorm) / 3;
