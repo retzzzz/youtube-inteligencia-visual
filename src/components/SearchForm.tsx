@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { YoutubeSearchParams } from "@/types/youtube-types";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Search } from "lucide-react";
+import { Search, AlertCircle } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -48,7 +47,8 @@ const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
       toast({
         title: "Atenção",
         description: "Nenhuma chave de API fornecida. Serão exibidos apenas dados simulados.",
-        variant: "warning",
+        variant: "default",
+        icon: <AlertCircle className="h-4 w-4" />
       });
     }
     
