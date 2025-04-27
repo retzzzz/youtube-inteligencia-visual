@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -44,7 +43,6 @@ const ApiKeyDialog = () => {
       setError("");
       setWarning("");
       
-      // Usar o serviço de validação melhorado
       const validationResult = await validateApiKey(apiKey.trim());
       
       if (!validationResult.valid) {
@@ -52,12 +50,10 @@ const ApiKeyDialog = () => {
         return;
       }
       
-      // Verificar se há aviso de quota excedida
       if (validationResult.quotaExceeded) {
         setWarning("Esta chave é válida, mas sua quota está excedida. Você poderá usá-la novamente quando a quota for renovada (geralmente a cada 24h).");
       }
       
-      // Se chegou aqui, a chave é válida (com ou sem quota)
       if (rememberKey) {
         localStorage.setItem("youtubeApiKey", apiKey.trim());
       }
@@ -147,7 +143,7 @@ const ApiKeyDialog = () => {
             )}
             
             {warning && (
-              <Alert variant="warning" className="py-2 border-yellow-500 bg-yellow-50">
+              <Alert variant="default" className="py-2 border-yellow-500 bg-yellow-50">
                 <AlertTriangle className="h-4 w-4 text-yellow-500" />
                 <AlertDescription className="text-xs">
                   {warning}
