@@ -39,6 +39,9 @@ const Header = () => {
       
       <nav className="flex gap-3 flex-wrap">
         <NavLink to="/" currentPath={location.pathname}>
+          Início
+        </NavLink>
+        <NavLink to="/search" currentPath={location.pathname}>
           Pesquisar
         </NavLink>
         <NavLink to="/video-analyzer" currentPath={location.pathname}>

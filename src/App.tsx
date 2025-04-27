@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import Index from './pages/Index';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
+import Search from './pages/Search';
 import VideoAnalyzer from './pages/VideoAnalyzer';
 import TitleGenerator from './pages/TitleGenerator';
 import ScriptGenerator from './pages/ScriptGenerator';
@@ -21,6 +22,7 @@ function App() {
         <div className="flex-grow">
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/search" element={<Search />} />
             <Route path="/login" element={<Login />} />
             <Route path="/video-analyzer" element={<VideoAnalyzer />} />
             <Route path="/title-generator" element={<TitleGenerator />} />
