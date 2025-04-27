@@ -12,6 +12,7 @@ import ApiKeyHeader from '@/components/search/ApiKeyHeader';
 import ErrorDisplay from '@/components/search/ErrorDisplay';
 import LoadingAndEmptyStates from '@/components/search/LoadingAndEmptyStates';
 import NewKeyNotice from '@/components/search/NewKeyNotice';
+import { markKeyAsNotNew } from '@/services/youtube/validators/key-validator';
 
 const Search = () => {
   const { 
@@ -35,9 +36,12 @@ const Search = () => {
       const keyMarker = localStorage.getItem(`apiKey_${youtubeApiKey.substring(0, 8)}_added`);
       if (keyMarker) {
         const keyAge = (Date.now() - parseInt(keyMarker)) / (1000 * 60);
+        console.log(`Chave API detectada no localStorage com idade de ${keyAge} minutos`);
         if (keyAge > 20) {
           setForceNotNew(true);
         }
+      } else {
+        console.log("Chave API não encontrada no localStorage");
       }
     }
   }, [youtubeApiKey]);
@@ -53,10 +57,9 @@ const Search = () => {
     if (searchParams) {
       // Marcar a chave como não nova no localStorage
       if (youtubeApiKey) {
-        localStorage.setItem(`apiKey_${youtubeApiKey.substring(0, 8)}_added`, 
-          (Date.now() - 60 * 60 * 1000).toString()); // 1 hora atrás
+        markKeyAsNotNew(youtubeApiKey);
+        setForceNotNew(true);
       }
-      setForceNotNew(true);
       forceSearchWithCurrentKey();
     }
   };

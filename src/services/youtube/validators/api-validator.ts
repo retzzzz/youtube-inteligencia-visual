@@ -1,5 +1,5 @@
 
-import { isEmptyKey, checkKeyAge } from './key-validator';
+import { isEmptyKey, checkKeyAge, markKeyAsNotNew } from './key-validator';
 import { analyzeApiResponse } from './response-validator';
 
 /**
@@ -27,9 +27,7 @@ export const validateApiKey = async (apiKey: string, forceNotNew: boolean = fals
       console.log("Chave API validada com sucesso usando i18nRegions");
       
       // Marcar a chave como validada com sucesso
-      if (!localStorage.getItem(`apiKey_${apiKey.substring(0, 8)}_added`)) {
-        localStorage.setItem(`apiKey_${apiKey.substring(0, 8)}_added`, Date.now().toString());
-      }
+      markKeyAsNotNew(apiKey);
       
       return {
         valid: true,
@@ -48,15 +46,18 @@ export const validateApiKey = async (apiKey: string, forceNotNew: boolean = fals
       console.log("Chave API validada com sucesso usando videoCategories");
       
       // Marcar a chave como validada com sucesso
-      if (!localStorage.getItem(`apiKey_${apiKey.substring(0, 8)}_added`)) {
-        localStorage.setItem(`apiKey_${apiKey.substring(0, 8)}_added`, Date.now().toString());
-      }
+      markKeyAsNotNew(apiKey);
       
       return {
         valid: true,
         quotaExceeded: false,
         message: "Chave API validada com sucesso"
       };
+    }
+    
+    // Se forçar a chave como não nova, marcar no localStorage
+    if (forceNotNew) {
+      markKeyAsNotNew(apiKey);
     }
     
     const validationResult = await analyzeApiResponse(videoCatResponse);
@@ -97,6 +98,11 @@ export const checkApiQuota = async (apiKey: string, forceNotNew: boolean = false
       return false;
     }
     
+    // Se forçar a chave como não nova, marcar no localStorage
+    if (forceNotNew) {
+      markKeyAsNotNew(apiKey);
+    }
+    
     // Testar múltiplos endpoints para ter certeza
     const endpoints = [
       `https://www.googleapis.com/youtube/v3/i18nRegions?part=snippet&key=${apiKey}`,
@@ -106,7 +112,10 @@ export const checkApiQuota = async (apiKey: string, forceNotNew: boolean = false
     
     for (const endpoint of endpoints) {
       const response = await fetch(endpoint);
-      if (response.ok) return true;
+      if (response.ok) {
+        markKeyAsNotNew(apiKey);
+        return true;
+      }
       
       if (!response.ok) {
         const errorData = await response.json();

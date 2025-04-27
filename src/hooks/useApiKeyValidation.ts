@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useToast } from "./use-toast";
 import { validateApiKey } from "@/services/youtube";
+import { markKeyAsNotNew } from "@/services/youtube/validators/key-validator";
 
 export const useApiKeyValidation = (onSuccess?: (key: string) => void) => {
   const [isValidating, setIsValidating] = useState(false);
@@ -20,6 +21,11 @@ export const useApiKeyValidation = (onSuccess?: (key: string) => void) => {
       setError("");
       setWarning("");
       
+      // Se forçar a chave como não nova, marcar no localStorage
+      if (forceNotNew && apiKey.trim()) {
+        markKeyAsNotNew(apiKey.trim());
+      }
+      
       const validationResult = await validateApiKey(apiKey.trim(), forceNotNew);
       console.log("Resultado da validação:", validationResult);
       
@@ -33,8 +39,7 @@ export const useApiKeyValidation = (onSuccess?: (key: string) => void) => {
         setWarning("Chave API recém-criada detectada. As chaves podem levar 5-15 minutos para ficarem totalmente ativas. Você pode usá-la agora, mas pode encontrar erros temporariamente.");
       } else {
         // Registrar a chave como não nova no localStorage
-        localStorage.setItem(`apiKey_${apiKey.substring(0, 8)}_added`, 
-          (Date.now() - 60 * 60 * 1000).toString()); // 1 hora atrás
+        markKeyAsNotNew(apiKey.trim());
       }
       
       // Verificar quota excedida
@@ -71,8 +76,7 @@ export const useApiKeyValidation = (onSuccess?: (key: string) => void) => {
       setWarning("");
       
       // Marcar explicitamente a chave como não nova
-      localStorage.setItem(`apiKey_${apiKey.substring(0, 8)}_added`, 
-        (Date.now() - 60 * 60 * 1000).toString()); // 1 hora atrás
+      markKeyAsNotNew(apiKey.trim());
       
       if (rememberKey) {
         localStorage.setItem("youtubeApiKey", apiKey.trim());
