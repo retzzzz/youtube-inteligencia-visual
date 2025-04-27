@@ -77,8 +77,8 @@ const ActionButtons = ({ results, searchParams }: ActionButtonsProps) => {
       return;
     }
 
-    // Get userId from authenticated user or use a fallback
-    const userId = user?.id || 'anonymous';
+    // Get userId from authenticated user's name or use a fallback
+    const userId = user?.name || 'anonymous';
     
     // Salvar busca with userId
     saveSearch(searchName, searchParams, userId);
