@@ -31,6 +31,8 @@ const SubnicheValidator = () => {
   const { toast } = useToast();
   const { youtubeApiKey } = useAuth();
 
+  const [currentStep, setCurrentStep] = useState<number>(0);
+
   const handleValidateSubniches = async () => {
     if (!nicho) {
       toast({
@@ -53,34 +55,29 @@ const SubnicheValidator = () => {
     setIsLoading(true);
     
     try {
-      const subnichos = await extrairSubnichos(nicho, idioma, maxCanais, youtubeApiKey);
+      setCurrentStep(0);
+      const canaisPromissores = await extrairCanaisPromissores(nicho, idioma, maxCanais, youtubeApiKey);
       
-      if (subnichos.length === 0) {
-        toast({
-          title: "Nenhum subnicho encontrado",
-          description: "Não foi possível encontrar subnichos para o nicho informado.",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
+      setCurrentStep(1);
+      const subnichos = extrairSubnichosDeCanais(canaisPromissores);
       
-      const metricas = calcularMetricasSubnicho(subnichos);
-      
+      setCurrentStep(2);
       const criterios = {
-        min_taxa_crescimento: minTaxaCrescimento,
-        min_media_visualizacoes: minMediaVisualizacoes,
+        max_canais_concorrentes: 5,
+        min_visualizacoes_media: minMediaVisualizacoes,
         max_idade_media_canais: maxIdadeMediaCanais
       };
       
-      const subnichos_validados = validarSubnicho(metricas, criterios);
-      const priorizados = priorizarSubniches(subnichos_validados);
+      const subnichos_validados = avaliarSaturacaoSubnicho(subnichos, criterios);
       
-      setSubnichesPriorizados(priorizados);
+      setCurrentStep(3);
+      const recomendacoes = recomendarSubniches(subnichos_validados);
+      
+      setSubnichesPriorizados(recomendacoes);
       
       toast({
         title: "Análise concluída!",
-        description: `Foram analisados ${subnichos.length} subnichos e identificados ${priorizados.length} com potencial.`,
+        description: `Foram analisados ${canaisPromissores.length} canais e identificados ${recomendacoes.length} subnichos promissores.`,
       });
     } catch (error) {
       console.error("Erro ao validar subnichos:", error);
@@ -108,111 +105,117 @@ const SubnicheValidator = () => {
     <div className="container mx-auto px-4 py-6 max-w-[1400px]">
       <Header />
       
-      <div className="grid grid-cols-1 gap-6 mb-8">
-        <Card className="p-6">
-          <h1 className="text-2xl font-bold mb-4">Validador de Subnichos</h1>
-          
-          <p className="mb-6 text-muted-foreground">
-            Descubra os melhores subnichos para criar um canal no YouTube, com análise de saturação, 
-            crescimento e potencial de monetização.
-          </p>
-          
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <Label htmlFor="nicho">Nicho Principal</Label>
-                <Input
-                  id="nicho"
-                  placeholder="Ex: religioso cristão, finanças pessoais, tecnologia"
-                  value={nicho}
-                  onChange={(e) => setNicho(e.target.value)}
-                />
-              </div>
-              
-              <div className="space-y-3">
-                <Label htmlFor="idioma">Idioma</Label>
-                <LanguageSelector 
-                  value={idioma}
-                  onChange={setIdioma}
-                />
-              </div>
-            </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2">
+          <Card className="p-6">
+            <h1 className="text-2xl font-bold mb-4">Validador de Subnichos</h1>
             
-            <div className="space-y-3">
-              <Label htmlFor="maxCanais">Número máximo de canais ({maxCanais})</Label>
-              <Slider
-                id="maxCanais"
-                value={[maxCanais]}
-                min={10}
-                max={100}
-                step={5}
-                onValueChange={(value) => setMaxCanais(value[0])}
-              />
-            </div>
+            <p className="mb-6 text-muted-foreground">
+              Descubra os melhores subnichos para criar um canal no YouTube, com análise de saturação, 
+              crescimento e potencial de monetização.
+            </p>
             
-            <div className="border-t pt-4">
-              <h3 className="font-medium mb-3">Critérios de Validação</h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-3">
-                  <Label htmlFor="minCrescimento">
-                    Taxa mínima de crescimento: {minTaxaCrescimento}%
-                  </Label>
-                  <Slider
-                    id="minCrescimento"
-                    value={[minTaxaCrescimento]}
-                    min={0}
-                    max={30}
-                    step={1}
-                    onValueChange={(value) => setMinTaxaCrescimento(value[0])}
+                  <Label htmlFor="nicho">Nicho Principal</Label>
+                  <Input
+                    id="nicho"
+                    placeholder="Ex: religioso cristão, finanças pessoais, tecnologia"
+                    value={nicho}
+                    onChange={(e) => setNicho(e.target.value)}
                   />
                 </div>
                 
                 <div className="space-y-3">
-                  <Label htmlFor="minVisualizacoes">
-                    Mínimo de visualizações: {minMediaVisualizacoes.toLocaleString()}
-                  </Label>
-                  <Slider
-                    id="minVisualizacoes"
-                    value={[minMediaVisualizacoes]}
-                    min={1000}
-                    max={20000}
-                    step={500}
-                    onValueChange={(value) => setMinMediaVisualizacoes(value[0])}
+                  <Label htmlFor="idioma">Idioma</Label>
+                  <LanguageSelector 
+                    value={idioma}
+                    onChange={setIdioma}
                   />
                 </div>
+              </div>
+              
+              <div className="space-y-3">
+                <Label htmlFor="maxCanais">Número máximo de canais ({maxCanais})</Label>
+                <Slider
+                  id="maxCanais"
+                  value={[maxCanais]}
+                  min={10}
+                  max={100}
+                  step={5}
+                  onValueChange={(value) => setMaxCanais(value[0])}
+                />
+              </div>
+              
+              <div className="border-t pt-4">
+                <h3 className="font-medium mb-3">Critérios de Validação</h3>
                 
-                <div className="space-y-3">
-                  <Label htmlFor="maxIdade">Idade máxima dos canais</Label>
-                  <Select 
-                    value={maxIdadeMediaCanais.toString()} 
-                    onValueChange={(value) => setMaxIdadeMediaCanais(Number(value))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione a idade máxima" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {idadeOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="space-y-3">
+                    <Label htmlFor="minCrescimento">
+                      Taxa mínima de crescimento: {minTaxaCrescimento}%
+                    </Label>
+                    <Slider
+                      id="minCrescimento"
+                      value={[minTaxaCrescimento]}
+                      min={0}
+                      max={30}
+                      step={1}
+                      onValueChange={(value) => setMinTaxaCrescimento(value[0])}
+                    />
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <Label htmlFor="minVisualizacoes">
+                      Mínimo de visualizações: {minMediaVisualizacoes.toLocaleString()}
+                    </Label>
+                    <Slider
+                      id="minVisualizacoes"
+                      value={[minMediaVisualizacoes]}
+                      min={1000}
+                      max={20000}
+                      step={500}
+                      onValueChange={(value) => setMinMediaVisualizacoes(value[0])}
+                    />
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <Label htmlFor="maxIdade">Idade máxima dos canais</Label>
+                    <Select 
+                      value={maxIdadeMediaCanais.toString()} 
+                      onValueChange={(value) => setMaxIdadeMediaCanais(Number(value))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione a idade máxima" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {idadeOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
+              
+              <div className="flex justify-end">
+                <Button
+                  onClick={handleValidateSubniches}
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Analisando..." : "Validar Subnichos"}
+                </Button>
+              </div>
             </div>
-            
-            <div className="flex justify-end">
-              <Button
-                onClick={handleValidateSubniches}
-                disabled={isLoading}
-              >
-                {isLoading ? "Analisando..." : "Validar Subnichos"}
-              </Button>
-            </div>
-          </div>
-        </Card>
+          </Card>
+        </div>
+        
+        <div className="md:col-span-1">
+          <ValidationProcess currentStep={currentStep} />
+        </div>
       </div>
 
       {subnichesPriorizados.length > 0 && (

@@ -412,3 +412,132 @@ function gerarRiscos(subnicho: SubnichoValidado): string {
     return `Crescimento moderado de ${subnicho.taxa_crescimento_inscritos_mensal.toFixed(1)}% ao mês, pode exigir mais tempo para resultados significativos.`;
   }
 }
+
+/**
+ * Extracts promising channels in a niche based on specified criteria
+ */
+export const extrairCanaisPromissores = async (
+  nicho_principal: string,
+  idioma: string,
+  max_canais: number,
+  youtubeApiKey: string
+): Promise<Canal[]> => {
+  try {
+    const canais = await extrairSubnichos(nicho_principal, idioma, max_canais, youtubeApiKey);
+    
+    // Filter channels based on criteria (≤6 months old)
+    const hoje = new Date();
+    return canais.filter(canal => {
+      const dataCriacao = new Date(canal.data_de_criacao);
+      const idadeMeses = (hoje.getFullYear() - dataCriacao.getFullYear()) * 12 + 
+                        (hoje.getMonth() - dataCriacao.getMonth());
+      
+      const ratioInscritosVideos = canal.total_inscritos / (canal.total_videos || 1);
+      
+      return idadeMeses <= 6 && ratioInscritosVideos >= 100; // Base metric for subscribers/videos ratio
+    });
+  } catch (error) {
+    console.error("Erro ao extrair canais promissores:", error);
+    throw error;
+  }
+};
+
+/**
+ * Extracts subniches from channel titles using NLP-like techniques
+ */
+export const extrairSubnichosDeCanais = (canais: Canal[]): Subnicho[] => {
+  const subnichoMap = new Map<string, Canal[]>();
+  
+  canais.forEach(canal => {
+    const keyphrases = extrairPalavrasChave(canal.titulos_recentes);
+    keyphrases.forEach(subnicho => {
+      if (!subnichoMap.has(subnicho)) {
+        subnichoMap.set(subnicho, []);
+      }
+      subnichoMap.get(subnicho)?.push(canal);
+    });
+  });
+  
+  return Array.from(subnichoMap.entries()).map(([subnicho, canais_exemplos]) => ({
+    subnicho,
+    canais_exemplos
+  }));
+};
+
+/**
+ * Evaluates saturation and potential for each subniche
+ */
+export const avaliarSaturacaoSubnicho = (
+  subniches: Subnicho[],
+  criterios: {
+    max_canais_concorrentes: number;
+    min_visualizacoes_media: number;
+    max_idade_media_canais: number;
+  }
+): SubnichoValidado[] => {
+  const hoje = new Date();
+  
+  return subniches.map(subnicho => {
+    const num_canais = subnicho.canais_exemplos.length;
+    
+    const media_visualizacoes = subnicho.canais_exemplos.reduce((acc, canal) => {
+      return acc + (canal.total_videos > 0 ? canal.total_inscritos / canal.total_videos : 0);
+    }, 0) / num_canais;
+    
+    const idade_media_canais = subnicho.canais_exemplos.reduce((acc, canal) => {
+      const dataCriacao = new Date(canal.data_de_criacao);
+      const idadeMeses = (hoje.getFullYear() - dataCriacao.getFullYear()) * 12 + 
+                        (hoje.getMonth() - dataCriacao.getMonth());
+      return acc + idadeMeses;
+    }, 0) / num_canais;
+    
+    const validado = 
+      num_canais <= criterios.max_canais_concorrentes &&
+      media_visualizacoes >= criterios.min_visualizacoes_media &&
+      idade_media_canais <= criterios.max_idade_media_canais;
+    
+    return {
+      ...subnicho,
+      media_visualizacoes,
+      idade_media_canais,
+      validado
+    };
+  });
+};
+
+/**
+ * Recommends the best subniches for a new channel
+ */
+export const recomendarSubniches = (
+  subniches_validados: SubnichoValidado[]
+): SubnichoPriorizado[] => {
+  // Filter only easy-entry subniches
+  const subnichesFiltrados = subniches_validados.filter(
+    subnicho => subnicho.validado
+  );
+  
+  // Normalize metrics for scoring
+  const maxVisualizacoes = Math.max(...subnichesFiltrados.map(s => s.media_visualizacoes));
+  const maxIdade = Math.max(...subnichesFiltrados.map(s => s.idade_media_canais));
+  
+  // Calculate composite score
+  const subnichesPontuados = subnichesFiltrados.map(subnicho => {
+    const numCanaisNorm = 1 / (subnicho.canais_exemplos.length || 1);
+    const visualizacoesNorm = subnicho.media_visualizacoes / (maxVisualizacoes || 1);
+    const idadeNorm = 1 - (subnicho.idade_media_canais / (maxIdade || 1));
+    
+    const pontuacao = (numCanaisNorm + visualizacoesNorm + idadeNorm) / 3;
+    
+    return {
+      ...subnicho,
+      pontuacao,
+      pontos_fortes: gerarPontosFortes(subnicho),
+      riscos: gerarRiscos(subnicho)
+    };
+  });
+  
+  // Sort by score and get top 5
+  return subnichesPontuados
+    .sort((a, b) => b.pontuacao - a.pontuacao)
+    .slice(0, 5);
+};
