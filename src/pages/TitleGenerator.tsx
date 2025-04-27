@@ -40,11 +40,21 @@ import {
   RecurrenceTrigger,
   PublicationSchedule
 } from '@/utils/titleRecurrence';
+import {
+  extrairPerfilAudiencia,
+  gerarMicroSubnichosPorAudiencia,
+  adaptarTitulosPorAudiencia,
+  planejarCronogramaPorAudiencia,
+  AudienceProfile,
+  MicroSubnicho
+} from '@/utils/audienceAnalysis';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import LanguageSelector from "@/components/LanguageSelector";
+import AudienceAnalysisForm from "@/components/AudienceAnalysisForm";
+import AudienceAnalysisResults from "@/components/AudienceAnalysisResults";
 
 export interface TitleVariation {
   text: string;
@@ -130,6 +140,11 @@ const TitleGenerator = () => {
   const [periodoCiclo, setPeriodoCiclo] = useState(4);
   const [cronogramaPublicacao, setCronogramaPublicacao] = useState<PublicationSchedule[]>([]);
   const [loadingRecorrencia, setLoadingRecorrencia] = useState(false);
+  
+  const [audienceProfile, setAudienceProfile] = useState<AudienceProfile | null>(null);
+  const [microSubnichos, setMicroSubnichos] = useState<MicroSubnicho[]>([]);
+  const [titulosAdaptados, setTitulosAdaptados] = useState<string[]>([]);
+  const [loadingAudiencia, setLoadingAudiencia] = useState(false);
 
   const handleGenerateTitles = async (
     keyword: string,
@@ -468,6 +483,58 @@ const TitleGenerator = () => {
     });
   };
 
+  const handleAnalyzeAudience = async (canalId: string, nichoPrincipal: string, subnicho: string) => {
+    if (!canalId) {
+      toast({
+        title: "ID do canal obrigatório",
+        description: "Por favor, informe o ID do canal.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoadingAudiencia(true);
+    
+    try {
+      const perfil = await extrairPerfilAudiencia(canalId, youtubeApiKey || "");
+      setAudienceProfile(perfil);
+      
+      const micronichos = gerarMicroSubnichosPorAudiencia(perfil, nichoPrincipal, subnicho);
+      setMicroSubnichos(micronichos);
+      
+      const titulosBase = [
+        `Como fazer ${nichoPrincipal} do jeito certo`,
+        `Segredos de ${subnicho} que ninguém te contou`,
+        `${nichoPrincipal}: técnicas avançadas reveladas`
+      ];
+      
+      const todosAdaptados: string[] = [];
+      titulosBase.forEach(titulo => {
+        const adaptados = adaptarTitulosPorAudiencia(titulo, perfil.top_paises, perfil.top_faixa_etaria);
+        todosAdaptados.push(...adaptados);
+      });
+      
+      setTitulosAdaptados(todosAdaptados);
+      
+      const cronograma = planejarCronogramaPorAudiencia(micronichos, 4, "semanal");
+      setCronogramaPublicacao(cronograma);
+      
+      toast({
+        title: "Análise concluída!",
+        description: `Foram identificados ${micronichos.length} micro-subnichos e gerados ${todosAdaptados.length} títulos adaptados.`,
+      });
+    } catch (error) {
+      console.error("Erro na análise de audiência:", error);
+      toast({
+        title: "Erro na análise",
+        description: "Não foi possível completar a análise de audiência.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingAudiencia(false);
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-6 max-w-[1400px]">
       <Header />
@@ -481,7 +548,7 @@ const TitleGenerator = () => {
           </p>
           
           <Tabs defaultValue="generate" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-10">
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-11">
               <TabsTrigger value="generate">Gerar</TabsTrigger>
               <TabsTrigger value="analyze">Analisar</TabsTrigger>
               <TabsTrigger value="variations">Variações</TabsTrigger>
@@ -492,6 +559,7 @@ const TitleGenerator = () => {
               <TabsTrigger value="multilingual">Multilíngues</TabsTrigger>
               <TabsTrigger value="recurrence">Recorrência</TabsTrigger>
               <TabsTrigger value="schedule">Cronograma</TabsTrigger>
+              <TabsTrigger value="audience">Audiência</TabsTrigger>
             </TabsList>
             
             <TabsContent value="generate" className="space-y-4">
@@ -1085,6 +1153,31 @@ const TitleGenerator = () => {
                     de publicação para criar um cronograma.
                   </p>
                 </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="audience" className="space-y-4">
+              <Alert>
+                <Info className="h-4 w-4" />
+                <AlertTitle>Análise de Audiência</AlertTitle>
+                <AlertDescription>
+                  Identifique o perfil da sua audiência, gere micro-subnichos que ressoem com ela e adapte seus títulos 
+                  para maximizar o engajamento.
+                </AlertDescription>
+              </Alert>
+              
+              <AudienceAnalysisForm 
+                onAnalyze={handleAnalyzeAudience}
+                isLoading={loadingAudiencia}
+              />
+              
+              {audienceProfile && (
+                <AudienceAnalysisResults 
+                  audienceProfile={audienceProfile}
+                  microSubnichos={microSubnichos}
+                  titulosAdaptados={titulosAdaptados}
+                  cronogramaPublicacao={cronogramaPublicacao}
+                />
               )}
             </TabsContent>
           </Tabs>
