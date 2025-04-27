@@ -1,5 +1,6 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Header from '@/components/Header';
 import SearchForm from '@/components/SearchForm';
 import { useYouTubeSearch } from '@/hooks/useYouTubeSearch';
@@ -14,6 +15,24 @@ const Search = () => {
     selectedVideo, 
     setSelectedVideo 
   } = useYouTubeSearch();
+  
+  const location = useLocation();
+  
+  // Carregar pesquisa a partir dos parâmetros da URL, se existirem
+  useEffect(() => {
+    const query = new URLSearchParams(location.search);
+    const paramsString = query.get('params');
+    
+    if (paramsString) {
+      try {
+        const loadedParams = JSON.parse(decodeURIComponent(paramsString));
+        console.log("Parâmetros carregados da URL:", loadedParams);
+        handleSearch(loadedParams);
+      } catch (error) {
+        console.error("Erro ao carregar parâmetros da URL:", error);
+      }
+    }
+  }, [location.search]);
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-[1200px]">

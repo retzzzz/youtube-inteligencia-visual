@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import ResultsTable from "@/components/ResultsTable";
 import RemodelingIdeas from "@/components/RemodelingIdeas";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import SavedSearchDialog from "@/components/SavedSearchDialog";
 
 interface ResultsSectionProps {
   results: VideoResult[];
@@ -21,11 +22,16 @@ const ResultsSection = ({ results, selectedVideo, onSelectVideo, searchParams }:
 
   return (
     <>
-      <div id="dashboard-section">
+      <div id="dashboard-section" className="mb-6">
         <KPISection results={results} />
         <ChartSection results={results} />
         <CPMAnalysisChart results={results} />
-        <ActionButtons results={results} searchParams={searchParams} />
+        <div className="flex items-center justify-between mt-6">
+          <ActionButtons results={results} searchParams={searchParams} />
+          {searchParams && (
+            <SavedSearchDialog searchParams={searchParams} />
+          )}
+        </div>
       </div>
 
       <Tabs defaultValue="resultados" className="my-6">

@@ -31,4 +31,5 @@ export interface SavedSearch {
   name: string;
   date: string;
   params: YoutubeSearchParams;
+  userId: string; // ID do usuário que salvou a pesquisa
 }

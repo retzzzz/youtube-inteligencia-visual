@@ -60,16 +60,17 @@ export const searchYouTubeVideos = async (params: YoutubeSearchParams): Promise<
 };
 
 // Local storage functions for saved searches
-export const saveSearch = (name: string, params: YoutubeSearchParams): SavedSearch => {
+export const saveSearch = (name: string, params: YoutubeSearchParams, userId: string): SavedSearch => {
   // Recupera buscas salvas do armazenamento local
   const savedSearches = JSON.parse(localStorage.getItem('savedSearches') || '[]');
   
-  // Adiciona nova busca
+  // Adiciona nova busca com ID do usuário
   const newSearch = {
     id: Math.random().toString(36).substring(2, 15),
     name,
     date: new Date().toISOString(),
-    params
+    params,
+    userId // Adicionando o ID do usuário
   };
   
   savedSearches.push(newSearch);
