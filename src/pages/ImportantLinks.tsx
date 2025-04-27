@@ -22,14 +22,14 @@ const ImportantLinks = () => {
       title: 'Dicas Importantes',
       description: 'Informações cruciais para o sucesso do seu canal de YouTube.',
       content: [
-        'Escolha um nicho específico e bem definido',
-        'Estude seu público-alvo',
-        'Crie títulos e miniaturas que chamem a atenção',
-        'Seja consistente na produção de conteúdo',
-        'Analise seus dados e métricas constantemente',
-        'Invista em equipamentos de qualidade gradualmente',
-        'Aprenda técnicas de edição de vídeo',
-        'Mantenha-se atualizado sobre as tendências do YouTube'
+        'Evite postagens excessivas de conteúdo similar em curto período para não sofrer shadowban',
+        'Interaja genuinamente com sua audiência para aumentar o engajamento',
+        'Mantenha uma consistência na programação de uploads para treinar o algoritmo',
+        'Títulos clickbait podem aumentar visualizações iniciais mas prejudicam retenção a longo prazo',
+        'Thumbnails personalizadas têm 43% mais chances de conversão do que capturas automáticas',
+        'Estude métricas de retenção para identificar momentos onde a audiência perde interesse',
+        'Colaborações estratégicas podem expandir seu alcance para novos públicos',
+        'SEO adaptado para YouTube é fundamental - use tags relevantes e descrições detalhadas'
       ]
     }
   ];
@@ -81,4 +81,3 @@ const ImportantLinks = () => {
 };
 
 export default ImportantLinks;
-
