@@ -7,6 +7,7 @@ import ResultsSection from '@/components/ResultsSection';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { useEffect, useState } from 'react';
 import ApiKeyHeader from '@/components/search/ApiKeyHeader';
 import ErrorDisplay from '@/components/search/ErrorDisplay';
 import LoadingAndEmptyStates from '@/components/search/LoadingAndEmptyStates';
@@ -26,10 +27,37 @@ const Search = () => {
   } = useYouTubeSearch();
   
   const { youtubeApiKey, setNeedsApiKey } = useAuth();
+  const [forceNotNew, setForceNotNew] = useState(false);
+
+  useEffect(() => {
+    // Verificar se a chave já é conhecida
+    if (youtubeApiKey) {
+      const keyMarker = localStorage.getItem(`apiKey_${youtubeApiKey.substring(0, 8)}_added`);
+      if (keyMarker) {
+        const keyAge = (Date.now() - parseInt(keyMarker)) / (1000 * 60);
+        if (keyAge > 20) {
+          setForceNotNew(true);
+        }
+      }
+    }
+  }, [youtubeApiKey]);
 
   const handleRetry = () => {
     if (searchParams) {
-      handleSearch(searchParams);
+      // Passar o parâmetro para não considerar a chave como nova
+      handleSearch(searchParams, forceNotNew);
+    }
+  };
+
+  const handleForceSearch = () => {
+    if (searchParams) {
+      // Marcar a chave como não nova no localStorage
+      if (youtubeApiKey) {
+        localStorage.setItem(`apiKey_${youtubeApiKey.substring(0, 8)}_added`, 
+          (Date.now() - 60 * 60 * 1000).toString()); // 1 hora atrás
+      }
+      setForceNotNew(true);
+      forceSearchWithCurrentKey();
     }
   };
 
@@ -62,21 +90,21 @@ const Search = () => {
         onRetry={handleRetry}
         isLoading={isLoading}
         hasSearchParams={!!searchParams}
-        isNewKey={isNewKey}
+        isNewKey={isNewKey && !forceNotNew}
       />
       
       <div className="mt-6">
         <h2 className="text-2xl font-bold mb-6">Pesquisa Avançada</h2>
-        <SearchForm onSearch={handleSearch} isLoading={isLoading} />
+        <SearchForm onSearch={(params) => handleSearch(params, forceNotNew)} isLoading={isLoading} />
         
         <NewKeyNotice 
-          isNewKey={isNewKey} 
+          isNewKey={isNewKey && !forceNotNew} 
           onRetry={handleRetry}
         />
         
         <ErrorDisplay 
           error={error}
-          onForceSearch={forceSearchWithCurrentKey}
+          onForceSearch={handleForceSearch}
           onRetry={handleRetry}
           onChangeApiKey={() => setNeedsApiKey(true)}
         />

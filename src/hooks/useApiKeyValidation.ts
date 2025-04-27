@@ -9,7 +9,7 @@ export const useApiKeyValidation = (onSuccess?: (key: string) => void) => {
   const [warning, setWarning] = useState("");
   const { toast } = useToast();
 
-  const validateAndSaveApiKey = async (apiKey: string, rememberKey: boolean) => {
+  const validateAndSaveApiKey = async (apiKey: string, rememberKey: boolean, forceNotNew: boolean = false) => {
     if (!apiKey.trim()) {
       setError("Por favor, insira uma chave de API");
       return;
@@ -20,7 +20,7 @@ export const useApiKeyValidation = (onSuccess?: (key: string) => void) => {
       setError("");
       setWarning("");
       
-      const validationResult = await validateApiKey(apiKey.trim());
+      const validationResult = await validateApiKey(apiKey.trim(), forceNotNew);
       console.log("Resultado da validação:", validationResult);
       
       if (!validationResult.valid) {
@@ -29,8 +29,12 @@ export const useApiKeyValidation = (onSuccess?: (key: string) => void) => {
       }
       
       // Verificar se é uma chave nova
-      if (validationResult.message.includes("nova") || validationResult.message.includes("recém-criada")) {
+      if (!forceNotNew && (validationResult.message.includes("nova") || validationResult.message.includes("recém-criada"))) {
         setWarning("Chave API recém-criada detectada. As chaves podem levar 5-15 minutos para ficarem totalmente ativas. Você pode usá-la agora, mas pode encontrar erros temporariamente.");
+      } else {
+        // Registrar a chave como não nova no localStorage
+        localStorage.setItem(`apiKey_${apiKey.substring(0, 8)}_added`, 
+          (Date.now() - 60 * 60 * 1000).toString()); // 1 hora atrás
       }
       
       // Verificar quota excedida
@@ -48,7 +52,7 @@ export const useApiKeyValidation = (onSuccess?: (key: string) => void) => {
         title: "Chave API salva",
         description: validationResult.quotaExceeded 
           ? "Sua chave API foi salva, mas a quota está excedida. Considere usar outra chave."
-          : validationResult.message.includes("nova")
+          : validationResult.message.includes("nova") && !forceNotNew
             ? "Sua chave API foi salva. Lembre-se que chaves novas podem levar alguns minutos para ativar completamente."
             : "Sua chave API do YouTube foi configurada com sucesso!",
       });
@@ -66,6 +70,10 @@ export const useApiKeyValidation = (onSuccess?: (key: string) => void) => {
       setError("");
       setWarning("");
       
+      // Marcar explicitamente a chave como não nova
+      localStorage.setItem(`apiKey_${apiKey.substring(0, 8)}_added`, 
+        (Date.now() - 60 * 60 * 1000).toString()); // 1 hora atrás
+      
       if (rememberKey) {
         localStorage.setItem("youtubeApiKey", apiKey.trim());
       }
@@ -74,7 +82,7 @@ export const useApiKeyValidation = (onSuccess?: (key: string) => void) => {
       
       toast({
         title: "Chave API aceita",
-        description: "Sua chave API foi aceita. Se for uma chave nova, aguarde alguns minutos antes de usá-la.",
+        description: "Sua chave API foi aceita e será usada para pesquisas.",
       });
     } catch (error) {
       console.error("Erro na validação alternativa:", error);

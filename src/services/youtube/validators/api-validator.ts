@@ -4,8 +4,10 @@ import { analyzeApiResponse } from './response-validator';
 
 /**
  * Valida uma chave de API do YouTube fazendo uma solicitação de teste
+ * @param apiKey Chave da API YouTube
+ * @param forceNotNew Forçar a chave a não ser considerada nova
  */
-export const validateApiKey = async (apiKey: string): Promise<{valid: boolean, quotaExceeded: boolean, message: string}> => {
+export const validateApiKey = async (apiKey: string, forceNotNew: boolean = false): Promise<{valid: boolean, quotaExceeded: boolean, message: string}> => {
   if (isEmptyKey(apiKey)) {
     return {
       valid: false,
@@ -23,6 +25,12 @@ export const validateApiKey = async (apiKey: string): Promise<{valid: boolean, q
     
     if (categoryResponse.ok) {
       console.log("Chave API validada com sucesso usando i18nRegions");
+      
+      // Marcar a chave como validada com sucesso
+      if (!localStorage.getItem(`apiKey_${apiKey.substring(0, 8)}_added`)) {
+        localStorage.setItem(`apiKey_${apiKey.substring(0, 8)}_added`, Date.now().toString());
+      }
+      
       return {
         valid: true,
         quotaExceeded: false,
@@ -38,6 +46,12 @@ export const validateApiKey = async (apiKey: string): Promise<{valid: boolean, q
     
     if (videoCatResponse.ok) {
       console.log("Chave API validada com sucesso usando videoCategories");
+      
+      // Marcar a chave como validada com sucesso
+      if (!localStorage.getItem(`apiKey_${apiKey.substring(0, 8)}_added`)) {
+        localStorage.setItem(`apiKey_${apiKey.substring(0, 8)}_added`, Date.now().toString());
+      }
+      
       return {
         valid: true,
         quotaExceeded: false,
@@ -49,10 +63,10 @@ export const validateApiKey = async (apiKey: string): Promise<{valid: boolean, q
     
     // Para chaves com erro de quota, verificar se são novas
     if (validationResult.quotaExceeded) {
-      const keyAge = await checkKeyAge(apiKey);
+      const keyAge = await checkKeyAge(apiKey, forceNotNew);
       console.log("Idade estimada da chave (minutos):", keyAge);
       
-      if (keyAge !== undefined && keyAge < 15) {
+      if (!forceNotNew && keyAge !== undefined && keyAge < 15) {
         return {
           valid: true,
           quotaExceeded: false,
@@ -74,8 +88,10 @@ export const validateApiKey = async (apiKey: string): Promise<{valid: boolean, q
 
 /**
  * Verifica se uma chave API tem quota disponível
+ * @param apiKey Chave da API YouTube
+ * @param forceNotNew Forçar a chave a não ser considerada nova
  */
-export const checkApiQuota = async (apiKey: string): Promise<boolean> => {
+export const checkApiQuota = async (apiKey: string, forceNotNew: boolean = false): Promise<boolean> => {
   try {
     if (isEmptyKey(apiKey)) {
       return false;
@@ -96,9 +112,11 @@ export const checkApiQuota = async (apiKey: string): Promise<boolean> => {
         const errorData = await response.json();
         if (errorData.error?.errors?.some((e: any) => e.reason === "quotaExceeded")) {
           // Verificar se é uma chave nova
-          const keyAge = await checkKeyAge(apiKey);
-          if (keyAge !== undefined && keyAge < 15) {
-            return true; // Assume quota disponível para chaves novas
+          if (!forceNotNew) {
+            const keyAge = await checkKeyAge(apiKey);
+            if (keyAge !== undefined && keyAge < 15) {
+              return true; // Assume quota disponível para chaves novas
+            }
           }
           continue; // Tenta o próximo endpoint
         }

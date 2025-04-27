@@ -15,6 +15,7 @@ const ApiKeyDialog = () => {
   const { needsApiKey, setNeedsApiKey, youtubeApiKey, setYoutubeApiKey } = useAuth();
   const [apiKey, setApiKey] = useState("");
   const [rememberKey, setRememberKey] = useState(true);
+  const [forceNotNew, setForceNotNew] = useState(false);
   
   const {
     isValidating,
@@ -31,11 +32,18 @@ const ApiKeyDialog = () => {
   useEffect(() => {
     if (youtubeApiKey && needsApiKey) {
       setApiKey(youtubeApiKey);
+      
+      // Verificar se a chave já é conhecida
+      const keyMarker = localStorage.getItem(`apiKey_${youtubeApiKey.substring(0, 8)}_added`);
+      if (keyMarker) {
+        const keyAge = (Date.now() - parseInt(keyMarker)) / (1000 * 60);
+        setForceNotNew(keyAge > 20);
+      }
     }
   }, [youtubeApiKey, needsApiKey]);
 
   const handleValidateAndSaveApiKey = () => {
-    validateAndSaveApiKey(apiKey, rememberKey);
+    validateAndSaveApiKey(apiKey, rememberKey, forceNotNew);
   };
 
   const handleForceValidation = () => {
@@ -44,6 +52,20 @@ const ApiKeyDialog = () => {
 
   const handleApiKeyChange = (value: string) => {
     setApiKey(value);
+    clearValidationState();
+    
+    // Verificar se a nova chave já é conhecida
+    const keyMarker = localStorage.getItem(`apiKey_${value.substring(0, 8)}_added`);
+    if (keyMarker) {
+      const keyAge = (Date.now() - parseInt(keyMarker)) / (1000 * 60);
+      setForceNotNew(keyAge > 20);
+    } else {
+      setForceNotNew(false);
+    }
+  };
+  
+  const handleForceNotNewToggle = () => {
+    setForceNotNew(prev => !prev);
     clearValidationState();
   };
 
@@ -89,21 +111,32 @@ const ApiKeyDialog = () => {
         />
         
         <ApiKeyAlerts error={error} warning={warning} />
+        
+        <div className="flex items-center justify-between">
+          <RememberKeyCheckbox 
+            checked={rememberKey}
+            onCheckedChange={setRememberKey}
+          />
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleForceNotNewToggle}
+            className={`text-xs ${forceNotNew ? 'bg-blue-50 text-blue-700 border-blue-300' : ''}`}
+          >
+            {forceNotNew ? 'Tratar como chave antiga' : 'Tratar como chave nova'}
+          </Button>
+        </div>
       </div>
 
-      <div className="my-6">
-        <RememberKeyCheckbox 
-          checked={rememberKey}
-          onCheckedChange={setRememberKey}
-        />
+      <div className="mt-6">
+        <Alert variant="destructive" className="rounded-xl shadow-md border-red-300 bg-red-50/50 backdrop-blur-sm text-red-800">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="text-xs">
+            <strong>Importante:</strong> Uma chave de API do YouTube válida é OBRIGATÓRIA para usar esta ferramenta. Não é possível prosseguir sem configurar uma chave válida.
+          </AlertDescription>
+        </Alert>
       </div>
-      
-      <Alert variant="destructive" className="rounded-xl shadow-md border-red-300 bg-red-50/50 backdrop-blur-sm text-red-800">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription className="text-xs">
-          <strong>Importante:</strong> Uma chave de API do YouTube válida é OBRIGATÓRIA para usar esta ferramenta. Não é possível prosseguir sem configurar uma chave válida.
-        </AlertDescription>
-      </Alert>
     </BaseDialog>
   );
 };

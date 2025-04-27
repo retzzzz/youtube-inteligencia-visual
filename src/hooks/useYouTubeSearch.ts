@@ -15,13 +15,30 @@ export const useYouTubeSearch = () => {
   const { toast } = useToast();
   const { youtubeApiKey, setYoutubeApiKey, setNeedsApiKey } = useAuth();
 
-  const handleSearch = async (params: YoutubeSearchParams) => {
+  // Função que verifica se a chave não é nova
+  const isKeyOld = (key: string): boolean => {
+    const keyMarker = localStorage.getItem(`apiKey_${key.substring(0, 8)}_added`);
+    if (keyMarker) {
+      const keyAge = (Date.now() - parseInt(keyMarker)) / (1000 * 60);
+      return keyAge > 20;
+    }
+    return false;
+  };
+
+  const handleSearch = async (params: YoutubeSearchParams, forceNotNew: boolean = false) => {
     setIsLoading(true);
     setSearchParams(params);
     setSelectedVideo(null);
     setError(null);
     setResults([]);
-    setIsNewKey(false);
+    
+    // Verificar se a chave já é conhecida como não nova
+    if (youtubeApiKey && isKeyOld(youtubeApiKey)) {
+      forceNotNew = true;
+      setIsNewKey(false);
+    } else {
+      setIsNewKey(!forceNotNew);
+    }
 
     try {
       // Verificações de API key
@@ -37,7 +54,7 @@ export const useYouTubeSearch = () => {
 
       // Verificar a validade da chave API com retentativas
       console.log("Validando chave API antes da busca:", youtubeApiKey.substring(0, 5) + "..." + youtubeApiKey.substring(youtubeApiKey.length - 4));
-      const validationResult = await validateApiKey(youtubeApiKey);
+      const validationResult = await validateApiKey(youtubeApiKey, forceNotNew);
       console.log("Resultado da validação:", validationResult);
       
       if (!validationResult.valid) {
@@ -51,13 +68,15 @@ export const useYouTubeSearch = () => {
       }
 
       // Verificar se a mensagem indica uma chave nova
-      if (validationResult.message.includes("nova")) {
+      if (!forceNotNew && validationResult.message.includes("nova")) {
         setIsNewKey(true);
         toast({
           title: "Chave API nova detectada",
           description: "Chaves recém-criadas podem levar alguns minutos para ficarem totalmente ativas. Prosseguindo com a busca.",
           variant: "default",
         });
+      } else {
+        setIsNewKey(false);
       }
 
       // Verificar se a chave tem quota disponível
@@ -81,7 +100,7 @@ export const useYouTubeSearch = () => {
       
       // Se chegou até aqui, tenta fazer a busca
       console.log("Iniciando busca com parâmetros:", {...params, apiKey: "API_KEY_HIDDEN"});
-      const data = await fetchYouTubeData(params);
+      const data = await fetchYouTubeData(params, forceNotNew);
       console.log("Dados recebidos da API:", data?.length || 0, "resultados");
       
       if (!data || data.length === 0) {
@@ -106,8 +125,8 @@ export const useYouTubeSearch = () => {
       
       if (error instanceof Error) {
         // Verificar se é um erro relacionado a chave nova
-        if (error.message.includes("chave foi criada recentemente") || 
-            error.message.includes("alguns minutos para ficar")) {
+        if (!forceNotNew && (error.message.includes("chave foi criada recentemente") || 
+            error.message.includes("alguns minutos para ficar"))) {
           setIsNewKey(true);
           errorMessage = error.message;
         } 
@@ -150,7 +169,7 @@ export const useYouTubeSearch = () => {
       const params = {...searchParams, apiKey: youtubeApiKey};
       console.log("Forçando busca com chave atual:", youtubeApiKey.substring(0, 5) + "..." + youtubeApiKey.substring(youtubeApiKey.length - 4));
       
-      const data = await fetchYouTubeData(params);
+      const data = await fetchYouTubeData(params, true);
       
       if (!data || data.length === 0) {
         toast({
