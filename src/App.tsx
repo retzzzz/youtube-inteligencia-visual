@@ -1,4 +1,3 @@
-
 import { Routes, Route } from 'react-router-dom';
 import Index from './pages/Index';
 import Login from './pages/Login';
@@ -10,6 +9,7 @@ import ScriptGenerator from './pages/ScriptGenerator';
 import SubnicheValidator from './pages/SubnicheValidator';
 import MicroSubnicheAnalyzer from './pages/MicroSubnicheAnalyzer';
 import FAQ from './pages/FAQ';
+import Tutorial from './pages/Tutorial';
 import { AuthProvider } from './contexts/AuthContext';
 import { Toaster } from './components/ui/toaster';
 import Footer from './components/Footer';
@@ -29,6 +29,7 @@ function App() {
             <Route path="/script-generator" element={<ScriptGenerator />} />
             <Route path="/subnicho-validator" element={<SubnicheValidator />} />
             <Route path="/micro-subnicho-analyzer" element={<MicroSubnicheAnalyzer />} />
+            <Route path="/tutorial" element={<Tutorial />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
