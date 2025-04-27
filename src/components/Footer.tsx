@@ -3,27 +3,36 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const Footer = () => {
+  const links = [
+    { name: 'Tutorial', path: '/tutorial' },
+    { name: 'FAQ', path: '/faq' },
+    { name: 'Micro-Subnichos', path: '/micro-subnicho-analyzer' },
+    { name: 'Pesquisar', path: '/search' },
+    { name: 'Analisador de Vídeos', path: '/video-analyzer' },
+    { name: 'Gerador de Títulos', path: '/title-generator' },
+    { name: 'Gerador de Roteiros', path: '/script-generator' },
+    { name: 'Validador de Subnichos', path: '/subnicho-validator' }
+  ];
+
   return (
     <footer className="border-t mt-16">
       <div className="container mx-auto py-6 px-4">
-        <div className="flex flex-col md:flex-row justify-between items-center">
-          <div className="text-muted-foreground text-sm mb-4 md:mb-0">
+        <div className="flex flex-col space-y-6">
+          <div className="text-muted-foreground text-sm text-center">
             © {new Date().getFullYear()} YTAnalyzer. Todos os direitos reservados.
           </div>
-          <nav className="flex gap-4">
-            <Link 
-              to="/faq" 
-              className="text-sm text-muted-foreground hover:text-primary transition-colors"
-            >
-              FAQ
-            </Link>
-            <Link 
-              to="/micro-subnicho-analyzer" 
-              className="text-sm text-muted-foreground hover:text-primary transition-colors"
-            >
-              Micro-Subnichos
-            </Link>
-          </nav>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {links.map((link) => (
+              <Link 
+                key={link.path}
+                to={link.path} 
+                className="text-sm text-muted-foreground hover:text-primary transition-colors text-center"
+              >
+                {link.name}
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </footer>
