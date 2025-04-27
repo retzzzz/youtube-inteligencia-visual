@@ -28,6 +28,7 @@ const Search = () => {
           <SavedSearches 
             currentSearch={searchParams} 
             onLoadSearch={handleSearch} 
+            hideCurrentSaveButton={true} 
           />
         </div>
         

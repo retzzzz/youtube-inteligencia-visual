@@ -1,20 +1,27 @@
 
 import { Button } from "@/components/ui/button";
-import { VideoResult } from "@/types/youtube-types";
+import { VideoResult, YoutubeSearchParams } from "@/types/youtube-types";
 import { exportToCSV } from "@/services/youtube-mock";
-import { Download, FileSpreadsheet, File } from "lucide-react";
+import { FileSpreadsheet, File, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import 'jspdf-autotable';
 import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { saveSearch } from "@/services/youtube-mock";
 
 interface ActionButtonsProps {
   results: VideoResult[];
+  searchParams: YoutubeSearchParams | null;
 }
 
-const ActionButtons = ({ results }: ActionButtonsProps) => {
+const ActionButtons = ({ results, searchParams }: ActionButtonsProps) => {
   const [isExporting, setIsExporting] = useState(false);
+  const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
+  const [searchName, setSearchName] = useState("");
   const { toast } = useToast();
   
   // Se não houver resultados, não renderizar botões
@@ -35,6 +42,48 @@ const ActionButtons = ({ results }: ActionButtonsProps) => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleOpenSaveDialog = () => {
+    if (!searchParams) {
+      toast({
+        title: "Erro ao salvar",
+        description: "Não há pesquisa atual para salvar.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setIsSaveDialogOpen(true);
+  };
+
+  const handleSaveSearch = () => {
+    if (!searchParams) {
+      toast({
+        title: "Erro ao salvar",
+        description: "Não há pesquisa atual para salvar.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!searchName.trim()) {
+      toast({
+        title: "Nome obrigatório",
+        description: "Por favor, digite um nome para esta pesquisa.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Salvar busca
+    saveSearch(searchName, searchParams);
+    setIsSaveDialogOpen(false);
+    setSearchName("");
+
+    toast({
+      title: "Pesquisa salva",
+      description: `A pesquisa "${searchName}" foi salva com sucesso.`,
+    });
   };
   
   const handleExportPdf = async () => {
@@ -100,26 +149,36 @@ const ActionButtons = ({ results }: ActionButtonsProps) => {
       pdf.text("* Exibindo até 20 resultados dos vídeos mais promissores", 14, 16);
       
       // Fix: Use the correct way to call autoTable with jsPDF
-      // @ts-ignore - Using typecasting to access autoTable
-      const autoTable = require('jspdf-autotable').default;
-      autoTable(pdf, {
-        startY: 20,
-        head: [tableCol],
-        body: tableRows,
-        theme: 'striped',
-        headStyles: {
-          fillColor: [255, 0, 0],
-          textColor: [255, 255, 255],
-          fontStyle: 'bold'
-        }
-      });
-      
-      // Save PDF
-      pdf.save(`youtube-optimizer-${new Date().toLocaleDateString('pt-BR')}.pdf`);
-      
-      toast({
-        title: "PDF gerado com sucesso",
-        description: "O relatório foi exportado em formato PDF."
+      import('jspdf-autotable').then((module) => {
+        const autoTable = module.default;
+        autoTable(pdf, {
+          startY: 20,
+          head: [tableCol],
+          body: tableRows,
+          theme: 'striped',
+          headStyles: {
+            fillColor: [255, 0, 0],
+            textColor: [255, 255, 255],
+            fontStyle: 'bold'
+          }
+        });
+        
+        // Save PDF after table is created
+        pdf.save(`youtube-optimizer-${new Date().toLocaleDateString('pt-BR')}.pdf`);
+        
+        toast({
+          title: "PDF gerado com sucesso",
+          description: "O relatório foi exportado em formato PDF."
+        });
+        setIsExporting(false);
+      }).catch(error => {
+        console.error("Erro ao carregar jspdf-autotable:", error);
+        toast({
+          title: "Erro na exportação",
+          description: "Não foi possível gerar o PDF. Tente novamente.",
+          variant: "destructive",
+        });
+        setIsExporting(false);
       });
     } catch (error) {
       console.error("Erro ao exportar PDF:", error);
@@ -128,27 +187,70 @@ const ActionButtons = ({ results }: ActionButtonsProps) => {
         description: "Não foi possível gerar o PDF. Tente novamente.",
         variant: "destructive",
       });
-    } finally {
       setIsExporting(false);
     }
   };
 
   return (
-    <div className="flex flex-wrap justify-end gap-2 my-4">
-      <Button variant="outline" onClick={handleExportCsv}>
-        <FileSpreadsheet className="w-4 h-4 mr-2" />
-        Exportar CSV
-      </Button>
+    <>
+      <div className="flex flex-wrap justify-end gap-2 my-4">
+        <Button variant="outline" onClick={handleOpenSaveDialog}>
+          <Save className="w-4 h-4 mr-2" />
+          Salvar Pesquisa
+        </Button>
+        
+        <Button variant="outline" onClick={handleExportCsv}>
+          <FileSpreadsheet className="w-4 h-4 mr-2" />
+          Exportar CSV
+        </Button>
+        
+        <Button variant="default" onClick={handleExportPdf} disabled={isExporting}>
+          {isExporting ? "Gerando PDF..." : (
+            <>
+              <File className="w-4 h-4 mr-2" />
+              Exportar PDF
+            </>
+          )}
+        </Button>
+      </div>
       
-      <Button variant="default" onClick={handleExportPdf} disabled={isExporting}>
-        {isExporting ? "Gerando PDF..." : (
-          <>
-            <File className="w-4 h-4 mr-2" />
-            Exportar PDF
-          </>
-        )}
-      </Button>
-    </div>
+      {/* Diálogo para salvar pesquisa */}
+      <Dialog open={isSaveDialogOpen} onOpenChange={setIsSaveDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Salvar Pesquisa</DialogTitle>
+            <DialogDescription>
+              Dê um nome para sua pesquisa para salvá-la e acessá-la facilmente no futuro.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="search-name">Nome da pesquisa</Label>
+              <Input
+                id="search-name"
+                value={searchName}
+                onChange={(e) => setSearchName(e.target.value)}
+                placeholder="Ex: Canais de marketing com alta performance"
+              />
+            </div>
+            
+            {searchParams && (
+              <div className="bg-secondary p-3 rounded-md text-sm">
+                <p>Palavras-chave: <span className="font-medium">{searchParams.keywords}</span></p>
+                <p>Tipo: <span className="font-medium">{searchParams.searchType}</span></p>
+                <p>Idioma: <span className="font-medium">{searchParams.language || "Todos"}</span></p>
+              </div>
+            )}
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsSaveDialogOpen(false)}>Cancelar</Button>
+            <Button onClick={handleSaveSearch}>Salvar Pesquisa</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

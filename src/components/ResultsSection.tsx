@@ -25,7 +25,7 @@ const ResultsSection = ({ results, selectedVideo, onSelectVideo, searchParams }:
         <KPISection results={results} />
         <ChartSection results={results} />
         <CPMAnalysisChart results={results} />
-        <ActionButtons results={results} />
+        <ActionButtons results={results} searchParams={searchParams} />
       </div>
 
       <Tabs defaultValue="resultados" className="my-6">
