@@ -423,11 +423,22 @@ export const extrairCanaisPromissores = async (
   youtubeApiKey: string
 ): Promise<Canal[]> => {
   try {
-    const canais = await extrairSubnichos(nicho_principal, idioma, max_canais, youtubeApiKey);
+    // First, get the subnichos
+    const subnichos = await extrairSubnichos(nicho_principal, idioma, max_canais, youtubeApiKey);
+    
+    // Extract all unique canais from the subnichos
+    const canaisFlatList: Canal[] = [];
+    subnichos.forEach(subnicho => {
+      subnicho.canais_exemplos.forEach(canal => {
+        if (!canaisFlatList.some(c => c.nome_do_canal === canal.nome_do_canal)) {
+          canaisFlatList.push(canal);
+        }
+      });
+    });
     
     // Filter channels based on criteria (≤6 months old)
     const hoje = new Date();
-    return canais.filter(canal => {
+    return canaisFlatList.filter(canal => {
       const dataCriacao = new Date(canal.data_de_criacao);
       const idadeMeses = (hoje.getFullYear() - dataCriacao.getFullYear()) * 12 + 
                         (hoje.getMonth() - dataCriacao.getMonth());
@@ -477,30 +488,29 @@ export const avaliarSaturacaoSubnicho = (
 ): SubnichoValidado[] => {
   const hoje = new Date();
   
-  return subniches.map(subnicho => {
+  // Convert basic subniches to MetricasSubnicho first
+  const metricasSubniches = calcularMetricasSubnicho(subniches);
+  
+  // Then validate and return
+  return metricasSubniches.map(subnicho => {
     const num_canais = subnicho.canais_exemplos.length;
-    
-    const media_visualizacoes = subnicho.canais_exemplos.reduce((acc, canal) => {
-      return acc + (canal.total_videos > 0 ? canal.total_inscritos / canal.total_videos : 0);
-    }, 0) / num_canais;
-    
-    const idade_media_canais = subnicho.canais_exemplos.reduce((acc, canal) => {
-      const dataCriacao = new Date(canal.data_de_criacao);
-      const idadeMeses = (hoje.getFullYear() - dataCriacao.getFullYear()) * 12 + 
-                        (hoje.getMonth() - dataCriacao.getMonth());
-      return acc + idadeMeses;
-    }, 0) / num_canais;
     
     const validado = 
       num_canais <= criterios.max_canais_concorrentes &&
-      media_visualizacoes >= criterios.min_visualizacoes_media &&
-      idade_media_canais <= criterios.max_idade_media_canais;
+      subnicho.media_visualizacoes_por_video >= criterios.min_visualizacoes_media &&
+      subnicho.idade_media_canais <= criterios.max_idade_media_canais;
     
     return {
       ...subnicho,
-      media_visualizacoes,
-      idade_media_canais,
-      validado
+      validado,
+      razoes: !validado ? [
+        num_canais > criterios.max_canais_concorrentes ? 
+          `Muitos canais concorrentes (${num_canais})` : null,
+        subnicho.media_visualizacoes_por_video < criterios.min_visualizacoes_media ? 
+          `Média de visualizações abaixo do mínimo (${subnicho.media_visualizacoes_por_video.toFixed(0)})` : null,
+        subnicho.idade_media_canais > criterios.max_idade_media_canais ? 
+          `Idade média dos canais acima do máximo (${subnicho.idade_media_canais.toFixed(1)} meses)` : null
+      ].filter(Boolean) as string[] : []
     };
   });
 };
@@ -511,7 +521,7 @@ export const avaliarSaturacaoSubnicho = (
 export const recomendarSubniches = (
   subniches_validados: SubnichoValidado[]
 ): SubnichoPriorizado[] => {
-  // Filter only easy-entry subniches
+  // Filter only valid subniches
   const subnichesFiltrados = subniches_validados.filter(
     subnicho => subnicho.validado
   );
