@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Header from '@/components/Header';
 import { Card } from '@/components/ui/card';
@@ -10,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Slider } from '@/components/ui/slider';
 import SubnicheValidationResults from '@/components/SubnicheValidationResults';
 import { useAuth } from '@/contexts/AuthContext';
+import LanguageSelector from '@/components/LanguageSelector';
 import {
   extrairSubnichos,
   calcularMetricasSubnicho,
@@ -131,11 +131,9 @@ const SubnicheValidator = () => {
               
               <div className="space-y-3">
                 <Label htmlFor="idioma">Idioma</Label>
-                <Input
-                  id="idioma"
-                  placeholder="Ex: português, inglês, espanhol"
+                <LanguageSelector 
                   value={idioma}
-                  onChange={(e) => setIdioma(e.target.value)}
+                  onChange={setIdioma}
                 />
               </div>
             </div>
