@@ -30,10 +30,12 @@ const ResultsTableHeader = ({
           <TableHead 
             key={column.id} 
             className={`whitespace-nowrap 
-              ${column.id === 'title' ? 'w-[400px] min-w-[300px]' : ''} 
+              ${column.id === 'title' ? 'w-[350px] min-w-[250px]' : ''} 
               ${column.id === 'videoAge' ? 'w-[60px]' : ''} 
-              ${column.id === 'id' ? 'w-[80px] text-center' : ''}
-              ${column.id === 'language' ? 'w-[120px]' : ''}
+              ${column.id === 'id' ? 'w-[70px] text-center' : ''}
+              ${column.id === 'language' ? 'w-[100px]' : ''}
+              ${column.id === 'channel' ? 'w-[180px]' : ''}
+              ${column.id === 'views' || column.id === 'subscribers' ? 'w-[120px]' : ''}
             `}
           >
             {column.sortable ? (
@@ -61,8 +63,7 @@ const ResultsTableHeader = ({
                       </TooltipTrigger>
                       <TooltipContent 
                         side="bottom" 
-                        className="w-[350px] p-4"
-                        style={{ zIndex: 100 }}
+                        className="w-[350px] p-4 z-[100]"
                       >
                         <p className="font-medium mb-2">Como é calculada a Pontuação Viral?</p>
                         <ul className="space-y-2 text-sm">
