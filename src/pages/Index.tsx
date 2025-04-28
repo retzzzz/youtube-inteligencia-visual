@@ -1,7 +1,5 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Card, CardContent } from "@/components/ui/card";
 import { Search, BarChart2, FileText, Compass, Target, Youtube } from 'lucide-react'; 
 import WelcomeMessage from '@/components/WelcomeMessage';
 import Header from '@/components/Header';
@@ -46,22 +44,22 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0A0C1B] bg-gradient-to-b from-[#0A0C1B] via-[#111535] to-[#0A0C1B] relative">
+    <div className="min-h-screen bg-[#0E122D] relative">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(29,58,180,0.15),rgba(0,0,0,0))]" />
-      <div className="container mx-auto px-4 py-6 max-w-[1200px] relative">
-        <Header />
-        <WelcomeMessage />
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
-          {tools.map((tool, index) => (
-            <Link 
-              to={tool.path} 
-              key={index} 
-              className="group relative"
-            >
-              <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 opacity-20 blur transition duration-1000 group-hover:opacity-30" />
-              <Card className="relative h-full bg-[#141832]/50 backdrop-blur-xl border border-white/10 shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:shadow-blue-500/10">
-                <CardContent className="p-6 h-full flex flex-col">
+      <div className="w-full relative">
+        <div className="px-4 py-6">
+          <Header />
+          <WelcomeMessage />
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10 max-w-[1200px] mx-auto">
+            {tools.map((tool, index) => (
+              <Link 
+                to={tool.path} 
+                key={index} 
+                className="group relative"
+              >
+                <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 opacity-20 blur transition duration-1000 group-hover:opacity-30" />
+                <div className="relative h-full backdrop-blur-xl bg-white/5 rounded-xl p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-blue-500/10">
                   <div className={`${tool.color} rounded-xl p-3 w-fit mb-4 shadow-lg transition-transform duration-300 group-hover:scale-110`}>
                     {tool.icon}
                   </div>
@@ -72,10 +70,10 @@ const Index = () => {
                       Explorar <Search className="h-4 w-4 inline" />
                     </span>
                   </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </div>

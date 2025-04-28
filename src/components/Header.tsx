@@ -11,56 +11,58 @@ const Header = () => {
   const { logout, user } = useAuth();
   
   return (
-    <header className="relative z-10">
-      <div className="p-4 rounded-xl bg-[#141832]/50 backdrop-blur-xl border border-white/10 shadow-xl mb-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold tracking-tight flex items-center">
-            <Link to="/" className="flex items-center gap-2">
-              <div className="p-2 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg shadow-lg">
-                <Youtube className="h-6 w-6 text-white" />
-              </div>
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400">
-                YTOptimizer
+    <header className="relative z-10 mb-6">
+      <div className="backdrop-blur-xl bg-white/5 py-4">
+        <div className="max-w-[1200px] mx-auto px-4">
+          <div className="flex items-center justify-between">
+            <h1 className="text-3xl font-bold tracking-tight flex items-center">
+              <Link to="/" className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg shadow-lg">
+                  <Youtube className="h-6 w-6 text-white" />
+                </div>
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400">
+                  YTOptimizer
+                </span>
+              </Link>
+            </h1>
+            
+            <div className="flex items-center gap-3">
+              <span className="text-blue-100/70 text-sm hidden md:inline">
+                Bem vindo, {user?.name || 'Usuário'}
               </span>
-            </Link>
-          </h1>
-          
-          <div className="flex items-center gap-3">
-            <span className="text-blue-100/70 text-sm hidden md:inline">
-              Bem vindo, {user?.name || 'Usuário'}
-            </span>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={logout}
-              className="flex items-center gap-2 bg-blue-950/20 hover:bg-blue-900/30 text-blue-100/90 transition-all duration-300"
-            >
-              <LogOut className="h-4 w-4" />
-              Sair
-            </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={logout}
+                className="flex items-center gap-2 hover:bg-white/10 text-blue-100/90 transition-all duration-300"
+              >
+                <LogOut className="h-4 w-4" />
+                Sair
+              </Button>
+            </div>
           </div>
+          
+          <nav className="flex gap-2 flex-wrap mt-4">
+            <NavLink to="/" currentPath={location.pathname}>
+              Início
+            </NavLink>
+            <NavLink to="/search" currentPath={location.pathname}>
+              Pesquisar
+            </NavLink>
+            <NavLink to="/video-analyzer" currentPath={location.pathname}>
+              Analisar Vídeo
+            </NavLink>
+            <NavLink to="/title-generator" currentPath={location.pathname}>
+              Títulos
+            </NavLink>
+            <NavLink to="/script-generator" currentPath={location.pathname}>
+              Roteirizador
+            </NavLink>
+            <NavLink to="/subnicho-validator" currentPath={location.pathname}>
+              Validador
+            </NavLink>
+          </nav>
         </div>
-        
-        <nav className="flex gap-2 flex-wrap mt-4">
-          <NavLink to="/" currentPath={location.pathname}>
-            Início
-          </NavLink>
-          <NavLink to="/search" currentPath={location.pathname}>
-            Pesquisar
-          </NavLink>
-          <NavLink to="/video-analyzer" currentPath={location.pathname}>
-            Analisar Vídeo
-          </NavLink>
-          <NavLink to="/title-generator" currentPath={location.pathname}>
-            Títulos
-          </NavLink>
-          <NavLink to="/script-generator" currentPath={location.pathname}>
-            Roteirizador
-          </NavLink>
-          <NavLink to="/subnicho-validator" currentPath={location.pathname}>
-            Validador
-          </NavLink>
-        </nav>
       </div>
     </header>
   );
