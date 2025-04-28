@@ -72,11 +72,23 @@ export const enrichVideoData = (
       );
       
       return {
+        videoId: videoId || null,
         id: videoId || item.id.channelId || item.id.playlistId || Math.random().toString(36).substring(2, 15),
         title: item.snippet.title || "",
+        description: item.snippet.description || "",
         thumbnail: item.snippet.thumbnails?.high?.url || item.snippet.thumbnails?.default?.url,
-        channel: item.snippet.channelTitle,
         channelId,
+        channelTitle: item.snippet.channelTitle || "",
+        publishTime: item.snippet.publishedAt || new Date().toISOString(),
+        viewCount: views,
+        likeCount: likes,
+        commentCount: comments,
+        channelViewCount: channelStat.viewCount || 0,
+        channelSubscriberCount: subscribers,
+        channelVideoCount: channelStat.videoCount || 0,
+        
+        // Additional properties
+        channel: item.snippet.channelTitle,
         channelUrl: channelId ? `https://www.youtube.com/channel/${channelId}` : undefined,
         videoUrl: videoId ? `https://www.youtube.com/watch?v=${videoId}` : undefined,
         views,
@@ -94,7 +106,7 @@ export const enrichVideoData = (
         category: videoStat.category
       };
     })
-    .filter(Boolean);
+    .filter(Boolean) as VideoResult[];
 
   // Apply language filter if specified
   if (params.language && params.language !== "any") {

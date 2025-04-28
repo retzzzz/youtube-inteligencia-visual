@@ -1,4 +1,3 @@
-
 import { VideoResult, YoutubeSearchParams } from "@/types/youtube-types";
 import { randomBetween, languages, channelNames, generateVideoTitle, isMusicVideo } from './utils';
 import { calculateViralScore, estimateCPM, detectNiche } from './metrics';
@@ -73,14 +72,28 @@ export const generateMockVideo = (params: YoutubeSearchParams, language: string)
   const estimatedRPM = Number((estimatedCPM * 0.55).toFixed(2));
   const estimatedEarnings = Number(((views / 1000) * estimatedRPM).toFixed(2));
   
+  const videoId = Math.random().toString(36).substring(2, 15);
+  
   return {
     id: Math.random().toString(36).substring(2, 15),
+    videoId,
     title,
-    thumbnail: `https://i.ytimg.com/vi/${Math.random().toString(36).substring(2, 15)}/hqdefault.jpg`,
-    channel: channelNames[Math.floor(Math.random() * channelNames.length)],
+    description: `Description for video ${title}`,
+    thumbnail: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
     channelId: Math.random().toString(36).substring(2, 15),
+    channelTitle: channelNames[Math.floor(Math.random() * channelNames.length)],
+    publishTime: new Date(new Date().getTime() - videoAge * 24 * 60 * 60 * 1000).toISOString(),
+    viewCount: views,
+    likeCount: Math.floor(views * (engagement / 100) * 0.7),
+    commentCount: Math.floor(views * (engagement / 100) * 0.3),
+    channelViewCount: Math.floor(Math.random() * 10000000),
+    channelSubscriberCount: subscribers,
+    channelVideoCount: Math.floor(Math.random() * 500),
+    
+    // Additional properties
+    channel: channelNames[Math.floor(Math.random() * channelNames.length)],
     channelUrl: `https://www.youtube.com/channel/${Math.random().toString(36).substring(2, 15)}`,
-    videoUrl: `https://www.youtube.com/watch?v=${Math.random().toString(36).substring(2, 15)}`,
+    videoUrl: `https://www.youtube.com/watch?v=${videoId}`,
     views,
     engagement,
     viralScore,
@@ -92,6 +105,7 @@ export const generateMockVideo = (params: YoutubeSearchParams, language: string)
     channelDate: new Date(new Date().setFullYear(new Date().getFullYear() - randomBetween(1, 10))).toISOString(),
     language,
     mainNiche: nicheInfo.mainNiche,
-    subNiche: nicheInfo.subNiche
+    subNiche: nicheInfo.subNiche,
+    category: "Entertainment"
   };
 };

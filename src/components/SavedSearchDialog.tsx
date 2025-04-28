@@ -87,7 +87,8 @@ const SavedSearchDialog = ({ searchParams }: SavedSearchDialogProps) => {
     setOpen(false);
   };
 
-  const formatDate = (dateStr: string) => {
+  const formatDate = (dateStr: string | undefined) => {
+    if (!dateStr) return '';
     const date = new Date(dateStr);
     return date.toLocaleDateString("pt-BR") + " " + date.toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' });
   };
@@ -155,7 +156,7 @@ const SavedSearchDialog = ({ searchParams }: SavedSearchDialogProps) => {
                       <h3 className="font-medium">{search.name}</h3>
                       <div className="flex items-center text-sm text-muted-foreground">
                         <Calendar className="w-3 h-3 mr-1" />
-                        {formatDate(search.dateCreated || search.date || '')}
+                        {formatDate(search.dateCreated || search.date)}
                         <span className="mx-2">•</span>
                         <SearchIcon className="w-3 h-3 mr-1" />
                         {search.params.keywords}

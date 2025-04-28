@@ -49,7 +49,7 @@ const ResultsTableHeader = ({
                 variant="ghost"
                 size="sm"
                 className="h-8 px-2 -ml-2 font-medium"
-                onClick={() => onSort(column.id)}
+                onClick={() => onSort(column.id as keyof VideoResult)}
               >
                 {column.label}
                 {sortColumn === column.id && (

@@ -2,7 +2,7 @@
 /**
  * Modern title generation utilities
  */
-import { TitleVariation } from "@/components/title-generator/TitleVariationDisplay";
+import { TitleVariation } from "@/types/youtube-types";
 
 /**
  * Generates title variations based on keyword, language, and emotion
@@ -72,15 +72,16 @@ export const generateTitleVariations = (
   
   // Add translations if requested
   if (language === 'auto') {
-    const languages = ['pt', 'es', 'en', 'fr'];
+    const languages = ['pt', 'es', 'en', 'fr'] as const;
     const defaultLanguage = 'pt';
     
-    for (const variation of titleVariations) {
+    for (let i = 0; i < titleVariations.length; i++) {
+      const variation = titleVariations[i];
       variation.translations = languages
         .filter(lang => lang !== defaultLanguage)
         .map(lang => ({
-          text: `[${lang.toUpperCase()}] ${variation.text}`,
-          language: lang as "pt" | "es" | "en" | "fr"
+          text: `[${lang.toUpperCase()}] ${variation.title}`,
+          language: lang
         }));
     }
   }

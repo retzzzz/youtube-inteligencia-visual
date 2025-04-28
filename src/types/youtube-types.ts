@@ -1,4 +1,3 @@
-
 export interface VideoResult {
   videoId: string;
   title: string;
@@ -168,12 +167,12 @@ export interface TitleVariation {
   competitionLevel: string;
   viralPotential: number;
   text?: string;
-  type?: string;
+  type?: "dor" | "esperanca" | "curiosidade";
   saturation?: 'low' | 'medium' | 'high';
-  language?: string;
+  language?: "pt" | "en" | "es" | "fr";
   translations?: Array<{
     text: string;
-    language: string;
+    language: "pt" | "en" | "es" | "fr";
   }>;
 }
 
