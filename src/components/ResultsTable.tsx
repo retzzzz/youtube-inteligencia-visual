@@ -2,25 +2,10 @@
 import { useState, useEffect } from "react";
 import { VideoResult, ColumnDefinition } from "@/types/youtube-types";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { ArrowUp, ArrowDown, Info } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import VideoTitleCell from "./table/VideoTitleCell";
-import GrowthTypeCell from "./table/GrowthTypeCell";
-import VideoLinksCell from "./table/VideoLinksCell";
-import { formatNumber, formatCurrency, formatVideoAge, formatLanguage } from "@/utils/formatters";
+import { Table, TableBody } from "@/components/ui/table";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import ResultsTableHeader from "./table/ResultsTableHeader";
+import ResultsTableRow from "./table/ResultsTableRow";
 
 interface ResultsTableProps {
   results: VideoResult[];
@@ -32,10 +17,6 @@ const ResultsTable = ({ results, onSelectVideo }: ResultsTableProps) => {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [displayCount, setDisplayCount] = useState(50);
   const [loadedResults, setLoadedResults] = useState<VideoResult[]>([]);
-
-  useEffect(() => {
-    setLoadedResults(results.slice(0, displayCount));
-  }, [results, displayCount]);
 
   const columns: ColumnDefinition[] = [
     { id: "title", label: "Título do Vídeo", sortable: true },
@@ -52,6 +33,10 @@ const ResultsTable = ({ results, onSelectVideo }: ResultsTableProps) => {
     { id: "language", label: "Idioma", sortable: true },
     { id: "id", label: "Links", sortable: false },
   ];
+
+  useEffect(() => {
+    setLoadedResults(results.slice(0, displayCount));
+  }, [results, displayCount]);
 
   const handleSort = (column: keyof VideoResult) => {
     if (sortColumn === column) {
@@ -91,109 +76,19 @@ const ResultsTable = ({ results, onSelectVideo }: ResultsTableProps) => {
         <div className="overflow-x-auto" style={{ maxWidth: '95vw' }}>
           <div className="min-w-[1400px]">
             <Table>
-              <TableHeader>
-                <TableRow>
-                  {columns.map((column) => (
-                    <TableHead 
-                      key={column.id} 
-                      className={`whitespace-nowrap 
-                        ${column.id === 'title' ? 'w-[500px] min-w-[400px]' : ''} 
-                        ${column.id === 'videoAge' ? 'w-[60px]' : ''} 
-                        ${column.id === 'id' ? 'w-[80px] text-center' : ''}
-                        ${column.id === 'language' ? 'w-[120px]' : ''}
-                      `}
-                    >
-                      {column.sortable ? (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 px-2 -ml-2 font-medium"
-                          onClick={() => handleSort(column.id)}
-                        >
-                          {column.label}
-                          {sortColumn === column.id && (
-                            <span className="ml-1">
-                              {sortDirection === "asc" ? (
-                                <ArrowUp className="h-4 w-4" />
-                              ) : (
-                                <ArrowDown className="h-4 w-4" />
-                              )}
-                            </span>
-                          )}
-                          {column.id === 'viralScore' && (
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <Info className="h-4 w-4 ml-1 text-muted-foreground" />
-                              </TooltipTrigger>
-                              <TooltipContent className="w-80 p-3">
-                                <p className="font-medium mb-2">Como é calculada a Pontuação Viral?</p>
-                                <ul className="space-y-2 text-sm">
-                                  <li>• Vídeos muito recentes (24-72h) recebem multiplicador especial</li>
-                                  <li>• Taxa de crescimento: mais views em menos tempo = maior pontuação</li>
-                                  <li>• Engajamento tem peso importante (likes, comentários)</li>
-                                  <li>• Canais menores recebem bônus na pontuação</li>
-                                  <li>• Vídeos já virais (&gt;500k views) recebem penalidade</li>
-                                </ul>
-                                <p className="text-sm mt-2 text-muted-foreground">
-                                  Escala: 0-1000 (baixo), 1000-2000 (médio), 2000+ (alto potencial viral)
-                                </p>
-                              </TooltipContent>
-                            </Tooltip>
-                          )}
-                        </Button>
-                      ) : (
-                        column.label
-                      )}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
+              <ResultsTableHeader
+                columns={columns}
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+              />
               <TableBody>
                 {sortedResults.map((result) => (
-                  <TableRow 
-                    key={result.id} 
-                    className={onSelectVideo ? "cursor-pointer hover:bg-muted" : ""}
-                    onClick={() => onSelectVideo && onSelectVideo(result)}
-                  >
-                    <TableCell className="max-w-[500px] min-w-[400px] pr-4">
-                      <VideoTitleCell video={result} />
-                    </TableCell>
-                    <TableCell>
-                      {result.channelUrl ? (
-                        <a 
-                          href={result.channelUrl} 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          className="hover:underline text-blue-600 hover:text-blue-800"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {result.channel}
-                        </a>
-                      ) : (
-                        result.channel
-                      )}
-                    </TableCell>
-                    <TableCell>{formatNumber(result.views)}</TableCell>
-                    <TableCell>{result.engagement}%</TableCell>
-                    <TableCell className="font-medium">{result.viralScore}</TableCell>
-                    <TableCell>{result.mainNiche || "Diversos"}</TableCell>
-                    <TableCell>
-                      <GrowthTypeCell type={result.growthType} />
-                    </TableCell>
-                    <TableCell>
-                      {result.viewsPerHour ? formatNumber(result.viewsPerHour) : "—"}
-                    </TableCell>
-                    <TableCell>{formatCurrency(result.estimatedCPM)}</TableCell>
-                    <TableCell>{formatNumber(result.subscribers)}</TableCell>
-                    <TableCell>{formatVideoAge(result.videoAge)}</TableCell>
-                    <TableCell>{formatLanguage(result.language)}</TableCell>
-                    <TableCell className="text-center">
-                      <VideoLinksCell 
-                        videoUrl={result.videoUrl} 
-                        channelUrl={result.channelUrl} 
-                      />
-                    </TableCell>
-                  </TableRow>
+                  <ResultsTableRow
+                    key={result.id}
+                    result={result}
+                    onSelectVideo={onSelectVideo}
+                  />
                 ))}
               </TableBody>
             </Table>
