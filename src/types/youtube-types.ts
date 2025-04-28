@@ -24,10 +24,13 @@ export interface VideoResult {
   subNiche?: string;
   language?: string;
   channel?: string;
+  channelUrl?: string;
   subscribers?: number;
   engagement?: number;
   viewsPerHour?: number;
   estimatedCPM?: number;
+  estimatedEarnings?: number;
+  estimatedRPM?: number;
   escalabilityScore?: number;
   videoUrl?: string;
   likes?: number;
@@ -35,6 +38,8 @@ export interface VideoResult {
   id?: string;
   growthType?: string;
   channelSize?: 'small' | 'medium' | 'large';
+  category?: string;
+  channelDate?: string;
 }
 
 export interface YoutubeSearchParams {
@@ -92,7 +97,9 @@ export interface SavedSearch {
   id: string;
   name: string;
   params: YoutubeSearchParams;
-  dateCreated: string;
+  date?: string;
+  dateCreated?: string;
+  userId?: string;
   results?: VideoResult[];
 }
 
@@ -152,4 +159,29 @@ export interface VideoAnalysis {
     message: string;
     count: number;
   };
+}
+
+// Update TitleVariation to include all needed properties
+export interface TitleVariation {
+  title: string;
+  explanation: string;
+  competitionLevel: string;
+  viralPotential: number;
+  text?: string;
+  type?: string;
+  saturation?: 'low' | 'medium' | 'high';
+  language?: string;
+  translations?: Array<{
+    text: string;
+    language: string;
+  }>;
+}
+
+// Adding SavedSearch from youtube-mock types
+export interface SavedSearchMock {
+  id: string;
+  name: string;
+  date: string;
+  params: YoutubeSearchParams;
+  userId: string;
 }

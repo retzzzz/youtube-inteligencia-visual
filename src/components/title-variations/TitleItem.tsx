@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Copy, Check, Languages } from 'lucide-react';
-import { TitleVariation } from '@/components/title-generator/TitleVariationDisplay';
+import { TitleVariation } from '@/types/youtube-types';
 import TitleBadges from './TitleBadges';
 import TranslatedTitle from './TranslatedTitle';
 

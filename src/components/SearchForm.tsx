@@ -24,13 +24,14 @@ const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
     keywords: "",
     searchType: "videos",
     language: "any",
+    period: "30d",
+    orderBy: "relevance", // Added the required property
+    maxResults: 50,
+    apiKey: youtubeApiKey || "",
     minViews: 1000,
     maxViews: null,
     minSubscribers: null,
     maxSubscribers: null,
-    period: "30d",
-    maxResults: 50,
-    apiKey: youtubeApiKey || "",
     excludeMusic: true,
     excludeKeywords: ""
   });

@@ -31,8 +31,13 @@ const SavedSearchDialog = ({ searchParams }: SavedSearchDialogProps) => {
   const loadSavedSearches = () => {
     if (user) {
       const searches = getSavedSearches();
-      // Filtrar apenas as pesquisas do usuário atual
-      const userSearches = searches.filter(search => search.userId === user.name);
+      // Filter for current user's searches and convert date format if needed
+      const userSearches = searches
+        .filter(search => search.userId === user.name)
+        .map(search => ({
+          ...search,
+          dateCreated: search.date || search.dateCreated // Handle both date formats
+        }));
       setSavedSearches(userSearches);
     }
   };
@@ -48,7 +53,7 @@ const SavedSearchDialog = ({ searchParams }: SavedSearchDialogProps) => {
     }
 
     if (user) {
-      // Salvar a pesquisa com o ID do usuário
+      // Save the search with the ID of the user
       saveSearch(name, searchParams, user.name);
       toast({
         title: "Pesquisa salva",
@@ -150,7 +155,7 @@ const SavedSearchDialog = ({ searchParams }: SavedSearchDialogProps) => {
                       <h3 className="font-medium">{search.name}</h3>
                       <div className="flex items-center text-sm text-muted-foreground">
                         <Calendar className="w-3 h-3 mr-1" />
-                        {formatDate(search.date)}
+                        {formatDate(search.dateCreated || search.date || '')}
                         <span className="mx-2">•</span>
                         <SearchIcon className="w-3 h-3 mr-1" />
                         {search.params.keywords}

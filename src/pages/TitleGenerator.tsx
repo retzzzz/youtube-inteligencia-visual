@@ -12,7 +12,7 @@ import TitleExampleWalkthrough from "@/components/title-generator/TitleExampleWa
 import { processTitleInput } from "@/utils/titleProcessor";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Info } from "lucide-react";
-import { TitleVariation } from "@/components/title-generator/TitleVariationDisplay";
+import { TitleVariation } from "@/types/youtube-types";
 
 const TitleGenerator = () => {
   const [isLoading, setIsLoading] = useState(false);

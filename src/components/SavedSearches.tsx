@@ -19,12 +19,20 @@ const SavedSearches = ({ currentSearch, onLoadSearch, hideCurrentSaveButton = fa
 
   // Carregar buscas salvas ao montar o componente
   useEffect(() => {
-    setSavedSearches(getSavedSearches());
+    const searches = getSavedSearches().map(search => ({
+      ...search,
+      dateCreated: search.date || search.dateCreated // Handle both date formats
+    }));
+    setSavedSearches(searches);
   }, []);
 
   const handleDeleteSearch = (id: string) => {
     deleteSavedSearch(id);
-    setSavedSearches(savedSearches.filter((search) => search.id !== id));
+    const searches = getSavedSearches().map(search => ({
+      ...search,
+      dateCreated: search.date || search.dateCreated // Handle both date formats
+    }));
+    setSavedSearches(searches);
     
     toast({
       title: "Pesquisa excluída",
@@ -33,6 +41,7 @@ const SavedSearches = ({ currentSearch, onLoadSearch, hideCurrentSaveButton = fa
   };
 
   const formatDate = (dateStr: string) => {
+    if (!dateStr) return '';
     const date = new Date(dateStr);
     return date.toLocaleDateString("pt-BR") + " " + date.toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' });
   };
@@ -40,7 +49,11 @@ const SavedSearches = ({ currentSearch, onLoadSearch, hideCurrentSaveButton = fa
   // Atualizar a lista de pesquisas salvas quando alguma ação de salvamento ou exclusão ocorrer
   useEffect(() => {
     const refreshSavedSearches = () => {
-      setSavedSearches(getSavedSearches());
+      const searches = getSavedSearches().map(search => ({
+        ...search,
+        dateCreated: search.date || search.dateCreated // Handle both date formats
+      }));
+      setSavedSearches(searches);
     };
     
     // Criar um listener para atualizar quando o localStorage mudar
@@ -81,7 +94,7 @@ const SavedSearches = ({ currentSearch, onLoadSearch, hideCurrentSaveButton = fa
                 <h3 className="font-medium">{search.name}</h3>
                 <div className="flex items-center text-sm text-muted-foreground">
                   <Calendar className="w-3 h-3 mr-1" />
-                  {formatDate(search.date)}
+                  {formatDate(search.dateCreated || search.date || '')}
                   <span className="mx-2">•</span>
                   <SearchIcon className="w-3 h-3 mr-1" />
                   {search.params.keywords}

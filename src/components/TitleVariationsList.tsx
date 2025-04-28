@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card } from './ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { TitleVariation } from '@/components/title-generator/TitleVariationDisplay';
+import { TitleVariation } from '@/types/youtube-types';
 import { translateText } from './title-variations/titleUtils';
 import TitleVariationHeader from './title-variations/TitleVariationHeader';
 import TitleVariationFilters from './title-variations/TitleVariationFilters';
@@ -106,8 +106,8 @@ const TitleVariationsList = ({
       if (sortBy === "emotion") {
         return (a.type || '').localeCompare(b.type || '');
       } else if (sortBy === "saturation") {
-        const satOrder = { low: 1, medium: 2, high: 3 };
-        return satOrder[a.saturation || 'medium'] - satOrder[b.saturation || 'medium'];
+        const satOrder: Record<string, number> = { low: 1, medium: 2, high: 3 };
+        return (satOrder[a.saturation || 'medium'] || 0) - (satOrder[b.saturation || 'medium'] || 0);
       }
       return 0;
     });

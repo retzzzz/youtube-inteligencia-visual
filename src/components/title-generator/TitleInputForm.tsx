@@ -24,11 +24,11 @@ export interface TitleInputData {
 }
 
 interface TitleInputFormProps {
-  onSubmit: (data: TitleInputData) => void;
+  onGenerate: (data: TitleInputData) => void;
   isLoading?: boolean;
 }
 
-const TitleInputForm: React.FC<TitleInputFormProps> = ({ onSubmit, isLoading = false }) => {
+const TitleInputForm: React.FC<TitleInputFormProps> = ({ onGenerate, isLoading = false }) => {
   const [formData, setFormData] = React.useState<TitleInputData>({
     originalTitle: '',
     emotion: 'curiosidade',
@@ -42,7 +42,7 @@ const TitleInputForm: React.FC<TitleInputFormProps> = ({ onSubmit, isLoading = f
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    onGenerate(formData);
   };
 
   return (
