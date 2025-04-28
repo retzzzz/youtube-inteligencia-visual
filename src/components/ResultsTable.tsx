@@ -9,8 +9,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowUp, ArrowDown } from "lucide-react";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { ArrowUp, ArrowDown, Info } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import VideoTitleCell from "./table/VideoTitleCell";
 import GrowthTypeCell from "./table/GrowthTypeCell";
 import VideoLinksCell from "./table/VideoLinksCell";
@@ -82,9 +87,9 @@ const ResultsTable = ({ results, onSelectVideo }: ResultsTableProps) => {
   return (
     <TooltipProvider>
       <div className="space-y-4 animate-fade-in">
-        <div className="glass-panel overflow-hidden">
-          <div className="overflow-x-auto">
-            <Table className="w-full">
+        <div className="overflow-x-auto" style={{ maxWidth: '95vw' }}>
+          <div className="min-w-[1400px]">
+            <Table>
               <TableHeader>
                 <TableRow>
                   {columns.map((column) => (
@@ -113,6 +118,26 @@ const ResultsTable = ({ results, onSelectVideo }: ResultsTableProps) => {
                                 <ArrowDown className="h-4 w-4" />
                               )}
                             </span>
+                          )}
+                          {column.id === 'viralScore' && (
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <Info className="h-4 w-4 ml-1 text-muted-foreground" />
+                              </TooltipTrigger>
+                              <TooltipContent className="w-80 p-3">
+                                <p className="font-medium mb-2">Como é calculada a Pontuação Viral?</p>
+                                <ul className="space-y-2 text-sm">
+                                  <li>• Vídeos muito recentes (24-72h) recebem multiplicador especial</li>
+                                  <li>• Taxa de crescimento: mais views em menos tempo = maior pontuação</li>
+                                  <li>• Engajamento tem peso importante (likes, comentários)</li>
+                                  <li>• Canais menores recebem bônus na pontuação</li>
+                                  <li>• Vídeos já virais (>500k views) recebem penalidade</li>
+                                </ul>
+                                <p className="text-sm mt-2 text-muted-foreground">
+                                  Escala: 0-1000 (baixo), 1000-2000 (médio), 2000+ (alto potencial viral)
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
                           )}
                         </Button>
                       ) : (
