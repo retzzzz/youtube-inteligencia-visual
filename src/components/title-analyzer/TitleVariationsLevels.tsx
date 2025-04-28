@@ -95,10 +95,7 @@ interface TitleVariationCardProps {
 }
 
 const TitleVariationCard: React.FC<TitleVariationCardProps> = ({ variation, badgeColor }) => {
-  // Extract language from variation if available, default to Portuguese
-  const language = variation.language || 'pt';
-  const isNotPortuguese = language !== 'pt';
-  const hasTranslation = isNotPortuguese && variation.translation && variation.translation.trim() !== '';
+  const hasTranslation = variation.translation && variation.translation.trim() !== '';
 
   return (
     <div className="border p-3 rounded-md">

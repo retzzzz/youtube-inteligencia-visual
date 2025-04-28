@@ -39,6 +39,8 @@ const TitleVariationDisplay: React.FC<TitleVariationDisplayProps> = ({
     }
   };
 
+  const hasTranslation = variation.translation && variation.translation.trim() !== '';
+
   return (
     <Card 
       className={`cursor-pointer transition-all duration-200 hover:shadow-md
@@ -61,6 +63,14 @@ const TitleVariationDisplay: React.FC<TitleVariationDisplayProps> = ({
         <p className="text-sm text-muted-foreground mt-2">
           {variation.explanation}
         </p>
+
+        {hasTranslation && (
+          <div className="mt-2 pt-2 border-t border-dashed border-gray-200">
+            <p className="text-sm text-muted-foreground">
+              <span className="font-medium">Tradução:</span> {variation.translation}
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
