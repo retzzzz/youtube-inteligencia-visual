@@ -57,19 +57,31 @@ export function generateLightVariations(
       if (structure.character) {
         const characterParts = structure.character.split(" ");
         if (characterParts.length > 1) {
-          const randomAdjective = langType === "es" ? 
-            ["famoso", "conocido", "respetado", "humilde", "honesto"][i % 5] :
-            langType === "en" ? 
-            ["famous", "known", "respected", "humble", "honest"][i % 5] :
-            ["famoso", "conhecido", "respeitado", "humilde", "honesto"][i % 5];
+          const adjectiveMap: Record<SupportedLanguage, string[]> = {
+            "es": ["famoso", "conocido", "respetado", "humilde", "honesto"],
+            "en": ["famous", "known", "respected", "humble", "honest"],
+            "fr": ["célèbre", "connu", "respecté", "humble", "honnête"],
+            "pt": ["famoso", "conhecido", "respeitado", "humilde", "honesto"]
+          };
+          
+          const structureMap: Record<SupportedLanguage, (firstName: string, adj: string, restName: string) => string> = {
+            "es": (first, adj, rest) => `${first}, el ${adj} ${rest}`,
+            "en": (first, adj, rest) => `${first}, the ${adj} ${rest}`,
+            "fr": (first, adj, rest) => `${first}, le ${adj} ${rest}`,
+            "pt": (first, adj, rest) => `${first}, o ${adj} ${rest}`
+          };
 
+          const adjectives = adjectiveMap[langType] || adjectiveMap.pt;
+          const randomAdjective = adjectives[i % adjectives.length];
+          const structureFn = structureMap[langType] || structureMap.pt;
+          
           newTitle = newTitle.replace(
             structure.character, 
-            langType === "es" ? 
-              `${characterParts[0]}, el ${randomAdjective} ${characterParts.slice(1).join(" ")}` :
-            langType === "en" ? 
-              `${characterParts[0]}, the ${randomAdjective} ${characterParts.slice(1).join(" ")}` :
-              `${characterParts[0]}, o ${randomAdjective} ${characterParts.slice(1).join(" ")}`
+            structureFn(
+              characterParts[0], 
+              randomAdjective, 
+              characterParts.slice(1).join(" ")
+            )
           );
           explanation = `Adicionado adjetivo "${randomAdjective}" ao personagem`;
         }

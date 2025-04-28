@@ -52,13 +52,17 @@ export function generateBoldVariations(
     const capitalizedMysticAdj = mysticAdj.charAt(0).toUpperCase() + mysticAdj.slice(1);
     let boldTitle = "";
     
-    if (langType === "es") {
-      boldTitle = `${structure.character} ${mysticAdj} y la ${capitalizedMysticAdj} ${structure.action?.split(" ").slice(-1)[0] || "historia"}`;
-    } else if (langType === "en") {
-      boldTitle = `${structure.character} the ${mysticAdj} and the ${objectAdj} ${structure.action?.split(" ").slice(-1)[0] || "story"}`;
-    } else {
-      boldTitle = `${structure.character} ${mysticAdj} e a ${structure.action?.split(" ").slice(-1)[0] || "história"} ${capitalizedMysticAdj}`;
-    }
+    const templates: Record<SupportedLanguage, (character: string, mystic: string, capitalizedMystic: string, lastWord: string) => string> = {
+      "es": (char, mystic, capMystic, lastWord) => `${char} ${mystic} y la ${capMystic} ${lastWord || "historia"}`,
+      "en": (char, mystic, capMystic, lastWord) => `${char} the ${mystic} and the ${objectAdj} ${lastWord || "story"}`,
+      "fr": (char, mystic, capMystic, lastWord) => `${char} ${mystic} et l'${capMystic} ${lastWord || "histoire"}`,
+      "pt": (char, mystic, capMystic, lastWord) => `${char} ${mystic} e a ${lastWord || "história"} ${capMystic}`
+    };
+    
+    const templateFn = templates[langType] || templates.pt;
+    const lastActionWord = structure.action?.split(" ").slice(-1)[0] || "";
+    
+    boldTitle = templateFn(structure.character, mysticAdj, capitalizedMysticAdj, lastActionWord);
     
     // Adicionar tradução se não for português
     const boldTitleTranslation = langType !== "pt" ? 
@@ -80,27 +84,47 @@ export function generateBoldVariations(
   
   let legendaryTitle = "";
   if (structure.character && structure.action) {
-    const humbleWord = langType === "es" ? "humilde" : 
-                        langType === "en" ? "humble" : "humilde";
-    const discoveredWord = langType === "es" ? "descubrió" : 
-                          langType === "en" ? "discovered" : "descobriu";
-    const ofTheWord = langType === "es" ? "de los" : 
-                      langType === "en" ? "of the" : "dos";
-                      
-    if (langType === "es") {
-      legendaryTitle = `Cuando el ${humbleWord} ${structure.character.split(" ")[0]} ${discoveredWord} el ${structure.action.split(" ").slice(-1)[0]} ${ofTheWord} ${randomLegendWord}s`;
-    } else if (langType === "en") {
-      legendaryTitle = `When the ${humbleWord} ${structure.character.split(" ")[0]} ${discoveredWord} the ${randomLegendWord} ${structure.action.split(" ").slice(-1)[0]}`;
-    } else {
-      legendaryTitle = `Quando o ${humbleWord} ${structure.character.split(" ")[0]} ${discoveredWord} o ${structure.action.split(" ").slice(-1)[0]} ${ofTheWord} ${randomLegendWord}s`;
-    }
-  } else {
-    const storyWord = langType === "es" ? "historia" : 
-                      langType === "en" ? "story" : "história";
-    const ofWord = langType === "es" ? "de" : 
-                  langType === "en" ? "of" : "de";
+    const phraseMap: Record<SupportedLanguage, {
+      humble: string;
+      discovered: string;
+      ofThe: string;
+    }> = {
+      "es": { humble: "humilde", discovered: "descubrió", ofThe: "de los" },
+      "en": { humble: "humble", discovered: "discovered", ofThe: "of the" },
+      "fr": { humble: "humble", discovered: "a découvert", ofThe: "des" },
+      "pt": { humble: "humilde", discovered: "descobriu", ofThe: "dos" }
+    };
     
-    legendaryTitle = `A ${storyWord} ${randomLegendWord} ${ofWord} ${title}`;
+    const phrases = phraseMap[langType] || phraseMap.pt;
+    const characterFirstName = structure.character.split(" ")[0];
+    const actionLastWord = structure.action.split(" ").slice(-1)[0];
+                      
+    const templates: Record<SupportedLanguage, (humble: string, char: string, discovered: string, action: string, ofThe: string, legendary: string) => string> = {
+      "es": (humble, char, discovered, action, ofThe, legendary) => 
+        `Cuando el ${humble} ${char} ${discovered} el ${action} ${ofThe} ${legendary}s`,
+      "en": (humble, char, discovered, action, ofThe, legendary) => 
+        `When the ${humble} ${char} ${discovered} the ${legendary} ${action}`,
+      "fr": (humble, char, discovered, action, ofThe, legendary) => 
+        `Quand le ${humble} ${char} ${discovered} le ${action} ${ofThe} ${legendary}s`,
+      "pt": (humble, char, discovered, action, ofThe, legendary) => 
+        `Quando o ${humble} ${char} ${discovered} o ${action} ${ofThe} ${legendary}s`
+    };
+    
+    const templateFn = templates[langType] || templates.pt;
+    legendaryTitle = templateFn(phrases.humble, characterFirstName, phrases.discovered, actionLastWord, phrases.ofThe, randomLegendWord);
+  } else {
+    const storyPhraseMap: Record<SupportedLanguage, {
+      story: string;
+      of: string;
+    }> = {
+      "es": { story: "historia", of: "de" },
+      "en": { story: "story", of: "of" },
+      "fr": { story: "histoire", of: "de" },
+      "pt": { story: "história", of: "de" }
+    };
+    
+    const phrases = storyPhraseMap[langType] || storyPhraseMap.pt;
+    legendaryTitle = `A ${phrases.story} ${randomLegendWord} ${phrases.of} ${title}`;
   }
   
   // Adicionar tradução se não for português
@@ -124,21 +148,25 @@ export function generateBoldVariations(
   if (structure.action && structure.character) {
     const actionKeyword = structure.action.split(" ").slice(-1)[0];
     
-    if (langType === "es") {
-      mysteryTitle = `La profecía ${randomMysteryWord} de la ${actionKeyword} según ${structure.character}`;
-    } else if (langType === "en") {
-      mysteryTitle = `The ${randomMysteryWord} prophecy of the ${actionKeyword} according to ${structure.character}`;
-    } else {
-      mysteryTitle = `A profecia ${randomMysteryWord} da ${actionKeyword} segundo ${structure.character}`;
-    }
+    const templates: Record<SupportedLanguage, (mystery: string, action: string, character: string) => string> = {
+      "es": (mystery, action, character) => `La profecía ${mystery} de la ${action} según ${character}`,
+      "en": (mystery, action, character) => `The ${mystery} prophecy of the ${action} according to ${character}`,
+      "fr": (mystery, action, character) => `La prophétie ${mystery} de la ${action} selon ${character}`,
+      "pt": (mystery, action, character) => `A profecia ${mystery} da ${action} segundo ${character}`
+    };
+    
+    const templateFn = templates[langType] || templates.pt;
+    mysteryTitle = templateFn(randomMysteryWord, actionKeyword, structure.character);
   } else {
-    if (langType === "es") {
-      mysteryTitle = `El secreto ${randomMysteryWord} detrás de ${title}`;
-    } else if (langType === "en") {
-      mysteryTitle = `The ${randomMysteryWord} secret behind ${title}`;
-    } else {
-      mysteryTitle = `O segredo ${randomMysteryWord} por trás de ${title}`;
-    }
+    const templates: Record<SupportedLanguage, (mystery: string, titleText: string) => string> = {
+      "es": (mystery, titleText) => `El secreto ${mystery} detrás de ${titleText}`,
+      "en": (mystery, titleText) => `The ${mystery} secret behind ${titleText}`,
+      "fr": (mystery, titleText) => `Le secret ${mystery} derrière ${titleText}`,
+      "pt": (mystery, titleText) => `O segredo ${mystery} por trás de ${titleText}`
+    };
+    
+    const templateFn = templates[langType] || templates.pt;
+    mysteryTitle = templateFn(randomMysteryWord, title);
   }
   
   // Adicionar tradução se não for português

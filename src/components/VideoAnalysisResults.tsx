@@ -15,7 +15,7 @@ import SubNicheIdeas from './SubNicheIdeas';
 import TitleStructureAnalysis from './title-analyzer/TitleStructureAnalysis';
 import TitleVariationsLevels from './title-analyzer/TitleVariationsLevels';
 import { analyzeTitleStructure } from '@/utils/titleStructuralAnalysis';
-import { generateAllVariationLevels } from '@/utils/titleVariations'; // Updated import
+import { generateAllVariationLevels } from '@/utils/titleVariations';
 
 interface VideoAnalysisResultsProps {
   analysis: VideoAnalysis;
@@ -32,8 +32,7 @@ const VideoAnalysisResults = ({ analysis }: VideoAnalysisResultsProps) => {
   const titleVariations = generateAllVariationLevels(
     analysis.basicInfo.title, 
     titleStructure, 
-    contentLanguage.startsWith('es') ? 'es' : 
-    contentLanguage.startsWith('en') ? 'en' : 'pt'
+    contentLanguage
   );
 
   return (

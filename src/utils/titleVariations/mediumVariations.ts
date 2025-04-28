@@ -19,12 +19,14 @@ export function generateMediumVariations(
   
   // Variação 1: Inverter a ordem (ação primeiro, depois personagem)
   if (structure.action && structure.character) {
-    const actionPhrase = langType === "es" ? 
-      "que desafió a" : 
-      langType === "en" ? 
-      "that challenged" : 
-      "que desafiou";
-      
+    const actionPhrases: Record<SupportedLanguage, string> = {
+      "es": "que desafió a",
+      "en": "that challenged",
+      "fr": "qui a défié",
+      "pt": "que desafiou"
+    };
+    
+    const actionPhrase = actionPhrases[langType] || actionPhrases.pt;
     const invertedTitle = `${structure.action} ${actionPhrase} ${structure.character}`;
     
     // Adicionar tradução se não for português
@@ -42,12 +44,14 @@ export function generateMediumVariations(
   }
   
   // Variação 2: Transformar em pergunta
-  const questionWords = langType === "es" ? 
-    ["¿Qué pasó cuando", "¿Sabías que", "¿Te imaginas cómo"] : 
-    langType === "en" ? 
-    ["What happened when", "Did you know that", "Can you imagine how"] :
-    ["O que aconteceu quando", "Você sabia que", "Você imagina como"];
+  const questionWordsMap: Record<SupportedLanguage, string[]> = {
+    "es": ["¿Qué pasó cuando", "¿Sabías que", "¿Te imaginas cómo"],
+    "en": ["What happened when", "Did you know that", "Can you imagine how"],
+    "fr": ["Qu'est-ce qui s'est passé quand", "Savais-tu que", "Peux-tu imaginer comment"],
+    "pt": ["O que aconteceu quando", "Você sabia que", "Você imagina como"]
+  };
   
+  const questionWords = questionWordsMap[langType] || questionWordsMap.pt;
   const questionWord = questionWords[Math.floor(Math.random() * questionWords.length)];
   const questionMark = langType === "es" ? "?" : "?";
   
@@ -75,18 +79,23 @@ export function generateMediumVariations(
   const numbers = [3, 5, 7, 10];
   const randomNumber = numbers[Math.floor(Math.random() * numbers.length)];
   
-  const reasons = langType === "es" ? 
-    "razones por las que" : 
-    langType === "en" ? 
-    "reasons why" :
-    "motivos pelos quais";
+  const reasonsMap: Record<SupportedLanguage, string> = {
+    "es": "razones por las que",
+    "en": "reasons why",
+    "fr": "raisons pour lesquelles", 
+    "pt": "motivos pelos quais"
+  };
   
-  const surprise = langType === "es" ? 
-    "te sorprenderá" : 
-    langType === "en" ? 
-    "will surprise you" :
-    "te surpreenderá";
-    
+  const surpriseMap: Record<SupportedLanguage, string> = {
+    "es": "te sorprenderá",
+    "en": "will surprise you",
+    "fr": "te surprendra",
+    "pt": "te surpreenderá"
+  };
+  
+  const reasons = reasonsMap[langType] || reasonsMap.pt;
+  const surprise = surpriseMap[langType] || surpriseMap.pt;
+  
   const numberTitle = `${randomNumber} ${reasons} ${structure.character || title} ${surprise}`;
   
   // Adicionar tradução se não for português

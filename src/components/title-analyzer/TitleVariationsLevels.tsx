@@ -15,6 +15,33 @@ interface TitleVariationsLevelsProps {
 }
 
 const TitleVariationsLevels: React.FC<TitleVariationsLevelsProps> = ({ variations }) => {
+  const getLevelName = (level: string): string => {
+    switch(level) {
+      case "light": return "Variações Leves";
+      case "medium": return "Variações Médias";
+      case "bold": return "Variações Ousadas";
+      default: return "Variações";
+    }
+  };
+  
+  const getLevelDescription = (level: string): string => {
+    switch(level) {
+      case "light": return "Trocas sutis com sinônimos, mantendo a estrutura original.";
+      case "medium": return "Reorganização de estrutura, transformação em pergunta ou lista numerada.";
+      case "bold": return "Inovação completa com micro-subnichos, mantendo o gancho emocional.";
+      default: return "";
+    }
+  };
+  
+  const getBadgeColor = (level: string): string => {
+    switch(level) {
+      case "light": return "blue";
+      case "medium": return "yellow";
+      case "bold": return "green";
+      default: return "blue";
+    }
+  };
+
   return (
     <Card className="p-6">
       <h3 className="text-lg font-semibold mb-4">Geração de variações em camadas</h3>
@@ -26,59 +53,25 @@ const TitleVariationsLevels: React.FC<TitleVariationsLevelsProps> = ({ variation
           <TabsTrigger value="bold">Variações Ousadas</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="light" className="pt-4">
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Trocas sutis com sinônimos, mantendo a estrutura original.
-            </p>
+        {["light", "medium", "bold"].map(level => (
+          <TabsContent key={level} value={level} className="pt-4">
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                {getLevelDescription(level)}
+              </p>
 
-            <div className="space-y-3">
-              {variations.light.map((variation, index) => (
-                <TitleVariationCard 
-                  key={`light-${index}`} 
-                  variation={variation} 
-                  badgeColor="blue"
-                />
-              ))}
+              <div className="space-y-3">
+                {variations[level as keyof typeof variations].map((variation, index) => (
+                  <TitleVariationCard 
+                    key={`${level}-${index}`} 
+                    variation={variation} 
+                    badgeColor={getBadgeColor(level)}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="medium" className="pt-4">
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Reorganização de estrutura, transformação em pergunta ou lista numerada.
-            </p>
-
-            <div className="space-y-3">
-              {variations.medium.map((variation, index) => (
-                <TitleVariationCard 
-                  key={`medium-${index}`} 
-                  variation={variation}
-                  badgeColor="yellow"
-                />
-              ))}
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="bold" className="pt-4">
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Inovação completa com micro-subnichos, mantendo o gancho emocional.
-            </p>
-
-            <div className="space-y-3">
-              {variations.bold.map((variation, index) => (
-                <TitleVariationCard 
-                  key={`bold-${index}`} 
-                  variation={variation}
-                  badgeColor="green"
-                />
-              ))}
-            </div>
-          </div>
-        </TabsContent>
+          </TabsContent>
+        ))}
       </Tabs>
       
       <div className="text-sm text-muted-foreground mt-4 p-3 bg-slate-50 rounded-md">
