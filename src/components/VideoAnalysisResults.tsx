@@ -13,12 +13,27 @@ import TitleVariations from './TitleVariations';
 import ScriptIdeas from './ScriptIdeas';
 import ImagePrompts from './ImagePrompts';
 import SubNicheIdeas from './SubNicheIdeas';
+import TitleStructureAnalysis from './title-analyzer/TitleStructureAnalysis';
+import TitleVariationsLevels from './title-analyzer/TitleVariationsLevels';
+import { analyzeTitleStructure } from '@/utils/titleStructuralAnalysis';
+import { generateAllVariationLevels } from '@/utils/titleVariationLevels';
 
 interface VideoAnalysisResultsProps {
   analysis: VideoAnalysis;
 }
 
 const VideoAnalysisResults = ({ analysis }: VideoAnalysisResultsProps) => {
+  // Analisar estrutura do título
+  const titleStructure = analyzeTitleStructure(analysis.basicInfo.title);
+  
+  // Gerar variações de título em três níveis
+  const titleVariations = generateAllVariationLevels(
+    analysis.basicInfo.title, 
+    titleStructure, 
+    analysis.basicInfo.language?.startsWith('es') ? 'es' : 
+    analysis.basicInfo.language?.startsWith('en') ? 'en' : 'pt'
+  );
+
   return (
     <div className="space-y-6 mb-10 animate-fade-in">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -37,7 +52,7 @@ const VideoAnalysisResults = ({ analysis }: VideoAnalysisResultsProps) => {
         )}
       </div>
 
-      <Tabs defaultValue="basic-info" className="w-full">
+      <Tabs defaultValue="title-variations" className="w-full">
         <TabsList className="grid grid-cols-3 md:grid-cols-7 mb-4">
           <TabsTrigger value="basic-info">🔎 Dados Básicos</TabsTrigger>
           <TabsTrigger value="translations">🌎 Traduções</TabsTrigger>
@@ -57,7 +72,19 @@ const VideoAnalysisResults = ({ analysis }: VideoAnalysisResultsProps) => {
         </TabsContent>
         
         <TabsContent value="title-variations">
-          <TitleVariations variations={analysis.titleVariations} />
+          <div className="space-y-6">
+            <TitleStructureAnalysis 
+              originalTitle={analysis.basicInfo.title}
+              structure={{
+                hasNumber: titleStructure.hasNumber,
+                character: titleStructure.character,
+                action: titleStructure.action,
+                hook: titleStructure.hook
+              }}
+            />
+            
+            <TitleVariationsLevels variations={titleVariations} />
+          </div>
         </TabsContent>
         
         <TabsContent value="script-ideas">
