@@ -9,6 +9,7 @@ import { analyzeYoutubeVideo } from "@/services/youtube-analyzer";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import ApiKeyDialog from "@/components/ApiKeyDialog";
+import Footer from "@/components/Footer";
 
 const VideoAnalyzer = () => {
   const [analysis, setAnalysis] = useState<VideoAnalysis | null>(null);
@@ -69,6 +70,8 @@ const VideoAnalyzer = () => {
       {analysis && (
         <VideoAnalysisResults analysis={analysis} />
       )}
+      
+      <Footer />
     </div>
   );
 };

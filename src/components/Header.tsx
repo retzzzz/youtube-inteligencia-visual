@@ -61,6 +61,9 @@ const Header = () => {
             <NavLink to="/subnicho-validator" currentPath={location.pathname}>
               Validador
             </NavLink>
+            <NavLink to="/micro-subnicho-analyzer" currentPath={location.pathname}>
+              Micro Subnichos
+            </NavLink>
           </nav>
         </div>
       </div>

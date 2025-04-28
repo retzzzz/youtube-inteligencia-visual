@@ -7,6 +7,7 @@ import SubnicheValidationResults from '@/components/SubnicheValidationResults';
 import ApiKeySection from '@/components/subnicho/ApiKeySection';
 import ErrorAlert from '@/components/subnicho/ErrorAlert';
 import { useSubnicheValidator } from '@/hooks/useSubnicheValidator';
+import Footer from '@/components/Footer';
 
 const SubnicheValidator = () => {
   const {
@@ -75,6 +76,8 @@ const SubnicheValidator = () => {
       {subnichesPriorizados.length > 0 && (
         <SubnicheValidationResults subnichesPriorizados={subnichesPriorizados} />
       )}
+      
+      <Footer />
     </div>
   );
 };

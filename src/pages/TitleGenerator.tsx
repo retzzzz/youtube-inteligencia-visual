@@ -1,9 +1,9 @@
-
 import React, { useState } from "react";
 import Header from "@/components/Header";
 import { useToast } from "@/hooks/use-toast";
 import TitleGeneratorContainer from "@/components/title-generator/TitleGeneratorContainer";
 import { useAuth } from "@/contexts/AuthContext";
+import Footer from "@/components/Footer";
 import { 
   TitleData,
   extrairTitulosConcorrentes,
@@ -36,7 +36,6 @@ const TitleGenerator = () => {
   const { toast } = useToast();
   const { youtubeApiKey } = useAuth();
   
-  // Additional state needed for TitleGeneratorContainer
   const [variacoesTitulo, setVariacoesTitulo] = useState<TitleVariations | null>(null);
   const [titulosSubnicho, setTitulosSubnicho] = useState<string[]>([]);
   const [titulosPriorizados, setTitulosPriorizados] = useState<TitleWithScore[]>([]);
@@ -78,7 +77,6 @@ const TitleGenerator = () => {
       const basicVariations = generateTitleVariations(keyword, language, emotion);
       setVariations(basicVariations);
       
-      // Generate structured variations
       const structured = {
         emotional: basicVariations.filter(v => v.type === "dor").map(v => v.text),
         structural: basicVariations.filter(v => v.type === "esperanca").map(v => v.text),
@@ -181,6 +179,8 @@ const TitleGenerator = () => {
           setLoadingAudiencia={setLoadingAudiencia}
         />
       </div>
+      
+      <Footer />
     </div>
   );
 };

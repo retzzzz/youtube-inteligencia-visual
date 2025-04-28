@@ -9,6 +9,7 @@ import AvaliarTab from '@/components/microSubniches/AvaliarTab';
 import RecomendarTab from '@/components/microSubniches/RecomendarTab';
 import TitulosTab from '@/components/microSubniches/TitulosTab';
 import PlanejamentoTab from '@/components/microSubniches/PlanejamentoTab';
+import Footer from '@/components/Footer';
 
 const MicroSubnicheAnalyzer = () => {
   const {
@@ -120,6 +121,8 @@ const MicroSubnicheAnalyzer = () => {
           </Tabs>
         </Card>
       </div>
+      
+      <Footer />
     </div>
   );
 };

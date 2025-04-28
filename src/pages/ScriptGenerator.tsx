@@ -9,6 +9,7 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { useScriptGenerator } from "@/hooks/useScriptGenerator";
 import ScriptGeneratorIntro from "@/components/script-generator/ScriptGeneratorIntro";
 import ScriptGeneratorTabs from "@/components/script-generator/ScriptGeneratorTabs";
+import Footer from "@/components/Footer";
 
 const ScriptGenerator = () => {
   const {
@@ -63,6 +64,8 @@ const ScriptGenerator = () => {
           </Tabs>
         </Card>
       </div>
+      
+      <Footer />
     </div>
   );
 };
