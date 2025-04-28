@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,6 +7,14 @@ export interface TitleVariation {
   explanation: string;
   competitionLevel: string;
   viralPotential: number;
+  text?: string;
+  type?: "dor" | "esperanca" | "curiosidade";
+  saturation?: 'low' | 'medium' | 'high';
+  language?: "pt" | "en" | "es" | "fr";
+  translations?: Array<{
+    text: string;
+    language: "pt" | "en" | "es" | "fr";
+  }>;
 }
 
 interface TitleVariationDisplayProps {

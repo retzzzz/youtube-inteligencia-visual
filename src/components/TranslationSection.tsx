@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { Card } from './ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { VideoTranslations } from '@/types/youtube-types';
 import { Button } from './ui/button';
-import { Copy, Translate } from 'lucide-react';
+import { Copy } from 'lucide-react';
+import TranslationIcon from './icons/TranslationIcon';
 import { useToast } from '@/hooks/use-toast';
 
 interface TranslationSectionProps {
@@ -103,10 +103,8 @@ interface TranslationContentProps {
 }
 
 const TranslationContent = ({ title, description, onCopy, language, isOriginal }: TranslationContentProps) => {
-  // Remove language prefix if present
   const cleanTitle = title.replace(/^\[(.*?)\]\s*/, '');
   
-  // Add Portuguese translation for non-Portuguese content
   const needsTranslation = !language.toLowerCase().includes('português');
   
   return (
@@ -129,7 +127,7 @@ const TranslationContent = ({ title, description, onCopy, language, isOriginal }
         
         {needsTranslation && (
           <div className="mt-2 flex items-center gap-2">
-            <Translate className="h-3.5 w-3.5 text-muted-foreground" />
+            <TranslationIcon className="h-3.5 w-3.5 text-muted-foreground" />
             <p className="text-sm text-muted-foreground italic">Tradução: {title.includes('BR') ? title.split('BR: ')[1] : (
               `Tradução não disponível`
             )}</p>
@@ -158,7 +156,7 @@ const TranslationContent = ({ title, description, onCopy, language, isOriginal }
         {needsTranslation && (
           <div className="mt-2">
             <div className="flex items-center gap-2 mb-1">
-              <Translate className="h-3.5 w-3.5 text-muted-foreground" />
+              <TranslationIcon className="h-3.5 w-3.5 text-muted-foreground" />
               <p className="text-sm text-muted-foreground">Tradução:</p>
             </div>
             <div className="bg-muted/30 p-3 rounded-md text-sm whitespace-pre-wrap max-h-48 overflow-y-auto italic">

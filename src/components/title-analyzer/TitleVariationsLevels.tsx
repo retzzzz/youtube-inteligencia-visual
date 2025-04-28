@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { TitleVariation } from '@/components/title-generator/TitleVariationDisplay';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Translate } from 'lucide-react';
+import TranslationIcon from '../icons/TranslationIcon';
 
 interface TitleVariationsLevelsProps {
   variations: {
@@ -96,7 +96,8 @@ interface TitleVariationCardProps {
 
 const TitleVariationCard: React.FC<TitleVariationCardProps> = ({ variation, badgeColor }) => {
   // Extract language from variation if available, default to Portuguese
-  const language = variation.language || 'pt';
+  // Update the type definition to handle this property correctly
+  const language = (variation as any).language || 'pt';
   const isNotPortuguese = language !== 'pt';
 
   // Create Portuguese translation if title is not in Portuguese
@@ -120,7 +121,7 @@ const TitleVariationCard: React.FC<TitleVariationCardProps> = ({ variation, badg
       {isNotPortuguese && portugueseTranslation && (
         <div className="mt-2 pt-2 border-t border-dashed border-border">
           <div className="flex items-center gap-1">
-            <Translate className="h-3.5 w-3.5 text-muted-foreground" />
+            <TranslationIcon className="h-3.5 w-3.5 text-muted-foreground" />
             <p className="text-xs italic text-muted-foreground">{portugueseTranslation}</p>
           </div>
         </div>

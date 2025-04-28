@@ -2,7 +2,8 @@
 import React, { useState } from 'react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
-import { Copy, Check, Translate } from 'lucide-react';
+import { Copy, Check } from 'lucide-react';
+import TranslationIcon from './icons/TranslationIcon';
 import { useToast } from '@/hooks/use-toast';
 
 interface ScriptIdeasProps {
@@ -61,7 +62,7 @@ const ScriptIdeas = ({ ideas, language = 'pt' }: ScriptIdeasProps) => {
                   {needsTranslation && (
                     <div className="mt-2 pt-2 border-t border-dashed border-border">
                       <div className="flex items-center gap-1 mb-1">
-                        <Translate className="h-3.5 w-3.5 text-muted-foreground" />
+                        <TranslationIcon className="h-3.5 w-3.5 text-muted-foreground" />
                         <p className="text-xs text-muted-foreground">Tradução:</p>
                       </div>
                       <p className="text-sm whitespace-pre-wrap italic">
