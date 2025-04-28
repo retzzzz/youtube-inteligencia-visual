@@ -1,7 +1,10 @@
 
-import React from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import TitleVariationDisplay, { TitleVariation } from "./TitleVariationDisplay";
+import React, { useState } from 'react';
+import { TitleVariation } from './TitleVariationDisplay';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import TitleVariationDisplay from './TitleVariationDisplay';
 
 export interface ProcessedTitleData {
   originalTitle: string;
@@ -15,84 +18,137 @@ interface TitleProcessingResultsProps {
   data: ProcessedTitleData;
 }
 
-const TitleProcessingResults = ({ data }: TitleProcessingResultsProps) => {
-  const hasStructureVariations = data.structureVariations && data.structureVariations.length > 0;
-  const hasKeywordSubniche = data.keywordSubniche && data.keywordSubniche.length > 0;
-  const hasTotalInnovation = data.totalInnovation && data.totalInnovation.length > 0;
-
-  if (!hasStructureVariations && !hasKeywordSubniche && !hasTotalInnovation) {
-    return null;
-  }
-
-  // Get initial tab value based on available data
-  let initialTabValue = "best";
-  if (hasStructureVariations) initialTabValue = "structure";
-  else if (hasKeywordSubniche) initialTabValue = "subniche";
-  else if (hasTotalInnovation) initialTabValue = "innovation";
+const TitleProcessingResults: React.FC<TitleProcessingResultsProps> = ({ data }) => {
+  const [selectedVariation, setSelectedVariation] = useState<TitleVariation | null>(
+    data.bestVariation || null
+  );
+  
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    // Could add toast notification here
+  };
+  
+  const allVariations = [
+    ...(data.structureVariations || []),
+    ...(data.keywordSubniche || []),
+    ...(data.totalInnovation || [])
+  ];
+  
+  // Sort variations by viral potential descending
+  const sortedVariations = [...allVariations].sort(
+    (a, b) => b.viralPotential - a.viralPotential
+  );
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-bold">Resultados para: "{data.originalTitle}"</h2>
-      
-      <Tabs defaultValue={initialTabValue} className="w-full">
-        <TabsList className="grid grid-cols-2 md:grid-cols-4">
-          {data.bestVariation && (
-            <TabsTrigger value="best">Melhor Opção</TabsTrigger>
-          )}
-          {hasStructureVariations && (
-            <TabsTrigger value="structure">🅐 Variações da Estrutura</TabsTrigger>
-          )}
-          {hasKeywordSubniche && (
-            <TabsTrigger value="subniche">🅑 Subniche do Termo-chave</TabsTrigger>
-          )}
-          {hasTotalInnovation && (
-            <TabsTrigger value="innovation">🅒 Inovação Total</TabsTrigger>
-          )}
-        </TabsList>
-        
-        {data.bestVariation && (
-          <TabsContent value="best">
-            <div className="p-4 border border-green-200 bg-green-50 dark:bg-green-900/20 rounded-lg">
-              <h3 className="text-lg font-medium mb-2">Variação Recomendada</h3>
-              <TitleVariationDisplay 
-                variations={[data.bestVariation]}
-                strategyName="Melhor opção"
-                strategyDescription="Esta variação tem o melhor balanço entre originalidade e potencial viral"
-              />
+    <div className="space-y-6 animate-fade-in">
+      <Card className="border-t-4 border-t-primary">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg">Título Original</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="p-3 bg-muted/50 rounded-md">
+            <p className="font-medium">{data.originalTitle}</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {data.bestVariation && (
+        <Card className="border-t-4 border-t-green-500">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center gap-2">
+              Melhor Variação Sugerida
+              <Badge variant="default" className="bg-green-500">
+                {data.bestVariation.viralPotential}%
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="p-3 bg-green-50 rounded-md">
+                <p className="font-medium">{data.bestVariation.title}</p>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {data.bestVariation.explanation}
+              </p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => copyToClipboard(data.bestVariation!.title)}
+              >
+                Copiar Título
+              </Button>
             </div>
-          </TabsContent>
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium">Todas as Variações ({allVariations.length})</h3>
+      
+        {data.structureVariations && data.structureVariations.length > 0 && (
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium text-muted-foreground">Variações da Estrutura</h4>
+            <div className="space-y-2">
+              {data.structureVariations.map((variation, i) => (
+                <TitleVariationDisplay
+                  key={`structure-${i}`}
+                  variation={variation}
+                  isSelected={selectedVariation === variation}
+                  onSelect={() => setSelectedVariation(variation)}
+                />
+              ))}
+            </div>
+          </div>
         )}
-        
-        {hasStructureVariations && (
-          <TabsContent value="structure">
-            <TitleVariationDisplay 
-              variations={data.structureVariations}
-              strategyName="🅐 Variações da Estrutura"
-              strategyDescription="Títulos que mantêm a estrutura original, mas variam palavras e expressões"
-            />
-          </TabsContent>
+
+        {data.keywordSubniche && data.keywordSubniche.length > 0 && (
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium text-muted-foreground">Subnichos de Palavras-Chave</h4>
+            <div className="space-y-2">
+              {data.keywordSubniche.map((variation, i) => (
+                <TitleVariationDisplay
+                  key={`subniche-${i}`}
+                  variation={variation}
+                  isSelected={selectedVariation === variation}
+                  onSelect={() => setSelectedVariation(variation)}
+                />
+              ))}
+            </div>
+          </div>
         )}
-        
-        {hasKeywordSubniche && (
-          <TabsContent value="subniche">
-            <TitleVariationDisplay 
-              variations={data.keywordSubniche}
-              strategyName="🅑 Subniche do Termo-chave"
-              strategyDescription="Títulos que substituem termos principais por subnichos mais específicos"
-            />
-          </TabsContent>
+
+        {data.totalInnovation && data.totalInnovation.length > 0 && (
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium text-muted-foreground">Inovações Totais</h4>
+            <div className="space-y-2">
+              {data.totalInnovation.map((variation, i) => (
+                <TitleVariationDisplay
+                  key={`innovation-${i}`}
+                  variation={variation}
+                  isSelected={selectedVariation === variation}
+                  onSelect={() => setSelectedVariation(variation)}
+                />
+              ))}
+            </div>
+          </div>
         )}
-        
-        {hasTotalInnovation && (
-          <TabsContent value="innovation">
-            <TitleVariationDisplay 
-              variations={data.totalInnovation}
-              strategyName="🅒 Inovação Total"
-              strategyDescription="Títulos completamente novos que mantêm a promessa central do original"
-            />
-          </TabsContent>
-        )}
-      </Tabs>
+      </div>
+
+      {selectedVariation && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-4 flex items-center justify-between z-10">
+          <div className="mr-4">
+            <p className="font-medium truncate max-w-[300px] md:max-w-none">
+              {selectedVariation.title}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Potencial: {selectedVariation.viralPotential}% | Concorrência: {selectedVariation.competitionLevel}
+            </p>
+          </div>
+          <Button onClick={() => copyToClipboard(selectedVariation.title)}>
+            Copiar Título
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,24 +1,21 @@
 
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Loader2 } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Checkbox } from "@/components/ui/checkbox";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-
-interface TitleInputFormProps {
-  onGenerate: (titleData: TitleInputData) => void;
-  isLoading: boolean;
-}
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 
 export interface TitleInputData {
   originalTitle: string;
-  language: string;
   emotion: string;
+  language: string;
   strategies: {
     structureVariations: boolean;
     keywordSubniche: boolean;
@@ -26,218 +23,122 @@ export interface TitleInputData {
   };
 }
 
-const formSchema = z.object({
-  originalTitle: z.string().min(10, {
-    message: "O título deve ter pelo menos 10 caracteres",
-  }),
-  language: z.string(),
-  emotion: z.string(),
-  structureVariations: z.boolean().default(true),
-  keywordSubniche: z.boolean().default(false),
-  totalInnovation: z.boolean().default(false),
-});
+interface TitleInputFormProps {
+  onSubmit: (data: TitleInputData) => void;
+  isLoading?: boolean;
+}
 
-const TitleInputForm = ({ onGenerate, isLoading }: TitleInputFormProps) => {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      originalTitle: "",
-      language: "pt",
-      emotion: "curiosidade",
+const TitleInputForm: React.FC<TitleInputFormProps> = ({ onSubmit, isLoading = false }) => {
+  const [formData, setFormData] = React.useState<TitleInputData>({
+    originalTitle: '',
+    emotion: 'curiosidade',
+    language: 'pt',
+    strategies: {
       structureVariations: true,
-      keywordSubniche: false,
-      totalInnovation: false,
-    },
+      keywordSubniche: true,
+      totalInnovation: true
+    }
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    const titleData: TitleInputData = {
-      originalTitle: values.originalTitle,
-      language: values.language,
-      emotion: values.emotion,
-      strategies: {
-        structureVariations: values.structureVariations,
-        keywordSubniche: values.keywordSubniche,
-        totalInnovation: values.totalInnovation,
-      }
-    };
-    
-    onGenerate(titleData);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(formData);
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="space-y-4">
-          <FormField
-            control={form.control}
-            name="originalTitle"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Título Original</FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="Ex: Milionário aposta tudo em um jogo — o que aconteceu vai te chocar" 
-                    {...field} 
-                    disabled={isLoading}
-                    className="h-12"
-                  />
-                </FormControl>
-                <FormDescription>
-                  Digite o título completo que deseja remodelar ou usar como base
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="language"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Idioma</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    disabled={isLoading}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o idioma" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="pt">Português</SelectItem>
-                      <SelectItem value="en">Inglês</SelectItem>
-                      <SelectItem value="es">Espanhol</SelectItem>
-                      <SelectItem value="fr">Francês</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="original-title">Título Original</Label>
+        <Input
+          id="original-title"
+          placeholder="Digite o título que deseja analisar ou otimizar"
+          value={formData.originalTitle}
+          onChange={(e) => setFormData({...formData, originalTitle: e.target.value})}
+          required
+        />
+      </div>
 
-            <FormField
-              control={form.control}
-              name="emotion"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Emoção Desejada</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    disabled={isLoading}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione a emoção" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="medo">Medo</SelectItem>
-                      <SelectItem value="curiosidade">Curiosidade</SelectItem>
-                      <SelectItem value="inspiracao">Inspiração</SelectItem>
-                      <SelectItem value="compaixao">Compaixão</SelectItem>
-                      <SelectItem value="misto">Misto</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <FormLabel>Estratégias de Remodelagem</FormLabel>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-              <FormField
-                control={form.control}
-                name="structureVariations"
-                render={({ field }) => (
-                  <FormItem className="flex items-center space-x-3 space-y-0 rounded-md border p-4">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        disabled={isLoading}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel className="font-medium">🅐 Variações da estrutura</FormLabel>
-                      <FormDescription>
-                        Mantém a estrutura, varia palavras/expressões
-                      </FormDescription>
-                    </div>
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="keywordSubniche"
-                render={({ field }) => (
-                  <FormItem className="flex items-center space-x-3 space-y-0 rounded-md border p-4">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        disabled={isLoading}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel className="font-medium">🅑 Subniche do termo-chave</FormLabel>
-                      <FormDescription>
-                        Substituir termos por subnichos específicos
-                      </FormDescription>
-                    </div>
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="totalInnovation"
-                render={({ field }) => (
-                  <FormItem className="flex items-center space-x-3 space-y-0 rounded-md border p-4">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        disabled={isLoading}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel className="font-medium">🅒 Inovação total</FormLabel>
-                      <FormDescription>
-                        Título do zero mantendo a promessa central
-                      </FormDescription>
-                    </div>
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="emotion">Emoção Principal</Label>
+          <Select
+            value={formData.emotion}
+            onValueChange={(value) => setFormData({...formData, emotion: value})}
+          >
+            <SelectTrigger id="emotion">
+              <SelectValue placeholder="Selecione a emoção" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="curiosidade">Curiosidade</SelectItem>
+              <SelectItem value="dor">Dor/Problema</SelectItem>
+              <SelectItem value="esperanca">Esperança/Solução</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        <Button 
-          type="submit" 
-          disabled={isLoading}
-          className="w-full md:w-auto"
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Gerando variações...
-            </>
-          ) : (
-            "Gerar Variações de Título"
-          )}
-        </Button>
-      </form>
-    </Form>
+        <div className="space-y-2">
+          <Label htmlFor="language">Idioma</Label>
+          <Select
+            value={formData.language}
+            onValueChange={(value) => setFormData({...formData, language: value})}
+          >
+            <SelectTrigger id="language">
+              <SelectValue placeholder="Selecione o idioma" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="pt">Português</SelectItem>
+              <SelectItem value="es">Espanhol</SelectItem>
+              <SelectItem value="en">Inglês</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="space-y-4 pt-2">
+        <Label>Estratégias a aplicar</Label>
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="structure-variations"
+              checked={formData.strategies.structureVariations}
+              onCheckedChange={(checked) => setFormData({
+                ...formData, 
+                strategies: {...formData.strategies, structureVariations: !!checked}
+              })}
+            />
+            <Label htmlFor="structure-variations">Variações com mesma estrutura</Label>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="keyword-subniche"
+              checked={formData.strategies.keywordSubniche}
+              onCheckedChange={(checked) => setFormData({
+                ...formData, 
+                strategies: {...formData.strategies, keywordSubniche: !!checked}
+              })}
+            />
+            <Label htmlFor="keyword-subniche">Subnichos baseados em palavras-chave</Label>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="total-innovation"
+              checked={formData.strategies.totalInnovation}
+              onCheckedChange={(checked) => setFormData({
+                ...formData, 
+                strategies: {...formData.strategies, totalInnovation: !!checked}
+              })}
+            />
+            <Label htmlFor="total-innovation">Inovação total do título</Label>
+          </div>
+        </div>
+      </div>
+
+      <Button type="submit" className="w-full" disabled={isLoading}>
+        {isLoading ? "Processando..." : "Analisar e Otimizar"}
+      </Button>
+    </form>
   );
 };
 
