@@ -29,7 +29,7 @@ const ScriptIdeas = ({ ideas, language = 'pt' }: ScriptIdeasProps) => {
   };
 
   // Check if the language is not Portuguese to determine if we need translations
-  const needsTranslation = !language.toLowerCase().startsWith('pt');
+  const isNotPortuguese = !language.toLowerCase().startsWith('pt');
 
   return (
     <Card className="p-6">
@@ -43,11 +43,15 @@ const ScriptIdeas = ({ ideas, language = 'pt' }: ScriptIdeasProps) => {
           const id = `idea-${index}`;
           const isCopied = copiedId === id;
           
-          // Split the idea into original and translation if it contains "Tradução:"
-          const hasTranslation = idea.includes("Tradução:");
-          const [originalIdea, translation] = hasTranslation 
-            ? idea.split("Tradução:") 
-            : [idea, null];
+          // Parse translation if present
+          let originalIdea = idea;
+          let translation = '';
+          
+          if (idea.includes("Tradução:")) {
+            const parts = idea.split("Tradução:");
+            originalIdea = parts[0].trim();
+            translation = parts[1].trim();
+          }
           
           return (
             <div 
@@ -57,16 +61,16 @@ const ScriptIdeas = ({ ideas, language = 'pt' }: ScriptIdeasProps) => {
               <div className="flex justify-between items-start gap-4">
                 <div className="space-y-2 flex-1">
                   <h4 className="font-medium">Ideia {index + 1}</h4>
-                  <p className="text-sm whitespace-pre-wrap">{originalIdea.trim()}</p>
+                  <p className="text-sm whitespace-pre-wrap">{originalIdea}</p>
                   
-                  {needsTranslation && (
+                  {isNotPortuguese && (
                     <div className="mt-2 pt-2 border-t border-dashed border-border">
                       <div className="flex items-center gap-1 mb-1">
                         <TranslationIcon className="h-3.5 w-3.5 text-muted-foreground" />
                         <p className="text-xs text-muted-foreground">Tradução:</p>
                       </div>
-                      <p className="text-sm whitespace-pre-wrap italic">
-                        {translation ? translation.trim() : "Tradução não disponível"}
+                      <p className="text-sm whitespace-pre-wrap">
+                        {translation || "Tradução não disponível"}
                       </p>
                     </div>
                   )}

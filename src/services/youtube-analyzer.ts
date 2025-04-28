@@ -98,41 +98,54 @@ export const analyzeYoutubeVideo = async (videoUrl: string, apiKey: string): Pro
     const isEnglish = language.startsWith('en');
     const isFrench = language.startsWith('fr');
     const isItalian = language.startsWith('it');
-    
+
     // Helper para gerar traduções com PT-BR incluído
     const generateTranslations = () => {
+      // Se o idioma original é português, nós traduzimos para os outros idiomas
+      // Se o idioma original é outro, traduzimos para português
+      
+      // Exemplo de título português (para simular traduções)
+      const titleInPortuguese = isPortuguese 
+        ? basicInfo.title 
+        : `Tradução para português do título em ${isEnglish ? 'inglês' : isSpanish ? 'espanhol' : isFrench ? 'francês' : 'italiano'}`;
+      
+      // Exemplo de descrição em português
+      const descriptionInPortuguese = isPortuguese
+        ? basicInfo.description
+        : `Tradução para português da descrição em ${isEnglish ? 'inglês' : isSpanish ? 'espanhol' : isFrench ? 'francês' : 'italiano'}`;
+        
       const translations = {
         english: {
-          title: isEnglish ? 
-            basicInfo.title : 
-            `[English] ${basicInfo.title}\nPT-BR: ${isPortuguese ? basicInfo.title : "Tradução para português do título em inglês"}`,
-          description: isEnglish ? 
-            basicInfo.description : 
-            `This is a translation of the description to English.\nPT-BR: ${isPortuguese ? basicInfo.description : "Tradução para português da descrição em inglês"}`
+          title: isEnglish 
+            ? basicInfo.title 
+            : `[English] ${basicInfo.title} PT-BR: ${titleInPortuguese}`,
+          description: isEnglish 
+            ? basicInfo.description 
+            : `This is a translation of the description to English. PT-BR: ${descriptionInPortuguese}`
         },
         spanish: {
-          title: isSpanish ? 
-            basicInfo.title : 
-            `[Español] ${basicInfo.title}\nPT-BR: ${isPortuguese ? basicInfo.title : "Tradução para português do título em espanhol"}`,
-          description: isSpanish ? 
-            basicInfo.description : 
-            `Esta es una traducción de la descripción al español.\nPT-BR: ${isPortuguese ? basicInfo.description : "Tradução para português da descrição em espanhol"}`
+          title: isSpanish 
+            ? basicInfo.title 
+            : `[Español] ${basicInfo.title} PT-BR: ${titleInPortuguese}`,
+          description: isSpanish 
+            ? basicInfo.description 
+            : `Esta es una traducción de la descripción al español. PT-BR: ${descriptionInPortuguese}`
         },
         french: {
-          title: isFrench ? 
-            basicInfo.title : 
-            `[Français] ${basicInfo.title}\nPT-BR: ${isPortuguese ? basicInfo.title : "Tradução para português do título em francês"}`,
-          description: isFrench ? 
-            basicInfo.description : 
-            `Ceci est une traduction de la description en français.\nPT-BR: ${isPortuguese ? basicInfo.description : "Tradução para português da descrição em francês"}`
+          title: isFrench 
+            ? basicInfo.title 
+            : `[Français] ${basicInfo.title} PT-BR: ${titleInPortuguese}`,
+          description: isFrench 
+            ? basicInfo.description 
+            : `Ceci est une traduction de la description en français. PT-BR: ${descriptionInPortuguese}`
         },
         italian: {
-          title: isItalian ? 
-            basicInfo.title : 
-            `[Italiano] ${basicInfo.title}\nPT-BR: ${isPortuguese ? basicInfo.title : "Tradução para português do título em italiano"}`,
-          description: isItalian ? 
-            basicInfo.description : 
-            `Questa è una traduzione della descrizione in italiano.\nPT-BR: ${isPortuguese ? basicInfo.description : "Tradução para português da descrição em italiano"}`
+          title: isItalian 
+            ? basicInfo.title 
+            : `[Italiano] ${basicInfo.title} PT-BR: ${titleInPortuguese}`,
+          description: isItalian 
+            ? basicInfo.description 
+            : `Questa è una traduzione della descrizione in italiano. PT-BR: ${descriptionInPortuguese}`
         }
       };
 
@@ -141,31 +154,72 @@ export const analyzeYoutubeVideo = async (videoUrl: string, apiKey: string): Pro
 
     // Helper para gerar ideias de roteiro com tradução
     const generateScriptIdeas = () => {
-      const baseIdeas = [
+      // Determinar o idioma base para as ideias
+      const baseLanguage = isSpanish ? 'es' : 
+                         isEnglish ? 'en' :
+                         isFrench ? 'fr' : 
+                         isItalian ? 'it' : 'pt';
+      
+      // Ideias base em português
+      const ptIdeas = [
         `História pessoal: Minha jornada com ${basicInfo.title} e como isso mudou minha perspectiva.`,
         `Análise aprofundada: Os 5 princípios fundamentais de ${basicInfo.title} que ninguém explica.`,
         `Guia passo a passo: Como implementar ${basicInfo.title} em sua rotina diária.`,
         `Debate: Prós e contras de diferentes abordagens para ${basicInfo.title}.`,
         `Entrevista com especialista: Conversando com um profissional sobre ${basicInfo.title}.`
       ];
-
-      // Se não for português, adicionar tradução
-      if (!isPortuguese) {
-        return baseIdeas.map(idea => {
-          let translatedIdea = idea;
-          if (isSpanish) {
-            return `Historia personal: Mi jornada con ${basicInfo.title} y cómo cambió mi perspectiva.\nTradução: ${translatedIdea}`;
-          } else if (isEnglish) {
-            return `Personal story: My journey with ${basicInfo.title} and how it changed my perspective.\nTradução: ${translatedIdea}`;
-          } else if (isFrench) {
-            return `Histoire personnelle: Mon voyage avec ${basicInfo.title} et comment cela a changé ma perspective.\nTradução: ${translatedIdea}`;
-          } else {
-            return `Storia personale: Il mio viaggio con ${basicInfo.title} e come ha cambiato la mia prospettiva.\nTradução: ${translatedIdea}`;
-          }
-        });
+      
+      // Ideias em espanhol
+      const esIdeas = [
+        `Historia personal: Mi jornada con ${basicInfo.title} y cómo cambió mi perspectiva.`,
+        `Análisis profundo: Los 5 principios fundamentales de ${basicInfo.title} que nadie explica.`,
+        `Guía paso a paso: Cómo implementar ${basicInfo.title} en tu rutina diaria.`,
+        `Debate: Pros y contras de diferentes enfoques para ${basicInfo.title}.`,
+        `Entrevista con un experto: Conversando con un profesional sobre ${basicInfo.title}.`
+      ];
+      
+      // Ideias em inglês
+      const enIdeas = [
+        `Personal story: My journey with ${basicInfo.title} and how it changed my perspective.`,
+        `Deep analysis: The 5 fundamental principles of ${basicInfo.title} that nobody explains.`,
+        `Step-by-step guide: How to implement ${basicInfo.title} in your daily routine.`,
+        `Debate: Pros and cons of different approaches to ${basicInfo.title}.`,
+        `Expert interview: Talking with a professional about ${basicInfo.title}.`
+      ];
+      
+      // Ideias em francês
+      const frIdeas = [
+        `Histoire personnelle: Mon voyage avec ${basicInfo.title} et comment cela a changé ma perspective.`,
+        `Analyse approfondie: Les 5 principes fondamentaux de ${basicInfo.title} que personne n'explique.`,
+        `Guide étape par étape: Comment mettre en œuvre ${basicInfo.title} dans votre routine quotidienne.`,
+        `Débat: Avantages et inconvénients de différentes approches pour ${basicInfo.title}.`,
+        `Entretien avec un expert: Conversation avec un professionnel sur ${basicInfo.title}.`
+      ];
+      
+      // Ideias em italiano
+      const itIdeas = [
+        `Storia personale: Il mio viaggio con ${basicInfo.title} e come ha cambiato la mia prospettiva.`,
+        `Analisi approfondita: I 5 principi fondamentali di ${basicInfo.title} che nessuno spiega.`,
+        `Guida passo passo: Come implementare ${basicInfo.title} nella tua routine quotidiana.`,
+        `Dibattito: Pro e contro di diversi approcci a ${basicInfo.title}.`,
+        `Intervista con un esperto: Conversazione con un professionista su ${basicInfo.title}.`
+      ];
+      
+      let ideas: string[] = [];
+      
+      if (baseLanguage === 'es') {
+        ideas = esIdeas.map((idea, i) => `${idea}\nTradução: ${ptIdeas[i]}`);
+      } else if (baseLanguage === 'en') {
+        ideas = enIdeas.map((idea, i) => `${idea}\nTradução: ${ptIdeas[i]}`);
+      } else if (baseLanguage === 'fr') {
+        ideas = frIdeas.map((idea, i) => `${idea}\nTradução: ${ptIdeas[i]}`);
+      } else if (baseLanguage === 'it') {
+        ideas = itIdeas.map((idea, i) => `${idea}\nTradução: ${ptIdeas[i]}`);
+      } else {
+        ideas = ptIdeas;
       }
       
-      return baseIdeas;
+      return ideas;
     };
 
     // Helper para gerar prompts de imagem com tradução
@@ -189,32 +243,99 @@ export const analyzeYoutubeVideo = async (videoUrl: string, apiKey: string): Pro
       `[EN] Set of custom icons representing key concepts of '${basicInfo.title}'\n[PT-BR] Conjunto de ícones personalizados representando os conceitos-chave de '${basicInfo.title}'`
     ];
     
+    // Função para gerar variações de título adaptadas ao idioma
+    const generateTitleVariations = () => {
+      // Determinar o idioma base para os títulos
+      const baseLanguage = isSpanish ? 'es' : 
+                         isEnglish ? 'en' :
+                         isFrench ? 'fr' : 
+                         isItalian ? 'it' : 'pt';
+                         
+      // Títulos emocionais em português
+      const ptEmotional = [
+        `Como ${basicInfo.title} mudou minha vida`,
+        `O incrível segredo por trás de ${basicInfo.title}`,
+        `A verdade chocante sobre ${basicInfo.title} que ninguém conta`,
+        `Por que ${basicInfo.title} me fez chorar`,
+        `A jornada inspiradora para descobrir ${basicInfo.title}`
+      ];
+      
+      // Títulos estruturais em português
+      const ptStructural = [
+        `7 maneiras de dominar ${basicInfo.title} em 30 dias`,
+        `${basicInfo.title}: o guia definitivo para iniciantes`,
+        `Você está fazendo ${basicInfo.title} errado? 5 erros comuns`,
+        `Antes e depois: como ${basicInfo.title} transformou meus resultados`,
+        `${basicInfo.title} explicado em apenas 5 minutos`
+      ];
+      
+      // Títulos em espanhol
+      const esEmotional = [
+        `Cómo ${basicInfo.title} cambió mi vida PT-BR: Como ${basicInfo.title} mudou minha vida`,
+        `El increíble secreto detrás de ${basicInfo.title} PT-BR: O incrível segredo por trás de ${basicInfo.title}`,
+        `La impactante verdad sobre ${basicInfo.title} que nadie te cuenta PT-BR: A verdade chocante sobre ${basicInfo.title} que ninguém conta`,
+        `Por qué ${basicInfo.title} me hizo llorar PT-BR: Por que ${basicInfo.title} me fez chorar`,
+        `El viaje inspirador para descubrir ${basicInfo.title} PT-BR: A jornada inspiradora para descobrir ${basicInfo.title}`
+      ];
+      
+      const esStructural = [
+        `7 formas de dominar ${basicInfo.title} en 30 días PT-BR: 7 maneiras de dominar ${basicInfo.title} em 30 dias`,
+        `${basicInfo.title}: la guía definitiva para principiantes PT-BR: ${basicInfo.title}: o guia definitivo para iniciantes`,
+        `¿Estás haciendo ${basicInfo.title} mal? 5 errores comunes PT-BR: Você está fazendo ${basicInfo.title} errado? 5 erros comuns`,
+        `Antes y después: cómo ${basicInfo.title} transformó mis resultados PT-BR: Antes e depois: como ${basicInfo.title} transformou meus resultados`,
+        `${basicInfo.title} explicado en solo 5 minutos PT-BR: ${basicInfo.title} explicado em apenas 5 minutos`
+      ];
+      
+      // Títulos em inglês
+      const enEmotional = [
+        `How ${basicInfo.title} changed my life PT-BR: Como ${basicInfo.title} mudou minha vida`,
+        `The incredible secret behind ${basicInfo.title} PT-BR: O incrível segredo por trás de ${basicInfo.title}`,
+        `The shocking truth about ${basicInfo.title} nobody tells you PT-BR: A verdade chocante sobre ${basicInfo.title} que ninguém conta`,
+        `Why ${basicInfo.title} made me cry PT-BR: Por que ${basicInfo.title} me fez chorar`,
+        `The inspiring journey to discover ${basicInfo.title} PT-BR: A jornada inspiradora para descobrir ${basicInfo.title}`
+      ];
+      
+      const enStructural = [
+        `7 ways to master ${basicInfo.title} in 30 days PT-BR: 7 maneiras de dominar ${basicInfo.title} em 30 dias`,
+        `${basicInfo.title}: the ultimate guide for beginners PT-BR: ${basicInfo.title}: o guia definitivo para iniciantes`,
+        `Are you doing ${basicInfo.title} wrong? 5 common mistakes PT-BR: Você está fazendo ${basicInfo.title} errado? 5 erros comuns`,
+        `Before and after: how ${basicInfo.title} transformed my results PT-BR: Antes e depois: como ${basicInfo.title} transformou meus resultados`,
+        `${basicInfo.title} explained in just 5 minutes PT-BR: ${basicInfo.title} explicado em apenas 5 minutos`
+      ];
+      
+      // Selecione os títulos com base no idioma
+      let emotional, structural;
+      if (baseLanguage === 'es') {
+        emotional = esEmotional;
+        structural = esStructural;
+      } else if (baseLanguage === 'en') {
+        emotional = enEmotional;
+        structural = enStructural;
+      } else {
+        emotional = ptEmotional;
+        structural = ptStructural;
+      }
+      
+      // Multilingual sempre usa outros idiomas
+      const multilingual = [
+        `[English] The ultimate guide to ${basicInfo.title} PT-BR: O guia definitivo para ${basicInfo.title}`,
+        `[Español] Todo lo que necesitas saber sobre ${basicInfo.title} PT-BR: Tudo o que você precisa saber sobre ${basicInfo.title}`,
+        `[Français] Les secrets de ${basicInfo.title} révélés PT-BR: Os segredos de ${basicInfo.title} revelados`,
+        `[Italiano] Come padroneggiare ${basicInfo.title} in 30 giorni PT-BR: Como dominar ${basicInfo.title} em 30 dias`,
+        `[Deutsch] ${basicInfo.title} leicht gemacht PT-BR: ${basicInfo.title} facilitado`
+      ];
+    
+      return {
+        emotional,
+        structural,
+        multilingual
+      };
+    };
+    
     return {
       basicInfo,
       translations: generateTranslations(),
-      titleVariations: {
-        emotional: [
-          `[Emoção] Como ${basicInfo.title} mudou minha vida`,
-          `O incrível segredo por trás de ${basicInfo.title}`,
-          `A verdade chocante sobre ${basicInfo.title} que ninguém conta`,
-          `Por que ${basicInfo.title} me fez chorar`,
-          `A jornada inspiradora para descobrir ${basicInfo.title}`
-        ],
-        structural: [
-          `7 maneiras de dominar ${basicInfo.title} em 30 dias`,
-          `${basicInfo.title}: o guia definitivo para iniciantes`,
-          `Você está fazendo ${basicInfo.title} errado? 5 erros comuns`,
-          `Antes e depois: como ${basicInfo.title} transformou meus resultados`,
-          `${basicInfo.title} explicado em apenas 5 minutos`
-        ],
-        multilingual: [
-          `[English] The ultimate guide to ${basicInfo.title}`,
-          `[Español] Todo lo que necesitas saber sobre ${basicInfo.title}`,
-          `[Français] Les secrets de ${basicInfo.title} révélés`,
-          `[Italiano] Come padroneggiare ${basicInfo.title} in 30 giorni`,
-          `[Deutsch] ${basicInfo.title} leicht gemacht`
-        ]
-      },
+      titleVariations: generateTitleVariations(),
       scriptIdeas: generateScriptIdeas(),
       thumbnailPrompts: generateImagePrompts(),
       supportImagePrompts: supportImagePrompts,

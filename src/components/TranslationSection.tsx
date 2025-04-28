@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card } from './ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
@@ -103,9 +104,16 @@ interface TranslationContentProps {
 }
 
 const TranslationContent = ({ title, description, onCopy, language, isOriginal }: TranslationContentProps) => {
+  // Clean the title, removing any prefix markers like [lang]:
   const cleanTitle = title.replace(/^\[(.*?)\]\s*/, '');
   
-  const needsTranslation = !language.toLowerCase().includes('português');
+  // Extract Portuguese translation if present
+  const hasPortuguese = title.includes('PT-BR:');
+  const portugueseTitle = hasPortuguese 
+    ? title.split('PT-BR:')[1].trim() 
+    : '';
+  
+  const shouldShowTranslation = !isOriginal && language.toLowerCase() !== 'português';
   
   return (
     <div className="space-y-4">
@@ -125,12 +133,12 @@ const TranslationContent = ({ title, description, onCopy, language, isOriginal }
         </div>
         <p className="font-medium">{cleanTitle}</p>
         
-        {needsTranslation && (
-          <div className="mt-2 flex items-center gap-2">
-            <TranslationIcon className="h-3.5 w-3.5 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground italic">Tradução: {title.includes('BR') ? title.split('BR: ')[1] : (
-              `Tradução não disponível`
-            )}</p>
+        {shouldShowTranslation && (
+          <div className="mt-2 flex items-start gap-2">
+            <TranslationIcon className="h-3.5 w-3.5 text-muted-foreground mt-1" />
+            <p className="text-sm text-muted-foreground">
+              Tradução: {portugueseTitle || "Tradução não disponível"}
+            </p>
           </div>
         )}
       </div>
@@ -153,14 +161,16 @@ const TranslationContent = ({ title, description, onCopy, language, isOriginal }
           {description}
         </div>
         
-        {needsTranslation && (
+        {shouldShowTranslation && (
           <div className="mt-2">
-            <div className="flex items-center gap-2 mb-1">
-              <TranslationIcon className="h-3.5 w-3.5 text-muted-foreground" />
+            <div className="flex items-start gap-2 mb-1">
+              <TranslationIcon className="h-3.5 w-3.5 text-muted-foreground mt-1" />
               <p className="text-sm text-muted-foreground">Tradução:</p>
             </div>
-            <div className="bg-muted/30 p-3 rounded-md text-sm whitespace-pre-wrap max-h-48 overflow-y-auto italic">
-              {description.includes('BR:') ? description.split('BR:')[1] : 'Tradução não disponível'}
+            <div className="bg-muted/30 p-3 rounded-md text-sm whitespace-pre-wrap max-h-48 overflow-y-auto">
+              {description.includes('PT-BR:') 
+                ? description.split('PT-BR:')[1].trim() 
+                : 'Tradução não disponível'}
             </div>
           </div>
         )}

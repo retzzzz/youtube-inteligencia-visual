@@ -29,24 +29,6 @@ const ImagePrompts = ({ thumbnailPrompts, supportPrompts }: ImagePromptsProps) =
     }, 2000);
   };
 
-  // Convert prompts to English and add Portuguese translation
-  const formatPromptWithTranslation = (prompt: string): { english: string, portuguese: string } => {
-    // If the prompt already has a translation marked
-    if (prompt.includes("[EN]") && prompt.includes("[PT-BR]")) {
-      const parts = prompt.split("[PT-BR]");
-      return {
-        english: parts[0].replace("[EN]", "").trim(),
-        portuguese: parts[1].trim()
-      };
-    }
-    
-    // Default case - return the original as English and add a placeholder translation
-    return {
-      english: `[EN] ${prompt}`,
-      portuguese: `[PT-BR] Traduza este prompt para português`
-    };
-  };
-
   return (
     <Card className="p-6">
       <h3 className="text-lg font-bold mb-4">Prompts para Imagens</h3>
@@ -103,14 +85,20 @@ const PromptList = ({ prompts, copyToClipboard, copiedId, prefix }: PromptListPr
         const id = `${prefix}-${index}`;
         const isCopied = copiedId === id;
         
-        // Format prompt to have English and Portuguese versions
-        const formattedPrompt = prompt.includes("[EN]") ? 
-          prompt : `[EN] ${prompt}`;
+        // Parse English and Portuguese sections
+        let englishPrompt = '';
+        let portuguesePrompt = '';
         
-        // Extract Portuguese translation if it exists
-        const translation = prompt.includes("[PT-BR]") ? 
-          prompt.split("[PT-BR]")[1].trim() : 
-          "Tradução não disponível";
+        if (prompt.includes("[EN]") && prompt.includes("[PT-BR]")) {
+          const enParts = prompt.split("[EN]");
+          const ptParts = prompt.split("[PT-BR]");
+          
+          englishPrompt = enParts[1]?.split("[PT-BR]")[0].trim() || prompt;
+          portuguesePrompt = ptParts[1]?.trim() || "Tradução não disponível";
+        } else {
+          englishPrompt = prompt;
+          portuguesePrompt = "Tradução não disponível";
+        }
         
         return (
           <div 
@@ -119,15 +107,15 @@ const PromptList = ({ prompts, copyToClipboard, copiedId, prefix }: PromptListPr
           >
             <div className="flex justify-between items-start gap-4">
               <div className="flex-1 space-y-2">
-                <p className="text-sm whitespace-pre-wrap">{formattedPrompt}</p>
+                <p className="text-sm whitespace-pre-wrap">[EN] {englishPrompt}</p>
                 
                 <div className="pt-2 border-t border-dashed border-border">
                   <div className="flex items-center gap-1 mb-1">
                     <TranslationIcon className="h-3.5 w-3.5 text-muted-foreground" />
                     <p className="text-xs text-muted-foreground">Tradução:</p>
                   </div>
-                  <p className="text-sm whitespace-pre-wrap italic">
-                    {translation}
+                  <p className="text-sm whitespace-pre-wrap">
+                    {portuguesePrompt}
                   </p>
                 </div>
               </div>
@@ -135,7 +123,7 @@ const PromptList = ({ prompts, copyToClipboard, copiedId, prefix }: PromptListPr
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => copyToClipboard(formattedPrompt, id)}
+                onClick={() => copyToClipboard(englishPrompt, id)}
                 className="h-8 w-8 p-0 flex-shrink-0"
               >
                 {isCopied ? (

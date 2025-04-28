@@ -96,19 +96,23 @@ interface TitleVariationCardProps {
 
 const TitleVariationCard: React.FC<TitleVariationCardProps> = ({ variation, badgeColor }) => {
   // Extract language from variation if available, default to Portuguese
-  // Update the type definition to handle this property correctly
-  const language = (variation as any).language || 'pt';
+  const language = variation.language || 'pt';
   const isNotPortuguese = language !== 'pt';
 
-  // Create Portuguese translation if title is not in Portuguese
-  const portugueseTranslation = isNotPortuguese 
-    ? "Tradução: " + variation.title.replace(/^\[.*?\]\s*/, '') 
-    : null;
+  // Get the title text, handling different properties
+  const originalTitle = variation.title || '';
+  
+  // Check if there's a Portuguese translation embedded in the title
+  let portugueseTranslation = '';
+  if (originalTitle.includes('PT-BR:')) {
+    const parts = originalTitle.split('PT-BR:');
+    portugueseTranslation = parts[1].trim();
+  }
 
   return (
     <div className="border p-3 rounded-md">
       <div className="flex justify-between items-start mb-2">
-        <h4 className="font-medium text-md">{variation.title}</h4>
+        <h4 className="font-medium text-md">{originalTitle.split('PT-BR:')[0].trim()}</h4>
         <Badge 
           variant="outline" 
           className={`bg-${badgeColor}-50 text-${badgeColor}-700`}
@@ -118,11 +122,13 @@ const TitleVariationCard: React.FC<TitleVariationCardProps> = ({ variation, badg
       </div>
       <p className="text-xs text-muted-foreground">{variation.explanation}</p>
       
-      {isNotPortuguese && portugueseTranslation && (
+      {isNotPortuguese && (
         <div className="mt-2 pt-2 border-t border-dashed border-border">
           <div className="flex items-center gap-1">
             <TranslationIcon className="h-3.5 w-3.5 text-muted-foreground" />
-            <p className="text-xs italic text-muted-foreground">{portugueseTranslation}</p>
+            <p className="text-xs text-muted-foreground">
+              Tradução: {portugueseTranslation || 'Tradução não disponível'}
+            </p>
           </div>
         </div>
       )}
