@@ -63,8 +63,8 @@ const ResultsSection = ({ results, selectedVideo, onSelectVideo, searchParams }:
           </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="resultados" className="mt-6 animate-fade-in w-full">
-          <div className="w-full overflow-x-visible">
+        <TabsContent value="resultados" className="mt-6 animate-fade-in w-[calc(100vw-40px)] -mx-4">
+          <div className="overflow-visible w-full">
             <ResultsTable results={results} onSelectVideo={onSelectVideo} />
           </div>
         </TabsContent>

@@ -54,24 +54,30 @@ const ResultsTableHeader = ({
                   </span>
                 )}
                 {column.id === 'viralScore' && (
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Info className="h-4 w-4 ml-1 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="w-[350px] p-4 z-50">
-                      <p className="font-medium mb-2">Como é calculada a Pontuação Viral?</p>
-                      <ul className="space-y-2 text-sm">
-                        <li>• Vídeos muito recentes (24-72h) recebem multiplicador especial</li>
-                        <li>• Taxa de crescimento: mais views em menos tempo = maior pontuação</li>
-                        <li>• Engajamento tem peso importante (likes, comentários)</li>
-                        <li>• Canais menores recebem bônus na pontuação</li>
-                        <li>• Vídeos já virais (&gt;500k views) recebem penalidade</li>
-                      </ul>
-                      <p className="text-sm mt-2 text-muted-foreground">
-                        Escala: 0-1000 (baixo), 1000-2000 (médio), 2000+ (alto potencial viral)
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Info className="h-4 w-4 ml-1 text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent 
+                        side="bottom" 
+                        className="w-[350px] p-4"
+                        style={{ zIndex: 100 }}
+                      >
+                        <p className="font-medium mb-2">Como é calculada a Pontuação Viral?</p>
+                        <ul className="space-y-2 text-sm">
+                          <li>• Vídeos muito recentes (24-72h) recebem multiplicador especial</li>
+                          <li>• Taxa de crescimento: mais views em menos tempo = maior pontuação</li>
+                          <li>• Engajamento tem peso importante (likes, comentários)</li>
+                          <li>• Canais menores recebem bônus na pontuação</li>
+                          <li>• Vídeos já virais (&gt;500k views) recebem penalidade</li>
+                        </ul>
+                        <p className="text-sm mt-2 text-muted-foreground">
+                          Escala: 0-1000 (baixo), 1000-2000 (médio), 2000+ (alto potencial viral)
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 )}
               </Button>
             ) : (

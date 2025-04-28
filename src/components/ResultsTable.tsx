@@ -73,7 +73,7 @@ const ResultsTable = ({ results, onSelectVideo }: ResultsTableProps) => {
   return (
     <TooltipProvider delayDuration={300}>
       <div className="space-y-4 animate-fade-in">
-        <div className="overflow-auto w-full" style={{ maxWidth: '100%' }}>
+        <div className="overflow-visible w-full">
           <Table className="w-full">
             <ResultsTableHeader
               columns={columns}
