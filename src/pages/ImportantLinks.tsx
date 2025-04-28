@@ -38,11 +38,11 @@ const ImportantLinks = () => {
     <div className="min-h-screen flex flex-col w-full pb-32">
       <Header />
       
-      <div className="space-y-8 mt-8 w-full px-4 md:px-8 py-6">
+      <div className="w-full px-4 md:px-8 py-6">
         <h1 className="text-4xl font-bold text-center mb-12">Links Importantes</h1>
         
         {importantLinks.map((link, index) => (
-          <Card key={index} className="p-6 hover:shadow-md transition-all w-full">
+          <Card key={index} className="p-6 hover:shadow-md transition-all w-full mb-6">
             <div className="space-y-4">
               <h2 className="text-2xl font-semibold">{link.title}</h2>
               {link.description && <p className="text-muted-foreground">{link.description}</p>}

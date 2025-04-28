@@ -54,7 +54,7 @@ const VideoAnalyzer = () => {
       <ApiKeyDialog />
       <Header />
       
-      <div className="grid grid-cols-1 gap-6 mb-8 w-full px-4 md:px-8 py-6">
+      <div className="w-full px-4 md:px-8 py-6">
         <Card className="p-6">
           <h1 className="text-2xl font-bold mb-4">Analisador de Vídeos do YouTube</h1>
           
@@ -67,7 +67,7 @@ const VideoAnalyzer = () => {
         </Card>
       </div>
 
-      <div className="px-4 md:px-8">
+      <div className="w-full px-4 md:px-8">
         {analysis && (
           <VideoAnalysisResults analysis={analysis} />
         )}

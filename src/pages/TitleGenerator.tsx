@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Header from "@/components/Header";
 import { useToast } from "@/hooks/use-toast";
@@ -113,7 +112,7 @@ const TitleGenerator = () => {
     <div className="min-h-screen flex flex-col w-full pb-32">
       <Header />
       
-      <div className="grid grid-cols-1 gap-6 mb-8 w-full px-4 md:px-8 py-6">
+      <div className="w-full px-4 md:px-8 py-6">
         <TitleGeneratorContainer
           variations={variations}
           titulosConcorrentes={titulosConcorrentes}

@@ -27,10 +27,10 @@ const ScriptGenerator = () => {
     <div className="min-h-screen flex flex-col w-full pb-32">
       <Header />
       
-      <div className="grid gap-6 mt-6 w-full px-4 md:px-8 py-6">
+      <div className="w-full px-4 md:px-8 py-6">
         <ScriptGeneratorIntro />
         
-        <Card className="p-6">
+        <Card className="p-6 w-full">
           <Tabs 
             value={currentStep} 
             onValueChange={(value) => setCurrentStep(value as "input" | "config" | "output")}

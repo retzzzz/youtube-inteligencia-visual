@@ -41,8 +41,8 @@ const MicroSubnicheAnalyzer = () => {
     <div className="min-h-screen flex flex-col w-full pb-32">
       <Header />
       
-      <div className="grid grid-cols-1 gap-6 mb-8 w-full px-4 md:px-8 py-6">
-        <Card className="p-6">
+      <div className="w-full px-4 md:px-8 py-6">
+        <Card className="p-6 w-full">
           <h1 className="text-2xl font-bold mb-4">Análise de Micro-Subnichos</h1>
           
           <p className="mb-6 text-muted-foreground">

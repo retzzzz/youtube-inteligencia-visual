@@ -5,7 +5,7 @@ import { Heart } from 'lucide-react';
 
 const Footer = () => {
   return (
-    <footer className="fixed bottom-0 left-0 right-0 border-t bg-gradient-to-b from-transparent to-muted/30 w-full z-10">
+    <footer className="fixed bottom-0 left-0 right-0 w-full bg-gradient-to-b from-transparent to-muted/30 border-t z-10">
       <div className="w-full py-8 px-4 md:px-8">
         <div className="flex flex-col space-y-6">
           <div className="text-muted-foreground text-sm text-center flex items-center justify-center gap-2">
