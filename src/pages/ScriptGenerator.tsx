@@ -24,10 +24,10 @@ const ScriptGenerator = () => {
   } = useScriptGenerator();
 
   return (
-    <div className="min-h-screen w-full px-4 md:px-8 py-6">
+    <div className="min-h-screen flex flex-col w-full pb-32">
       <Header />
       
-      <div className="grid gap-6 mt-6 w-full">
+      <div className="grid gap-6 mt-6 w-full px-4 md:px-8 py-6">
         <ScriptGeneratorIntro />
         
         <Card className="p-6">

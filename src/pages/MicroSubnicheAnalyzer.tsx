@@ -38,10 +38,10 @@ const MicroSubnicheAnalyzer = () => {
   } = useMicroSubnicheAnalyzer();
 
   return (
-    <div className="min-h-screen w-full px-4 md:px-8 py-6">
+    <div className="min-h-screen flex flex-col w-full pb-32">
       <Header />
       
-      <div className="grid grid-cols-1 gap-6 mb-8 w-full">
+      <div className="grid grid-cols-1 gap-6 mb-8 w-full px-4 md:px-8 py-6">
         <Card className="p-6">
           <h1 className="text-2xl font-bold mb-4">Análise de Micro-Subnichos</h1>
           

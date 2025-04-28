@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Search, BarChart2, FileText, Compass, Target, Youtube } from 'lucide-react'; 
 import WelcomeMessage from '@/components/WelcomeMessage';
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 
 const Index = () => {
   const tools = [
@@ -45,13 +46,13 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0E122D] relative">
+    <div className="min-h-screen flex flex-col w-full bg-[#0E122D] relative pb-32">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(29,58,180,0.15),rgba(0,0,0,0))]" />
       <div className="w-full relative">
         <Header />
         <WelcomeMessage />
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 px-4 md:px-8 mt-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 px-4 md:px-8 mt-10 w-full">
           {tools.map((tool, index) => (
             <Link 
               to={tool.path} 
@@ -75,6 +76,7 @@ const Index = () => {
           ))}
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

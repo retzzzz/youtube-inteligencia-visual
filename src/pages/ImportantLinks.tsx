@@ -35,10 +35,10 @@ const ImportantLinks = () => {
   ];
 
   return (
-    <div className="min-h-screen w-full px-4 md:px-8 py-6">
+    <div className="min-h-screen flex flex-col w-full pb-32">
       <Header />
       
-      <div className="space-y-8 mt-8 w-full">
+      <div className="space-y-8 mt-8 w-full px-4 md:px-8 py-6">
         <h1 className="text-4xl font-bold text-center mb-12">Links Importantes</h1>
         
         {importantLinks.map((link, index) => (

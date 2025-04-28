@@ -50,11 +50,11 @@ const VideoAnalyzer = () => {
   };
 
   return (
-    <div className="min-h-screen w-full px-4 md:px-8 py-6">
+    <div className="min-h-screen flex flex-col w-full pb-32">
       <ApiKeyDialog />
       <Header />
       
-      <div className="grid grid-cols-1 gap-6 mb-8 w-full">
+      <div className="grid grid-cols-1 gap-6 mb-8 w-full px-4 md:px-8 py-6">
         <Card className="p-6">
           <h1 className="text-2xl font-bold mb-4">Analisador de Vídeos do YouTube</h1>
           
@@ -67,9 +67,11 @@ const VideoAnalyzer = () => {
         </Card>
       </div>
 
-      {analysis && (
-        <VideoAnalysisResults analysis={analysis} />
-      )}
+      <div className="px-4 md:px-8">
+        {analysis && (
+          <VideoAnalysisResults analysis={analysis} />
+        )}
+      </div>
       
       <Footer />
     </div>

@@ -67,7 +67,7 @@ const Search = () => {
 
   if (!youtubeApiKey) {
     return (
-      <div className="min-h-screen flex flex-col w-full">
+      <div className="min-h-screen flex flex-col w-full pb-32">
         <Header />
         <div className="flex-grow w-full px-4 md:px-8 py-6">
           <Alert variant="destructive" className="mt-8 shadow-lg">
@@ -90,7 +90,7 @@ const Search = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col w-full">
+    <div className="min-h-screen flex flex-col w-full pb-32">
       <Header />
       
       <div className="flex-grow w-full px-4 md:px-8 py-6">
