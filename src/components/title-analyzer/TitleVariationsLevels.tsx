@@ -1,10 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { TitleVariation } from '@/components/title-generator/TitleVariationDisplay';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import TranslationIcon from '../icons/TranslationIcon';
+import { Button } from '../ui/button';
+import { Globe } from 'lucide-react';
 
 interface TitleVariationsLevelsProps {
   variations: {
@@ -15,6 +17,8 @@ interface TitleVariationsLevelsProps {
 }
 
 const TitleVariationsLevels: React.FC<TitleVariationsLevelsProps> = ({ variations }) => {
+  const [showTranslations, setShowTranslations] = useState<boolean>(true);
+  
   const getLevelName = (level: string): string => {
     switch(level) {
       case "light": return "Variações Leves";
@@ -44,7 +48,18 @@ const TitleVariationsLevels: React.FC<TitleVariationsLevelsProps> = ({ variation
 
   return (
     <Card className="p-6">
-      <h3 className="text-lg font-semibold mb-4">Geração de variações em camadas</h3>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold">Geração de variações em camadas</h3>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => setShowTranslations(!showTranslations)}
+          className="flex items-center gap-1"
+        >
+          <Globe className="h-4 w-4" />
+          <span>{showTranslations ? "Ocultar traduções" : "Mostrar traduções"}</span>
+        </Button>
+      </div>
 
       <Tabs defaultValue="light" className="mb-4">
         <TabsList>
@@ -66,6 +81,7 @@ const TitleVariationsLevels: React.FC<TitleVariationsLevelsProps> = ({ variation
                     key={`${level}-${index}`} 
                     variation={variation} 
                     badgeColor={getBadgeColor(level)}
+                    showTranslation={showTranslations}
                   />
                 ))}
               </div>
@@ -85,9 +101,14 @@ const TitleVariationsLevels: React.FC<TitleVariationsLevelsProps> = ({ variation
 interface TitleVariationCardProps {
   variation: TitleVariation;
   badgeColor: 'blue' | 'yellow' | 'green';
+  showTranslation: boolean;
 }
 
-const TitleVariationCard: React.FC<TitleVariationCardProps> = ({ variation, badgeColor }) => {
+const TitleVariationCard: React.FC<TitleVariationCardProps> = ({ 
+  variation, 
+  badgeColor,
+  showTranslation
+}) => {
   const hasTranslation = variation.translation && variation.translation.trim() !== '';
   
   // Map for badge classes based on color
@@ -110,8 +131,15 @@ const TitleVariationCard: React.FC<TitleVariationCardProps> = ({ variation, badg
       <div className="flex justify-between items-start mb-2">
         <div className="flex items-center gap-2">
           <h4 className="font-medium text-md">{variation.title}</h4>
-          {variation.language && variation.language !== 'pt' && (
-            <Badge className="bg-gray-100 text-gray-600 text-xs">{languageNames[variation.language] || variation.language}</Badge>
+          {variation.language && (
+            <Badge className={
+              variation.language === 'pt' ? "bg-green-100 text-green-600" :
+              variation.language === 'es' ? "bg-blue-100 text-blue-600" :
+              variation.language === 'en' ? "bg-purple-100 text-purple-600" :
+              "bg-amber-100 text-amber-600"
+            }>
+              {languageNames[variation.language] || variation.language}
+            </Badge>
           )}
         </div>
         <Badge 
@@ -123,7 +151,7 @@ const TitleVariationCard: React.FC<TitleVariationCardProps> = ({ variation, badg
       </div>
       <p className="text-xs text-muted-foreground">{variation.explanation}</p>
       
-      {hasTranslation && (
+      {hasTranslation && showTranslation && (
         <div className="mt-2 pt-2 border-t border-dashed border-border">
           <div className="flex items-center gap-1">
             <TranslationIcon className="h-3.5 w-3.5 text-muted-foreground" />

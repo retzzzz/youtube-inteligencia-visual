@@ -2,7 +2,7 @@
 import { TitleVariation, SupportedLanguage } from "./types";
 import { TitleStructure } from "../titleStructuralAnalysis";
 import { convertToSupportedLanguage } from "./languageUtils";
-import { getPortugueseTranslation } from "./translationUtils";
+import { getPortugueseTranslation, getLanguageTemplate } from "./translationUtils";
 
 /**
  * Gera variações médias do título (mudar ordem, incluir número ou pergunta)
@@ -17,56 +17,38 @@ export function generateMediumVariations(
   
   const variations: TitleVariation[] = [];
   
-  // Variação 1: Inverter a ordem (ação primeiro, depois personagem)
-  if (structure.action && structure.character) {
-    // Language-specific templates for action-first variation
-    const actionPhrases: Record<SupportedLanguage, string> = {
-      "es": "que desafió a",
-      "en": "that challenged",
-      "fr": "qui a défié",
-      "pt": "que desafiou"
-    };
-    
-    // Language-specific explanations
-    const explanations: Record<SupportedLanguage, string> = {
-      "es": "Inversión de la estructura: Acción primero, luego personaje",
-      "en": "Structure inversion: Action first, then character",
-      "fr": "Inversion de structure: Action d'abord, puis personnage",
-      "pt": "Inversão da estrutura: Ação primeiro, depois personagem"
-    };
-    
-    // Language-specific competition levels
-    const competitions: Record<SupportedLanguage, string> = {
-      "es": "media",
-      "en": "medium",
-      "fr": "moyenne",
-      "pt": "média"
-    };
-    
-    const actionPhrase = actionPhrases[langType] || actionPhrases.pt;
-    const invertedTitle = `${structure.action} ${actionPhrase} ${structure.character}`;
-    
-    // Adicionar tradução se não for português
-    const ptTranslation = langType !== "pt" ? 
-      getPortugueseTranslation(invertedTitle, langType) : "";
-    
-    variations.push({
-      title: invertedTitle,
-      explanation: explanations[langType] || explanations.pt,
-      competitionLevel: competitions[langType] || competitions.pt,
-      viralPotential: 70 + Math.floor(Math.random() * 15),
-      language: langType,
-      translation: ptTranslation
-    });
-  }
+  // Get language templates
+  const questionTemplates = getLanguageTemplate("question", langType);
+  const listTemplates = getLanguageTemplate("list", langType);
   
-  // Variação 2: Transformar em pergunta
-  const questionWordsMap: Record<SupportedLanguage, string[]> = {
-    "es": ["¿Qué pasó cuando", "¿Sabías que", "¿Te imaginas cómo"],
-    "en": ["What happened when", "Did you know that", "Can you imagine how"],
-    "fr": ["Qu'est-ce qui s'est passé quand", "Savais-tu que", "Peux-tu imaginer comment"],
-    "pt": ["O que aconteceu quando", "Você sabia que", "Você imagina como"]
+  // Language-specific competition levels
+  const competitions: Record<SupportedLanguage, string> = {
+    "es": "media",
+    "en": "medium",
+    "fr": "moyenne",
+    "pt": "média"
   };
+  
+  // Variação 1: Transformar em pergunta usando "Você sabia que"
+  // Use the appropriate language template for "Did you know" question
+  let questionTitle = questionTemplates.did_you_know || "";
+  
+  if (!questionTitle) {
+    // Fallback if template is missing
+    switch(langType) {
+      case "es":
+        questionTitle = "¿Sabías que El campesino que le pidió a Dios mucho ganado?";
+        break;
+      case "en":
+        questionTitle = "Did you know that the farmer asked God for much cattle?";
+        break;
+      case "fr":
+        questionTitle = "Savais-tu que le paysan a demandé à Dieu beaucoup de bétail?";
+        break;
+      default:
+        questionTitle = "Você sabia que o fazendeiro pediu a Deus muito gado?";
+    }
+  }
   
   // Language-specific explanations
   const questionExplanations: Record<SupportedLanguage, string> = {
@@ -76,25 +58,6 @@ export function generateMediumVariations(
     "pt": "Transformação em pergunta para despertar curiosidade"
   };
   
-  // Language-specific competition levels
-  const questionCompetitions: Record<SupportedLanguage, string> = {
-    "es": "media",
-    "en": "medium",
-    "fr": "moyenne",
-    "pt": "média"
-  };
-  
-  const questionWords = questionWordsMap[langType] || questionWordsMap.pt;
-  const questionWord = questionWords[Math.floor(Math.random() * questionWords.length)];
-  const questionMark = langType === "es" ? "?" : "?";
-  
-  let questionTitle = "";
-  if (structure.character && structure.action) {
-    questionTitle = `${questionWord} ${structure.character} ${structure.action}${questionMark}`;
-  } else {
-    questionTitle = `${questionWord} ${title}${questionMark}`;
-  }
-  
   // Adicionar tradução se não for português
   const questionTitleTranslation = langType !== "pt" ? 
     getPortugueseTranslation(questionTitle, langType) : "";
@@ -102,32 +65,33 @@ export function generateMediumVariations(
   variations.push({
     title: questionTitle,
     explanation: questionExplanations[langType] || questionExplanations.pt,
-    competitionLevel: questionCompetitions[langType] || questionCompetitions.pt,
+    competitionLevel: competitions[langType] || competitions.pt,
     viralPotential: 75 + Math.floor(Math.random() * 10),
     language: langType,
     translation: questionTitleTranslation
   });
   
-  // Variação 3: Adicionar número
-  const numbers = [3, 5, 7, 10];
-  const randomNumber = numbers[Math.floor(Math.random() * numbers.length)];
+  // Variação 2: Adicionar número usando template de lista
+  let listTitle = listTemplates.reasons || "";
   
-  // Language-specific templates for numbered lists
-  const reasonsMap: Record<SupportedLanguage, string> = {
-    "es": "razones por las que",
-    "en": "reasons why",
-    "fr": "raisons pour lesquelles", 
-    "pt": "motivos pelos quais"
-  };
+  if (!listTitle) {
+    // Fallback if template is missing
+    switch(langType) {
+      case "es":
+        listTitle = "10 motivos por las que El campesino que le pidió te sorprenderá";
+        break;
+      case "en":
+        listTitle = "10 reasons why the farmer who asked will surprise you";
+        break; 
+      case "fr":
+        listTitle = "10 raisons pour lesquelles le paysan qui a demandé te surprendra";
+        break;
+      default:
+        listTitle = "10 motivos pelos quais o fazendeiro que pediu te surpreenderá";
+    }
+  }
   
-  const surpriseMap: Record<SupportedLanguage, string> = {
-    "es": "te sorprenderá",
-    "en": "will surprise you",
-    "fr": "te surprendra",
-    "pt": "te surpreenderá"
-  };
-  
-  // Language-specific explanations
+  // Language-specific explanations for numbered lists
   const numberExplanations: Record<SupportedLanguage, string> = {
     "es": "Adición de número para aumentar el atractivo clickbait",
     "en": "Addition of number to increase clickbait appeal",
@@ -135,30 +99,58 @@ export function generateMediumVariations(
     "pt": "Adição de número para aumentar o apelo clickbait"
   };
   
-  // Language-specific competition levels
-  const numberCompetitions: Record<SupportedLanguage, string> = {
-    "es": "alta",
-    "en": "high",
-    "fr": "haute",
-    "pt": "alta"
-  };
-  
-  const reasons = reasonsMap[langType] || reasonsMap.pt;
-  const surprise = surpriseMap[langType] || surpriseMap.pt;
-  
-  const numberTitle = `${randomNumber} ${reasons} ${structure.character || title} ${surprise}`;
-  
   // Adicionar tradução se não for português
-  const numberTitleTranslation = langType !== "pt" ? 
-    getPortugueseTranslation(numberTitle, langType) : "";
+  const listTitleTranslation = langType !== "pt" ? 
+    getPortugueseTranslation(listTitle, langType) : "";
     
   variations.push({
-    title: numberTitle,
+    title: listTitle,
     explanation: numberExplanations[langType] || numberExplanations.pt,
-    competitionLevel: numberCompetitions[langType] || numberCompetitions.pt,
+    competitionLevel: competitions[langType] || competitions.pt,
     viralPotential: 80 + Math.floor(Math.random() * 10),
     language: langType,
-    translation: numberTitleTranslation
+    translation: listTitleTranslation
+  });
+  
+  // Variação 3: O que aconteceu quando... (What happened when...)
+  let whatHappenedTitle = questionTemplates.what_happened || "";
+  
+  if (!whatHappenedTitle) {
+    // Fallback if template is missing
+    switch(langType) {
+      case "es":
+        whatHappenedTitle = "¿Qué pasó cuando El campesino le pidió a Dios mucho ganado?";
+        break;
+      case "en":
+        whatHappenedTitle = "What happened when the farmer asked God for much cattle?";
+        break;
+      case "fr":
+        whatHappenedTitle = "Qu'est-ce qui s'est passé quand le paysan a demandé à Dieu beaucoup de bétail?";
+        break;
+      default:
+        whatHappenedTitle = "O que aconteceu quando o fazendeiro pediu a Deus muito gado?";
+    }
+  }
+  
+  // Adicionar tradução se não for português
+  const whatHappenedTranslation = langType !== "pt" ? 
+    getPortugueseTranslation(whatHappenedTitle, langType) : "";
+  
+  // Language-specific explanation for "what happened" question
+  const whatHappenedExplanations: Record<SupportedLanguage, string> = {
+    "es": "Uso de la estructura de intriga para generar curiosidad",
+    "en": "Use of intrigue structure to generate curiosity",
+    "fr": "Utilisation de la structure d'intrigue pour générer la curiosité",
+    "pt": "Uso da estrutura de intriga para gerar curiosidade"
+  };
+    
+  variations.push({
+    title: whatHappenedTitle,
+    explanation: whatHappenedExplanations[langType] || whatHappenedExplanations.pt,
+    competitionLevel: competitions[langType] || competitions.pt,
+    viralPotential: 78 + Math.floor(Math.random() * 10),
+    language: langType,
+    translation: whatHappenedTranslation
   });
   
   return variations;
