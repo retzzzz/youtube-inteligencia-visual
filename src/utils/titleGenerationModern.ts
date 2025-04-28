@@ -23,9 +23,46 @@ export const generateTitleVariations = (
   // Generate emotional variations
   for (const type of baseType) {
     for (const saturation of baseSaturation) {
+      // Create a variation message based on emotion type and saturation
+      const variationTitle = `${type.toUpperCase()}: ${keyword} (${saturation})`;
+      
+      // Generate dynamic explanation based on type and saturation
+      let explanation = `Title variation using ${type} emotion with ${saturation} saturation.`;
+      if (type === 'dor') {
+        explanation = `Pain-point focused title highlighting the problem "${keyword}" with ${saturation} emotional intensity.`;
+      } else if (type === 'esperanca') {
+        explanation = `Hope-focused title presenting "${keyword}" as a solution with ${saturation} emotional appeal.`;
+      } else if (type === 'curiosidade') {
+        explanation = `Curiosity-triggering title about "${keyword}" with ${saturation} intrigue factor.`;
+      }
+      
+      // Calculate competition level based on type and saturation
+      let competitionLevel: "baixa" | "média" | "alta" = "média";
+      if (type === 'curiosidade' && saturation === 'high') {
+        competitionLevel = "alta";
+      } else if (type === 'dor' && saturation === 'low') {
+        competitionLevel = "baixa";
+      }
+      
+      // Calculate viral potential based on emotion type and saturation
+      let viralPotential = 50; // Default medium potential
+      if (saturation === 'high') {
+        viralPotential += 25;
+      } else if (saturation === 'low') {
+        viralPotential -= 15;
+      }
+      
+      // Curiosity tends to be more viral
+      if (type === 'curiosidade') {
+        viralPotential += 10;
+      }
+      
       titleVariations.push({
-        title: `${type.toUpperCase()}: ${keyword} (${saturation})`,
-        text: `${type.toUpperCase()}: ${keyword} (${saturation})`,
+        title: variationTitle,
+        text: variationTitle,
+        explanation,
+        competitionLevel,
+        viralPotential,
         type: type as "dor" | "esperanca" | "curiosidade",
         saturation: saturation as "low" | "medium" | "high",
         language: language as "pt" | "es" | "en" | "fr"
