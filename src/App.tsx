@@ -22,7 +22,7 @@ function App() {
   return (
     <AuthProvider>
       <div className="flex flex-col min-h-screen w-screen max-w-none">
-        <div className="flex-grow w-full">
+        <div className="flex-grow">
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/search" element={<Search />} />

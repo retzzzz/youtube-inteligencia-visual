@@ -7,14 +7,14 @@ import Footer from '@/components/Footer';
 
 const Tutorial = () => {
   return (
-    <div className="min-h-screen flex flex-col w-full pb-32">
+    <div className="flex flex-col min-h-screen">
       <Header />
-      <div className="w-full px-4 md:px-8 py-6">
+      <main className="flex-grow w-full px-4 md:px-8 py-6 mb-8">
         <div className="mt-8 mb-16 w-full">
           <TutorialHeader />
           <TutorialSteps />
         </div>
-      </div>
+      </main>
       <Footer />
     </div>
   );

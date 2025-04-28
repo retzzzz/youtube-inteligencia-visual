@@ -35,10 +35,10 @@ const SubnicheValidator = () => {
   } = useSubnicheValidator();
 
   return (
-    <div className="min-h-screen flex flex-col w-full pb-32">
+    <div className="flex flex-col min-h-screen">
       <Header />
       
-      <div className="w-full px-4 md:px-8 py-6">
+      <main className="flex-grow w-full px-4 md:px-8 py-6 mb-8">
         <ApiKeySection 
           youtubeApiKey={youtubeApiKey}
           isNewKey={isNewKey}
@@ -77,7 +77,7 @@ const SubnicheValidator = () => {
         {subnichesPriorizados.length > 0 && (
           <SubnicheValidationResults subnichesPriorizados={subnichesPriorizados} />
         )}
-      </div>
+      </main>
       
       <Footer />
     </div>

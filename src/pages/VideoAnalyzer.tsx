@@ -50,11 +50,11 @@ const VideoAnalyzer = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col w-full pb-32">
+    <div className="flex flex-col min-h-screen">
       <ApiKeyDialog />
       <Header />
       
-      <div className="w-full px-4 md:px-8 py-6">
+      <main className="flex-grow w-full px-4 md:px-8 py-6 mb-8">
         <Card className="p-6">
           <h1 className="text-2xl font-bold mb-4">Analisador de Vídeos do YouTube</h1>
           
@@ -65,13 +65,11 @@ const VideoAnalyzer = () => {
           
           <YoutubeAnalyzerForm onAnalyzeVideo={handleAnalyzeVideo} isLoading={isLoading} />
         </Card>
-      </div>
 
-      <div className="w-full px-4 md:px-8">
         {analysis && (
           <VideoAnalysisResults analysis={analysis} />
         )}
-      </div>
+      </main>
       
       <Footer />
     </div>

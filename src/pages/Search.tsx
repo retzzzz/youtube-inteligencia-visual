@@ -1,3 +1,4 @@
+
 import { AlertCircle } from 'lucide-react';
 import Header from '@/components/Header';
 import SearchForm from '@/components/SearchForm';
@@ -66,9 +67,9 @@ const Search = () => {
 
   if (!youtubeApiKey) {
     return (
-      <div className="min-h-screen flex flex-col w-full pb-32">
+      <div className="flex flex-col min-h-screen">
         <Header />
-        <div className="w-full px-4 md:px-8 py-6">
+        <main className="flex-grow w-full px-4 md:px-8 py-6 mb-8">
           <Alert variant="destructive" className="mt-8 shadow-lg">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
@@ -82,17 +83,17 @@ const Search = () => {
               </Button>
             </AlertDescription>
           </Alert>
-        </div>
+        </main>
         <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col w-full pb-32">
+    <div className="flex flex-col min-h-screen">
       <Header />
       
-      <div className="w-full px-4 md:px-8 py-6">
+      <main className="flex-grow w-full px-4 md:px-8 py-6 mb-8">
         <h2 className="text-2xl font-bold mb-6">Pesquisa Avançada</h2>
         <SearchForm onSearch={(params) => handleSearch(params, forceNotNew)} isLoading={isLoading} />
         
@@ -125,7 +126,7 @@ const Search = () => {
           hasSearchParams={!!searchParams}
           error={error}
         />
-      </div>
+      </main>
       
       <Footer />
     </div>
