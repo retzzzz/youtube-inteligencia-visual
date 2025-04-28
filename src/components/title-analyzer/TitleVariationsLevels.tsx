@@ -33,7 +33,7 @@ const TitleVariationsLevels: React.FC<TitleVariationsLevelsProps> = ({ variation
     }
   };
   
-  const getBadgeColor = (level: string): string => {
+  const getBadgeColor = (level: string): "blue" | "yellow" | "green" => {
     switch(level) {
       case "light": return "blue";
       case "medium": return "yellow";
