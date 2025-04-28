@@ -1,4 +1,3 @@
-
 import { TitleVariation } from "@/components/title-generator/TitleVariationDisplay";
 import { ProcessedTitleData } from "@/components/title-generator/TitleProcessingResults";
 import { TitleInputData } from "@/components/title-generator/TitleInputForm";
@@ -167,7 +166,7 @@ export const generateSubnicheVariations = (
   const variations: TitleVariation[] = [];
   const mainKeyword = keywords[0];
   
-  // Mapeamento de termos para subnichos
+  // Map for term-subniche relationships (fixing the duplicate property)
   const subnicheMap: Record<string, string[]> = {
     // Português
     "milionário": ["investidor bem-sucedido", "empresário de sucesso", "trader profissional"],
@@ -187,7 +186,7 @@ export const generateSubnicheVariations = (
     "millonario": ["inversor exitoso", "empresario de éxito", "trader profesional"],
     "dinero": ["inversiones", "patrimonio", "activos financieros"],
     "salud": ["bienestar", "longevidad", "salud mental"],
-    "dieta": ["nutrición", "alimentación baja en carbohidratos", "dieta cetogénica"],
+    "dieta_es": ["nutrición", "alimentación baja en carbohidratos", "dieta cetogénica"],
     "ejercicio": ["entrenamiento funcional", "musculación", "yoga"]
   };
   

@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import GenerateTab from './GenerateTab';
 import AnalyzeTab from './AnalyzeTab';
 import { TitleData } from '@/utils/titleAnalysis';
-import { TitleVariation } from '@/pages/TitleGenerator';
+import { TitleVariation } from './TitleVariationDisplay';
 import TitleVariations from '../TitleVariations';
 import { Button } from "@/components/ui/button";
 import {

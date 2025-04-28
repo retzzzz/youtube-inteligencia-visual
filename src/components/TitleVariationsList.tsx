@@ -5,8 +5,8 @@ import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { Copy, Check, Languages, ArrowDown as ArrowDownIcon, ArrowUp as ArrowUpIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { TitleVariation } from '@/pages/TitleGenerator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { TitleVariation } from '@/components/title-generator/TitleVariationDisplay';
 
 interface TitleVariationsListProps {
   variations: TitleVariation[];

@@ -4,8 +4,10 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Info } from "lucide-react";
 import TitleGeneratorForm from "@/components/TitleGeneratorForm";
 import TitleVariationsList from "@/components/TitleVariationsList";
-import { TitleVariation } from '@/pages/TitleGenerator';
 import { useToast } from '@/hooks/use-toast';
+
+// Import the TitleVariation from the display component instead of the page
+import { TitleVariation } from './TitleVariationDisplay';
 
 interface GenerateTabProps {
   variations: TitleVariation[];

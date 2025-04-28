@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Header from "@/components/Header";
 import { Card } from "@/components/ui/card";
@@ -12,6 +11,7 @@ import TitleExampleWalkthrough from "@/components/title-generator/TitleExampleWa
 import { processTitleInput } from "@/utils/titleProcessor";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Info } from "lucide-react";
+import { TitleVariation } from "@/components/title-generator/TitleVariationDisplay";
 
 const TitleGenerator = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -24,7 +24,6 @@ const TitleGenerator = () => {
     setIsLoading(true);
     
     try {
-      // Verificar se pelo menos uma estratégia foi selecionada
       const hasStrategy = 
         inputData.strategies.structureVariations ||
         inputData.strategies.keywordSubniche ||
@@ -43,7 +42,6 @@ const TitleGenerator = () => {
       const data = await processTitleInput(inputData, youtubeApiKey);
       setProcessedData(data);
       
-      // Mudar para a aba de resultados
       setActiveTab("results");
       
       toast({

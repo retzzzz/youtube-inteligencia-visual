@@ -44,9 +44,9 @@ const TitleVariationDisplay = ({
   const getCompetitionBadgeVariant = (level: "baixa" | "média" | "alta") => {
     switch (level) {
       case "baixa":
-        return "success";
+        return "secondary";
       case "média":
-        return "warning";
+        return "outline";
       case "alta":
         return "destructive";
       default:
