@@ -7,8 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ScriptStats, ScriptConfig as ScriptConfigType } from "@/pages/ScriptGenerator";
 import { Separator } from "@/components/ui/separator";
+import { ScriptStats, ScriptConfig as ScriptConfigType } from "@/hooks/useScriptGenerator";
 
 interface ScriptConfigProps {
   scriptStats: ScriptStats;

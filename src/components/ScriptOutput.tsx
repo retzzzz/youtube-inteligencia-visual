@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { ProcessedScript } from "@/pages/ScriptGenerator";
 import { Badge } from "@/components/ui/badge";
 import { Copy, Check, Download, Text } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ProcessedScript } from "@/hooks/useScriptGenerator";
 
 interface ScriptOutputProps {
   script: ProcessedScript;
