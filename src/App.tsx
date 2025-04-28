@@ -15,15 +15,14 @@ import ScriptTutorial from './pages/ScriptTutorial';
 import ImportantLinks from './pages/ImportantLinks';
 import { AuthProvider } from './contexts/AuthContext';
 import { Toaster } from './components/ui/toaster';
-import Footer from './components/Footer';
 import ApiKeyDialog from './components/ApiKeyDialog';  // Import the API key dialog
 import './App.css';
 
 function App() {
   return (
     <AuthProvider>
-      <div className="flex flex-col min-h-screen">
-        <div className="flex-grow">
+      <div className="flex flex-col min-h-screen w-full">
+        <div className="flex-grow w-full">
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/search" element={<Search />} />
@@ -40,7 +39,6 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
-        <Footer />
         <ApiKeyDialog />  {/* Add the API key dialog here */}
       </div>
       <Toaster />
@@ -49,4 +47,3 @@ function App() {
 }
 
 export default App;
-

@@ -72,7 +72,7 @@ const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-card rounded-lg border border-border backdrop-blur-sm bg-opacity-90">
+    <form onSubmit={handleSubmit} className="w-full space-y-4 p-4 bg-card rounded-lg border border-border backdrop-blur-sm bg-opacity-90">
       {!youtubeApiKey && (
         <Alert variant="destructive" className="mb-4">
           <AlertCircle className="h-4 w-4" />

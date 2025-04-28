@@ -22,8 +22,8 @@ const ResultsSection = ({ results, selectedVideo, onSelectVideo, searchParams }:
   if (!results.length) return null;
 
   return (
-    <>
-      <div id="dashboard-section" className="mb-8">
+    <div className="w-full">
+      <div id="dashboard-section" className="mb-8 w-full">
         <Card className="p-6 shadow-lg mb-8 border bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-black">
           <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-primary" />
@@ -51,7 +51,7 @@ const ResultsSection = ({ results, selectedVideo, onSelectVideo, searchParams }:
         </div>
       </div>
 
-      <Tabs defaultValue="resultados" className="my-6">
+      <Tabs defaultValue="resultados" className="my-6 w-full">
         <TabsList className="w-full md:w-auto p-1 bg-muted/40 backdrop-blur-sm">
           <TabsTrigger value="resultados" className="data-[state=active]:shadow-md flex items-center gap-2">
             <Table className="h-4 w-4" />
@@ -63,15 +63,15 @@ const ResultsSection = ({ results, selectedVideo, onSelectVideo, searchParams }:
           </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="resultados" className="mt-6 animate-fade-in">
+        <TabsContent value="resultados" className="mt-6 animate-fade-in w-full">
           <div className="w-full overflow-x-auto" style={{ maxWidth: "100%", overflowX: "auto" }}>
             <ResultsTable results={results} onSelectVideo={onSelectVideo} />
           </div>
         </TabsContent>
         
-        <TabsContent value="remodelagem" className="mt-6 animate-fade-in">
+        <TabsContent value="remodelagem" className="mt-6 animate-fade-in w-full">
           {selectedVideo ? (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
               <div className="lg:col-span-1">
                 <Card className="p-5 glass-panel card-3d-effect">
                   <h3 className="text-lg font-bold mb-3 border-b pb-2">Vídeo Selecionado</h3>
@@ -100,13 +100,13 @@ const ResultsSection = ({ results, selectedVideo, onSelectVideo, searchParams }:
               </div>
             </div>
           ) : (
-            <div className="text-center py-12 glass-panel">
+            <div className="text-center py-12 glass-panel w-full">
               <p className="text-muted-foreground">Selecione um vídeo para ver sugestões de remodelagem.</p>
             </div>
           )}
         </TabsContent>
       </Tabs>
-    </>
+    </div>
   );
 };
 

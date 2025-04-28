@@ -13,6 +13,7 @@ import ErrorDisplay from '@/components/search/ErrorDisplay';
 import LoadingAndEmptyStates from '@/components/search/LoadingAndEmptyStates';
 import NewKeyNotice from '@/components/search/NewKeyNotice';
 import { markKeyAsNotNew } from '@/services/youtube/validators/key-validator';
+import Footer from '@/components/Footer';
 
 const Search = () => {
   const { 
@@ -66,30 +67,33 @@ const Search = () => {
 
   if (!youtubeApiKey) {
     return (
-      <div className="min-h-screen w-full px-4 md:px-8 py-6">
+      <div className="min-h-screen flex flex-col w-full">
         <Header />
-        <Alert variant="destructive" className="mt-8 shadow-lg">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            É necessário configurar uma chave de API do YouTube para usar esta ferramenta.
-            <Button
-              variant="link"
-              className="p-0 h-auto ml-2"
-              onClick={() => setNeedsApiKey(true)}
-            >
-              Configurar chave API
-            </Button>
-          </AlertDescription>
-        </Alert>
+        <div className="flex-grow w-full px-4 md:px-8 py-6">
+          <Alert variant="destructive" className="mt-8 shadow-lg">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              É necessário configurar uma chave de API do YouTube para usar esta ferramenta.
+              <Button
+                variant="link"
+                className="p-0 h-auto ml-2"
+                onClick={() => setNeedsApiKey(true)}
+              >
+                Configurar chave API
+              </Button>
+            </AlertDescription>
+          </Alert>
+        </div>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen w-full px-4 md:px-8 py-6">
+    <div className="min-h-screen flex flex-col w-full">
       <Header />
       
-      <div className="mt-6 w-full">
+      <div className="flex-grow w-full px-4 md:px-8 py-6">
         <h2 className="text-2xl font-bold mb-6">Pesquisa Avançada</h2>
         <SearchForm onSearch={(params) => handleSearch(params, forceNotNew)} isLoading={isLoading} />
         
@@ -123,6 +127,8 @@ const Search = () => {
           error={error}
         />
       </div>
+      
+      <Footer />
     </div>
   );
 };
