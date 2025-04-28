@@ -12,6 +12,7 @@ export interface TitleVariation {
   type?: "dor" | "esperanca" | "curiosidade";
   saturation?: 'low' | 'medium' | 'high';
   language?: "pt" | "en" | "es" | "fr";
+  translation?: string;
   translations?: Array<{
     text: string;
     language: "pt" | "en" | "es" | "fr";

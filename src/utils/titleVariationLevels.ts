@@ -76,21 +76,35 @@ export function generateLightVariations(
       if (structure.character) {
         const characterParts = structure.character.split(" ");
         if (characterParts.length > 1) {
-          const randomAdjective = ["famoso", "conhecido", "respeitado", "humilde", "honesto"][i % 5];
+          const randomAdjective = language === "es" ? 
+            ["famoso", "conocido", "respetado", "humilde", "honesto"][i % 5] :
+            language === "en" ? 
+            ["famous", "known", "respected", "humble", "honest"][i % 5] :
+            ["famoso", "conhecido", "respeitado", "humilde", "honesto"][i % 5];
+
           newTitle = newTitle.replace(
             structure.character, 
-            `${characterParts[0]}, o ${randomAdjective} ${characterParts.slice(1).join(" ")}`
+            language === "es" ? 
+              `${characterParts[0]}, el ${randomAdjective} ${characterParts.slice(1).join(" ")}` :
+            language === "en" ? 
+              `${characterParts[0]}, the ${randomAdjective} ${characterParts.slice(1).join(" ")}` :
+              `${characterParts[0]}, o ${randomAdjective} ${characterParts.slice(1).join(" ")}`
           );
           explanation = `Adicionado adjetivo "${randomAdjective}" ao personagem`;
         }
       }
     }
+
+    // Adicionar tradução se não for português
+    const ptTranslation = language !== "pt" ? getPortugueseTranslation(newTitle, language) : "";
     
     variations.push({
       title: newTitle,
       explanation: explanation,
       competitionLevel: "baixa",
-      viralPotential: 60 + Math.floor(Math.random() * 10)
+      viralPotential: 60 + Math.floor(Math.random() * 10),
+      language: language,
+      translation: ptTranslation
     });
   }
   
@@ -109,12 +123,25 @@ export function generateMediumVariations(
   
   // Variação 1: Inverter a ordem (ação primeiro, depois personagem)
   if (structure.action && structure.character) {
-    const invertedTitle = `${structure.action} que desafiou ${structure.character}`;
+    const actionPhrase = language === "es" ? 
+      "que desafió a" : 
+      language === "en" ? 
+      "that challenged" : 
+      "que desafiou";
+      
+    const invertedTitle = `${structure.action} ${actionPhrase} ${structure.character}`;
+    
+    // Adicionar tradução se não for português
+    const ptTranslation = language !== "pt" ? 
+      getPortugueseTranslation(invertedTitle, language) : "";
+    
     variations.push({
       title: invertedTitle,
       explanation: "Inversão da estrutura: Ação primeiro, depois personagem",
       competitionLevel: "média",
-      viralPotential: 70 + Math.floor(Math.random() * 15)
+      viralPotential: 70 + Math.floor(Math.random() * 15),
+      language: language,
+      translation: ptTranslation
     });
   }
   
@@ -135,11 +162,17 @@ export function generateMediumVariations(
     questionTitle = `${questionWord} ${title}${questionMark}`;
   }
   
+  // Adicionar tradução se não for português
+  const questionTitleTranslation = language !== "pt" ? 
+    getPortugueseTranslation(questionTitle, language) : "";
+    
   variations.push({
     title: questionTitle,
     explanation: "Transformação em pergunta para despertar curiosidade",
     competitionLevel: "média",
-    viralPotential: 75 + Math.floor(Math.random() * 10)
+    viralPotential: 75 + Math.floor(Math.random() * 10),
+    language: language,
+    translation: questionTitleTranslation
   });
   
   // Variação 3: Adicionar número
@@ -152,13 +185,25 @@ export function generateMediumVariations(
     "reasons why" :
     "motivos pelos quais";
   
-  const numberTitle = `${randomNumber} ${reasons} ${structure.character || title} te surpreenderá`;
+  const surprise = language === "es" ? 
+    "te sorprenderá" : 
+    language === "en" ? 
+    "will surprise you" :
+    "te surpreenderá";
+    
+  const numberTitle = `${randomNumber} ${reasons} ${structure.character || title} ${surprise}`;
   
+  // Adicionar tradução se não for português
+  const numberTitleTranslation = language !== "pt" ? 
+    getPortugueseTranslation(numberTitle, language) : "";
+    
   variations.push({
     title: numberTitle,
     explanation: "Adição de número para aumentar o apelo clickbait",
     competitionLevel: "alta",
-    viralPotential: 80 + Math.floor(Math.random() * 10)
+    viralPotential: 80 + Math.floor(Math.random() * 10),
+    language: language,
+    translation: numberTitleTranslation
   });
   
   return variations;
@@ -205,18 +250,24 @@ export function generateBoldVariations(
     let boldTitle = "";
     
     if (language === "es") {
-      boldTitle = `${structure.character} ${mysticAdj} y la ${capitalizedMysticAdj} ${structure.action.split(" ").slice(-1)[0]}`;
+      boldTitle = `${structure.character} ${mysticAdj} y la ${capitalizedMysticAdj} ${structure.action?.split(" ").slice(-1)[0] || "historia"}`;
     } else if (language === "en") {
-      boldTitle = `${structure.character} the ${mysticAdj} and the ${objectAdj} ${structure.action.split(" ").slice(-1)[0]}`;
+      boldTitle = `${structure.character} the ${mysticAdj} and the ${objectAdj} ${structure.action?.split(" ").slice(-1)[0] || "story"}`;
     } else {
-      boldTitle = `${structure.character} ${mysticAdj} e a ${structure.action.split(" ").slice(-1)[0]} ${capitalizedMysticAdj}`;
+      boldTitle = `${structure.character} ${mysticAdj} e a ${structure.action?.split(" ").slice(-1)[0] || "história"} ${capitalizedMysticAdj}`;
     }
     
+    // Adicionar tradução se não for português
+    const boldTitleTranslation = language !== "pt" ? 
+      getPortugueseTranslation(boldTitle, language) : "";
+      
     variations.push({
       title: boldTitle,
       explanation: `Adição de elemento místico "${mysticAdj}" ao personagem e objeto`,
       competitionLevel: "baixa",
-      viralPotential: 85 + Math.floor(Math.random() * 10)
+      viralPotential: 85 + Math.floor(Math.random() * 10),
+      language: language,
+      translation: boldTitleTranslation
     });
   }
   
@@ -226,22 +277,40 @@ export function generateBoldVariations(
   
   let legendaryTitle = "";
   if (structure.character && structure.action) {
+    const humbleWord = language === "es" ? "humilde" : 
+                        language === "en" ? "humble" : "humilde";
+    const discoveredWord = language === "es" ? "descubrió" : 
+                          language === "en" ? "discovered" : "descobriu";
+    const ofTheWord = language === "es" ? "de los" : 
+                      language === "en" ? "of the" : "dos";
+                      
     if (language === "es") {
-      legendaryTitle = `Cuando el humilde ${structure.character.split(" ")[0]} descubrió el ${structure.action.split(" ").slice(-1)[0]} de los ${randomLegendWord}s`;
+      legendaryTitle = `Cuando el ${humbleWord} ${structure.character.split(" ")[0]} ${discoveredWord} el ${structure.action.split(" ").slice(-1)[0]} ${ofTheWord} ${randomLegendWord}s`;
     } else if (language === "en") {
-      legendaryTitle = `When the humble ${structure.character.split(" ")[0]} discovered the ${randomLegendWord} ${structure.action.split(" ").slice(-1)[0]}`;
+      legendaryTitle = `When the ${humbleWord} ${structure.character.split(" ")[0]} ${discoveredWord} the ${randomLegendWord} ${structure.action.split(" ").slice(-1)[0]}`;
     } else {
-      legendaryTitle = `Quando o humilde ${structure.character.split(" ")[0]} descobriu o ${structure.action.split(" ").slice(-1)[0]} dos ${randomLegendWord}s`;
+      legendaryTitle = `Quando o ${humbleWord} ${structure.character.split(" ")[0]} ${discoveredWord} o ${structure.action.split(" ").slice(-1)[0]} ${ofTheWord} ${randomLegendWord}s`;
     }
   } else {
-    legendaryTitle = `A história ${randomLegendWord} de ${title}`;
+    const storyWord = language === "es" ? "historia" : 
+                      language === "en" ? "story" : "história";
+    const ofWord = language === "es" ? "de" : 
+                  language === "en" ? "of" : "de";
+    
+    legendaryTitle = `A ${storyWord} ${randomLegendWord} ${ofWord} ${title}`;
   }
   
+  // Adicionar tradução se não for português
+  const legendaryTitleTranslation = language !== "pt" ? 
+    getPortugueseTranslation(legendaryTitle, language) : "";
+    
   variations.push({
     title: legendaryTitle,
     explanation: `Adição de elemento lendário/ancestral "${randomLegendWord}"`,
     competitionLevel: "média",
-    viralPotential: 90 + Math.floor(Math.random() * 5)
+    viralPotential: 90 + Math.floor(Math.random() * 5),
+    language: language,
+    translation: legendaryTitleTranslation
   });
   
   // Variação 3: Elemento secreto/misterioso
@@ -269,14 +338,161 @@ export function generateBoldVariations(
     }
   }
   
+  // Adicionar tradução se não for português
+  const mysteryTitleTranslation = language !== "pt" ? 
+    getPortugueseTranslation(mysteryTitle, language) : "";
+    
   variations.push({
     title: mysteryTitle,
     explanation: `Adição de elemento misterioso/secreto "${randomMysteryWord}"`,
     competitionLevel: "média",
-    viralPotential: 88 + Math.floor(Math.random() * 7)
+    viralPotential: 88 + Math.floor(Math.random() * 7),
+    language: language,
+    translation: mysteryTitleTranslation
   });
   
   return variations;
+}
+
+/**
+ * Função para gerar traduções para o português
+ * Em um ambiente de produção, isto seria feito com uma API de tradução
+ */
+function getPortugueseTranslation(text: string, sourceLanguage: string): string {
+  if (sourceLanguage === "pt") return ""; // Se já é português, não traduz
+  
+  // Traduções básicas de espanhol para portugués
+  if (sourceLanguage === "es") {
+    // Mapeamento básico de palavras comuns espanhol -> português
+    const translations: Record<string, string> = {
+      "campesino": "fazendeiro",
+      "pidió": "pediu",
+      "Dios": "Deus",
+      "mucho": "muito",
+      "ganado": "gado",
+      "cuando": "quando",
+      "humilde": "humilde",
+      "descubrió": "descobriu",
+      "historia": "história",
+      "secreto": "secreto",
+      "detrás": "por trás",
+      "razones": "motivos",
+      "sorprenderá": "surpreenderá",
+      "por las que": "pelos quais",
+      "te": "te",
+      "según": "segundo",
+      "profecía": "profecia",
+      "qué pasó": "o que aconteceu",
+      "sabías que": "você sabia que",
+      "te imaginas": "você imagina",
+      "cómo": "como",
+      "el": "o",
+      "la": "a",
+      "los": "os",
+      "las": "as",
+      "y": "e",
+      "con": "com",
+      "de": "de",
+      "en": "em",
+      "que": "que"
+    };
+    
+    // Substituição básica de palavras
+    let translation = text;
+    
+    // Primeiro tenta traduzir frases completas frequentes
+    if (text.includes("¿Qué pasó cuando")) {
+      translation = translation.replace("¿Qué pasó cuando", "O que aconteceu quando");
+    }
+    if (text.includes("¿Sabías que")) {
+      translation = translation.replace("¿Sabías que", "Você sabia que");
+    }
+    if (text.includes("¿Te imaginas cómo")) {
+      translation = translation.replace("¿Te imaginas cómo", "Você imagina como");
+    }
+    
+    // Remove pontuação espanhola
+    translation = translation.replace("¿", "").replace("¡", "");
+    
+    // Traduz palavra por palavra para frases específicas
+    if (text.includes("El campesino que le pidió a Dios mucho ganado")) {
+      return "O fazendeiro que pediu a Deus muito gado";
+    }
+    
+    // Para outros casos, faz substituições palavra por palavra
+    Object.keys(translations).forEach(spanishWord => {
+      const regex = new RegExp(`\\b${spanishWord}\\b`, 'gi');
+      translation = translation.replace(regex, translations[spanishWord]);
+    });
+    
+    return translation;
+  }
+  
+  // Traduções básicas de inglês para portugués
+  if (sourceLanguage === "en") {
+    // Mapeamento básico de palavras comuns inglês -> português
+    const translations: Record<string, string> = {
+      "farmer": "fazendeiro",
+      "asked": "pediu",
+      "God": "Deus", 
+      "many": "muitos",
+      "cattle": "gados",
+      "when": "quando",
+      "humble": "humilde",
+      "discovered": "descobriu",
+      "story": "história",
+      "secret": "secreto",
+      "behind": "por trás",
+      "reasons": "motivos",
+      "why": "por que",
+      "will": "vai",
+      "surprise": "surpreender",
+      "you": "você",
+      "according": "de acordo com",
+      "prophecy": "profecia",
+      "what happened": "o que aconteceu",
+      "did you know": "você sabia",
+      "can you imagine": "você consegue imaginar",
+      "how": "como",
+      "the": "o",
+      "and": "e",
+      "with": "com",
+      "of": "de",
+      "in": "em",
+      "that": "que",
+      "who": "quem"
+    };
+    
+    // Substituição básica de palavras
+    let translation = text;
+    
+    // Primeiro tenta traduzir frases completas frequentes
+    if (text.includes("What happened when")) {
+      translation = translation.replace("What happened when", "O que aconteceu quando");
+    }
+    if (text.includes("Did you know that")) {
+      translation = translation.replace("Did you know that", "Você sabia que");
+    }
+    if (text.includes("Can you imagine how")) {
+      translation = translation.replace("Can you imagine how", "Você consegue imaginar como");
+    }
+    
+    // Para títulos específicos
+    if (text.includes("The farmer who asked God for many cattle")) {
+      return "O fazendeiro que pediu a Deus muito gado";
+    }
+    
+    // Para outros casos, faz substituições palavra por palavra
+    Object.keys(translations).forEach(englishWord => {
+      const regex = new RegExp(`\\b${englishWord}\\b`, 'gi');
+      translation = translation.replace(regex, translations[englishWord]);
+    });
+    
+    return translation;
+  }
+  
+  // Caso não consiga traduzir, retorna indicando que é uma tradução automática
+  return `[Tradução automática] ${text}`;
 }
 
 /**
