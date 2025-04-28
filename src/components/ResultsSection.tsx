@@ -1,4 +1,3 @@
-
 import { VideoResult, YoutubeSearchParams } from "@/types/youtube-types";
 import KPISection from "@/components/KPISection";
 import ChartSection from "@/components/ChartSection";
@@ -63,7 +62,7 @@ const ResultsSection = ({ results, selectedVideo, onSelectVideo, searchParams }:
           </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="resultados" className="mt-6 animate-fade-in w-[calc(100vw-40px)] -mx-4">
+        <TabsContent value="resultados" className="mt-6 animate-fade-in">
           <div className="overflow-visible w-full">
             <ResultsTable results={results} onSelectVideo={onSelectVideo} />
           </div>
