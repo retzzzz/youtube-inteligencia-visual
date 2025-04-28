@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { VideoResult, ColumnDefinition } from "@/types/youtube-types";
 import { Button } from "@/components/ui/button";
@@ -131,7 +132,7 @@ const ResultsTable = ({ results, onSelectVideo }: ResultsTableProps) => {
                                   <li>• Taxa de crescimento: mais views em menos tempo = maior pontuação</li>
                                   <li>• Engajamento tem peso importante (likes, comentários)</li>
                                   <li>• Canais menores recebem bônus na pontuação</li>
-                                  <li>• Vídeos já virais (>500k views) recebem penalidade</li>
+                                  <li>• Vídeos já virais (&gt;500k views) recebem penalidade</li>
                                 </ul>
                                 <p className="text-sm mt-2 text-muted-foreground">
                                   Escala: 0-1000 (baixo), 1000-2000 (médio), 2000+ (alto potencial viral)
