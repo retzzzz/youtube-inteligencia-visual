@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -165,6 +164,9 @@ export default {
 				'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
 				'gradient-tech': 'linear-gradient(to right, #0f2027, #203a43, #2c5364)',
 				'gradient-youtube': 'linear-gradient(45deg, #FF0000, #FF5E3A)',
+			},
+			fontFamily: {
+				sora: ['Sora', 'sans-serif'],
 			}
 		}
 	},
