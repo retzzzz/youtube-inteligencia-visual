@@ -46,8 +46,8 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-background/80 relative">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]" />
+    <div className="min-h-screen bg-[#0A0C1B] bg-gradient-to-b from-[#0A0C1B] via-[#111535] to-[#0A0C1B] relative">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(29,58,180,0.15),rgba(0,0,0,0))]" />
       <div className="container mx-auto px-4 py-6 max-w-[1200px] relative">
         <Header />
         <WelcomeMessage />
@@ -59,16 +59,16 @@ const Index = () => {
               key={index} 
               className="group relative"
             >
-              <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-r from-pink-600 to-purple-600 opacity-20 blur transition duration-1000 group-hover:opacity-30" />
-              <Card className="relative h-full bg-black/5 dark:bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:shadow-purple-500/10">
+              <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 opacity-20 blur transition duration-1000 group-hover:opacity-30" />
+              <Card className="relative h-full bg-[#141832]/50 backdrop-blur-xl border border-white/10 shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:shadow-blue-500/10">
                 <CardContent className="p-6 h-full flex flex-col">
                   <div className={`${tool.color} rounded-xl p-3 w-fit mb-4 shadow-lg transition-transform duration-300 group-hover:scale-110`}>
                     {tool.icon}
                   </div>
-                  <h3 className="font-bold text-xl mb-3 text-foreground">{tool.title}</h3>
-                  <p className="text-muted-foreground flex-grow">{tool.description}</p>
+                  <h3 className="font-bold text-xl mb-3 text-white/90">{tool.title}</h3>
+                  <p className="text-blue-100/70 flex-grow">{tool.description}</p>
                   <div className="mt-4 pt-4 border-t border-white/10 flex justify-end">
-                    <span className="text-sm font-medium text-primary/80 flex items-center gap-1 group-hover:text-primary transition-colors">
+                    <span className="text-sm font-medium text-blue-300/80 flex items-center gap-1 group-hover:text-blue-200 transition-colors">
                       Explorar <Search className="h-4 w-4 inline" />
                     </span>
                   </div>
