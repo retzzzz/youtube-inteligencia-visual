@@ -89,14 +89,34 @@ interface TitleVariationCardProps {
 
 const TitleVariationCard: React.FC<TitleVariationCardProps> = ({ variation, badgeColor }) => {
   const hasTranslation = variation.translation && variation.translation.trim() !== '';
+  
+  // Map for badge classes based on color
+  const badgeClassMap = {
+    'blue': 'bg-blue-50 text-blue-700 border-blue-200',
+    'yellow': 'bg-yellow-50 text-yellow-700 border-yellow-200',
+    'green': 'bg-green-50 text-green-700 border-green-200'
+  };
+  
+  // Language indicators
+  const languageNames: Record<string, string> = {
+    'pt': 'PT',
+    'es': 'ES',
+    'en': 'EN',
+    'fr': 'FR'
+  };
 
   return (
     <div className="border p-3 rounded-md">
       <div className="flex justify-between items-start mb-2">
-        <h4 className="font-medium text-md">{variation.title}</h4>
+        <div className="flex items-center gap-2">
+          <h4 className="font-medium text-md">{variation.title}</h4>
+          {variation.language && variation.language !== 'pt' && (
+            <Badge className="bg-gray-100 text-gray-600 text-xs">{languageNames[variation.language] || variation.language}</Badge>
+          )}
+        </div>
         <Badge 
           variant="outline" 
-          className={`bg-${badgeColor}-50 text-${badgeColor}-700`}
+          className={badgeClassMap[badgeColor]}
         >
           {variation.viralPotential}%
         </Badge>

@@ -19,11 +19,28 @@ export function generateMediumVariations(
   
   // Variação 1: Inverter a ordem (ação primeiro, depois personagem)
   if (structure.action && structure.character) {
+    // Language-specific templates for action-first variation
     const actionPhrases: Record<SupportedLanguage, string> = {
       "es": "que desafió a",
       "en": "that challenged",
       "fr": "qui a défié",
       "pt": "que desafiou"
+    };
+    
+    // Language-specific explanations
+    const explanations: Record<SupportedLanguage, string> = {
+      "es": "Inversión de la estructura: Acción primero, luego personaje",
+      "en": "Structure inversion: Action first, then character",
+      "fr": "Inversion de structure: Action d'abord, puis personnage",
+      "pt": "Inversão da estrutura: Ação primeiro, depois personagem"
+    };
+    
+    // Language-specific competition levels
+    const competitions: Record<SupportedLanguage, string> = {
+      "es": "media",
+      "en": "medium",
+      "fr": "moyenne",
+      "pt": "média"
     };
     
     const actionPhrase = actionPhrases[langType] || actionPhrases.pt;
@@ -35,8 +52,8 @@ export function generateMediumVariations(
     
     variations.push({
       title: invertedTitle,
-      explanation: "Inversão da estrutura: Ação primeiro, depois personagem",
-      competitionLevel: "média",
+      explanation: explanations[langType] || explanations.pt,
+      competitionLevel: competitions[langType] || competitions.pt,
       viralPotential: 70 + Math.floor(Math.random() * 15),
       language: langType,
       translation: ptTranslation
@@ -49,6 +66,22 @@ export function generateMediumVariations(
     "en": ["What happened when", "Did you know that", "Can you imagine how"],
     "fr": ["Qu'est-ce qui s'est passé quand", "Savais-tu que", "Peux-tu imaginer comment"],
     "pt": ["O que aconteceu quando", "Você sabia que", "Você imagina como"]
+  };
+  
+  // Language-specific explanations
+  const questionExplanations: Record<SupportedLanguage, string> = {
+    "es": "Transformación en pregunta para despertar curiosidad",
+    "en": "Transformation into question to spark curiosity",
+    "fr": "Transformation en question pour éveiller la curiosité",
+    "pt": "Transformação em pergunta para despertar curiosidade"
+  };
+  
+  // Language-specific competition levels
+  const questionCompetitions: Record<SupportedLanguage, string> = {
+    "es": "media",
+    "en": "medium",
+    "fr": "moyenne",
+    "pt": "média"
   };
   
   const questionWords = questionWordsMap[langType] || questionWordsMap.pt;
@@ -68,8 +101,8 @@ export function generateMediumVariations(
     
   variations.push({
     title: questionTitle,
-    explanation: "Transformação em pergunta para despertar curiosidade",
-    competitionLevel: "média",
+    explanation: questionExplanations[langType] || questionExplanations.pt,
+    competitionLevel: questionCompetitions[langType] || questionCompetitions.pt,
     viralPotential: 75 + Math.floor(Math.random() * 10),
     language: langType,
     translation: questionTitleTranslation
@@ -79,6 +112,7 @@ export function generateMediumVariations(
   const numbers = [3, 5, 7, 10];
   const randomNumber = numbers[Math.floor(Math.random() * numbers.length)];
   
+  // Language-specific templates for numbered lists
   const reasonsMap: Record<SupportedLanguage, string> = {
     "es": "razones por las que",
     "en": "reasons why",
@@ -93,6 +127,22 @@ export function generateMediumVariations(
     "pt": "te surpreenderá"
   };
   
+  // Language-specific explanations
+  const numberExplanations: Record<SupportedLanguage, string> = {
+    "es": "Adición de número para aumentar el atractivo clickbait",
+    "en": "Addition of number to increase clickbait appeal",
+    "fr": "Ajout de nombre pour augmenter l'attrait de clickbait",
+    "pt": "Adição de número para aumentar o apelo clickbait"
+  };
+  
+  // Language-specific competition levels
+  const numberCompetitions: Record<SupportedLanguage, string> = {
+    "es": "alta",
+    "en": "high",
+    "fr": "haute",
+    "pt": "alta"
+  };
+  
   const reasons = reasonsMap[langType] || reasonsMap.pt;
   const surprise = surpriseMap[langType] || surpriseMap.pt;
   
@@ -104,8 +154,8 @@ export function generateMediumVariations(
     
   variations.push({
     title: numberTitle,
-    explanation: "Adição de número para aumentar o apelo clickbait",
-    competitionLevel: "alta",
+    explanation: numberExplanations[langType] || numberExplanations.pt,
+    competitionLevel: numberCompetitions[langType] || numberCompetitions.pt,
     viralPotential: 80 + Math.floor(Math.random() * 10),
     language: langType,
     translation: numberTitleTranslation

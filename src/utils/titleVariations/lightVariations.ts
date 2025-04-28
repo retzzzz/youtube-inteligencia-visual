@@ -25,8 +25,23 @@ export function generateLightVariations(
   // Gerar 3 variações leves
   for (let i = 0; i < 3; i++) {
     let newTitle = title;
-    let explanation = "Substituição de palavras-chave por sinônimos";
+    let explanation = "";
     let modified = false;
+    
+    // Set explanation based on language
+    switch(langType) {
+      case "es":
+        explanation = "Sustitución de palabras clave por sinónimos";
+        break;
+      case "en":
+        explanation = "Substitution of keywords with synonyms";
+        break;
+      case "fr":
+        explanation = "Substitution de mots-clés par des synonymes";
+        break;
+      default:
+        explanation = "Substituição de palavras-chave por sinônimos";
+    }
     
     // Substituir até 2 palavras-chave por sinônimos
     Object.keys(synonyms).forEach(key => {
@@ -83,7 +98,21 @@ export function generateLightVariations(
               characterParts.slice(1).join(" ")
             )
           );
-          explanation = `Adicionado adjetivo "${randomAdjective}" ao personagem`;
+          
+          // Update explanation based on language
+          switch(langType) {
+            case "es":
+              explanation = `Adjetivo "${randomAdjective}" añadido al personaje`;
+              break;
+            case "en":
+              explanation = `Adjective "${randomAdjective}" added to the character`;
+              break;
+            case "fr":
+              explanation = `Adjectif "${randomAdjective}" ajouté au personnage`;
+              break;
+            default:
+              explanation = `Adicionado adjetivo "${randomAdjective}" ao personagem`;
+          }
         }
       }
     }
@@ -91,10 +120,26 @@ export function generateLightVariations(
     // Adicionar tradução se não for português
     const ptTranslation = langType !== "pt" ? getPortugueseTranslation(newTitle, langType) : "";
     
+    // Set competition level based on language
+    let competitionLevel: string;
+    switch(langType) {
+      case "es":
+        competitionLevel = "baja";
+        break;
+      case "en":
+        competitionLevel = "low";
+        break;
+      case "fr":
+        competitionLevel = "faible";
+        break;
+      default:
+        competitionLevel = "baixa";
+    }
+    
     variations.push({
       title: newTitle,
       explanation: explanation,
-      competitionLevel: "baixa",
+      competitionLevel: competitionLevel,
       viralPotential: 60 + Math.floor(Math.random() * 10),
       language: langType,
       translation: ptTranslation

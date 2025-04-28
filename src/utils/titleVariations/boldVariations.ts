@@ -17,6 +17,14 @@ export function generateBoldVariations(
   
   const variations: TitleVariation[] = [];
   
+  // Language-specific competition levels
+  const competitionLevels: Record<SupportedLanguage, {low: string, medium: string}> = {
+    "es": {low: "baja", medium: "media"},
+    "en": {low: "low", medium: "medium"},
+    "fr": {low: "faible", medium: "moyenne"},
+    "pt": {low: "baixa", medium: "média"}
+  };
+  
   // Subnichos específicos para diferentes temas
   const subniches: Record<SupportedLanguage, string[][]> = {
     pt: [
@@ -41,7 +49,37 @@ export function generateBoldVariations(
     ]
   };
   
+  // Language-specific explanations
+  const explanations: Record<SupportedLanguage, {
+    mystic: (adj: string) => string,
+    legendary: (word: string) => string, 
+    mystery: (word: string) => string
+  }> = {
+    es: {
+      mystic: (adj) => `Adición de elemento místico "${adj}" al personaje y objeto`,
+      legendary: (word) => `Adición de elemento legendario/ancestral "${word}"`,
+      mystery: (word) => `Adición de elemento misterioso/secreto "${word}"`
+    },
+    en: {
+      mystic: (adj) => `Addition of mystical element "${adj}" to character and object`,
+      legendary: (word) => `Addition of legendary/ancient element "${word}"`,
+      mystery: (word) => `Addition of mysterious/secret element "${word}"`
+    },
+    fr: {
+      mystic: (adj) => `Ajout d'élément mystique "${adj}" au personnage et objet`,
+      legendary: (word) => `Ajout d'élément légendaire/ancestral "${word}"`,
+      mystery: (word) => `Ajout d'élément mystérieux/secret "${word}"`
+    },
+    pt: {
+      mystic: (adj) => `Adição de elemento místico "${adj}" ao personagem e objeto`,
+      legendary: (word) => `Adição de elemento lendário/ancestral "${word}"`,
+      mystery: (word) => `Adição de elemento misterioso/secreto "${word}"`
+    }
+  };
+  
   const subnichesList = subniches[langType] || subniches.pt;
+  const competitionLevel = competitionLevels[langType] || competitionLevels.pt;
+  const explanationFunctions = explanations[langType] || explanations.pt;
   
   // Variação 1: Adjetivo místico para o personagem
   if (structure.character) {
@@ -70,8 +108,8 @@ export function generateBoldVariations(
       
     variations.push({
       title: boldTitle,
-      explanation: `Adição de elemento místico "${mysticAdj}" ao personagem e objeto`,
-      competitionLevel: "baixa",
+      explanation: explanationFunctions.mystic(mysticAdj),
+      competitionLevel: competitionLevel.low,
       viralPotential: 85 + Math.floor(Math.random() * 10),
       language: langType,
       translation: boldTitleTranslation
@@ -133,8 +171,8 @@ export function generateBoldVariations(
     
   variations.push({
     title: legendaryTitle,
-    explanation: `Adição de elemento lendário/ancestral "${randomLegendWord}"`,
-    competitionLevel: "média",
+    explanation: explanationFunctions.legendary(randomLegendWord),
+    competitionLevel: competitionLevel.medium,
     viralPotential: 90 + Math.floor(Math.random() * 5),
     language: langType,
     translation: legendaryTitleTranslation
@@ -175,8 +213,8 @@ export function generateBoldVariations(
     
   variations.push({
     title: mysteryTitle,
-    explanation: `Adição de elemento misterioso/secreto "${randomMysteryWord}"`,
-    competitionLevel: "média",
+    explanation: explanationFunctions.mystery(randomMysteryWord),
+    competitionLevel: competitionLevel.medium,
     viralPotential: 88 + Math.floor(Math.random() * 7),
     language: langType,
     translation: mysteryTitleTranslation
