@@ -4,14 +4,15 @@ import { Card } from './ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { VideoTranslations } from '@/types/youtube-types';
 import { Button } from './ui/button';
-import { Copy } from 'lucide-react';
+import { Copy, Translate } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface TranslationSectionProps {
   translations: VideoTranslations;
+  originalLanguage: string;
 }
 
-const TranslationSection = ({ translations }: TranslationSectionProps) => {
+const TranslationSection = ({ translations, originalLanguage }: TranslationSectionProps) => {
   const { toast } = useToast();
 
   const copyToClipboard = (text: string, type: string) => {
@@ -20,6 +21,21 @@ const TranslationSection = ({ translations }: TranslationSectionProps) => {
       title: "Copiado!",
       description: `${type} copiado para área de transferência.`,
     });
+  };
+
+  const getLanguageLabel = (code: string): string => {
+    switch(code.toLowerCase()) {
+      case 'es': return 'Espanhol';
+      case 'en': return 'Inglês';
+      case 'fr': return 'Francês';
+      case 'it': return 'Italiano';
+      case 'pt': return 'Português';
+      default: return code;
+    }
+  };
+
+  const isOriginalLanguage = (code: string): boolean => {
+    return originalLanguage.toLowerCase().startsWith(code.toLowerCase());
   };
 
   return (
@@ -40,6 +56,7 @@ const TranslationSection = ({ translations }: TranslationSectionProps) => {
             description={translations.spanish.description} 
             onCopy={copyToClipboard} 
             language="espanhol"
+            isOriginal={isOriginalLanguage('es')}
           />
         </TabsContent>
         
@@ -49,6 +66,7 @@ const TranslationSection = ({ translations }: TranslationSectionProps) => {
             description={translations.english.description} 
             onCopy={copyToClipboard} 
             language="inglês"
+            isOriginal={isOriginalLanguage('en')}
           />
         </TabsContent>
         
@@ -58,6 +76,7 @@ const TranslationSection = ({ translations }: TranslationSectionProps) => {
             description={translations.french.description} 
             onCopy={copyToClipboard} 
             language="francês"
+            isOriginal={isOriginalLanguage('fr')}
           />
         </TabsContent>
         
@@ -67,6 +86,7 @@ const TranslationSection = ({ translations }: TranslationSectionProps) => {
             description={translations.italian.description} 
             onCopy={copyToClipboard} 
             language="italiano"
+            isOriginal={isOriginalLanguage('it')}
           />
         </TabsContent>
       </Tabs>
@@ -79,29 +99,49 @@ interface TranslationContentProps {
   description: string;
   onCopy: (text: string, type: string) => void;
   language: string;
+  isOriginal: boolean;
 }
 
-const TranslationContent = ({ title, description, onCopy, language }: TranslationContentProps) => {
+const TranslationContent = ({ title, description, onCopy, language, isOriginal }: TranslationContentProps) => {
+  // Remove language prefix if present
+  const cleanTitle = title.replace(/^\[(.*?)\]\s*/, '');
+  
+  // Add Portuguese translation for non-Portuguese content
+  const needsTranslation = !language.toLowerCase().includes('português');
+  
   return (
     <div className="space-y-4">
       <div>
         <div className="flex justify-between items-start mb-2">
-          <h4 className="text-sm font-medium text-muted-foreground">Título em {language}</h4>
+          <h4 className="text-sm font-medium text-muted-foreground">
+            {isOriginal ? `Título original (${language})` : `Título em ${language}`}
+          </h4>
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={() => onCopy(title, `Título em ${language}`)}
+            onClick={() => onCopy(cleanTitle, `Título em ${language}`)}
             className="h-7 px-2"
           >
             <Copy className="h-3.5 w-3.5 mr-1" /> Copiar
           </Button>
         </div>
-        <p className="font-medium">{title}</p>
+        <p className="font-medium">{cleanTitle}</p>
+        
+        {needsTranslation && (
+          <div className="mt-2 flex items-center gap-2">
+            <Translate className="h-3.5 w-3.5 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground italic">Tradução: {title.includes('BR') ? title.split('BR: ')[1] : (
+              `Tradução não disponível`
+            )}</p>
+          </div>
+        )}
       </div>
       
       <div>
         <div className="flex justify-between items-start mb-2">
-          <h4 className="text-sm font-medium text-muted-foreground">Descrição em {language}</h4>
+          <h4 className="text-sm font-medium text-muted-foreground">
+            {isOriginal ? `Descrição original (${language})` : `Descrição em ${language}`}
+          </h4>
           <Button 
             variant="ghost" 
             size="sm" 
@@ -114,6 +154,18 @@ const TranslationContent = ({ title, description, onCopy, language }: Translatio
         <div className="bg-muted/50 p-3 rounded-md text-sm whitespace-pre-wrap max-h-48 overflow-y-auto">
           {description}
         </div>
+        
+        {needsTranslation && (
+          <div className="mt-2">
+            <div className="flex items-center gap-2 mb-1">
+              <Translate className="h-3.5 w-3.5 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">Tradução:</p>
+            </div>
+            <div className="bg-muted/30 p-3 rounded-md text-sm whitespace-pre-wrap max-h-48 overflow-y-auto italic">
+              {description.includes('BR:') ? description.split('BR:')[1] : 'Tradução não disponível'}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

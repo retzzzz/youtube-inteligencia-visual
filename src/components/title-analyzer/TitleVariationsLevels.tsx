@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { TitleVariation } from '@/components/title-generator/TitleVariationDisplay';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Translate } from 'lucide-react';
 
 interface TitleVariationsLevelsProps {
   variations: {
@@ -33,15 +34,11 @@ const TitleVariationsLevels: React.FC<TitleVariationsLevelsProps> = ({ variation
 
             <div className="space-y-3">
               {variations.light.map((variation, index) => (
-                <div key={`light-${index}`} className="border p-3 rounded-md">
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-medium text-md">{variation.title}</h4>
-                    <Badge variant="outline" className="bg-blue-50 text-blue-700">
-                      {variation.viralPotential}%
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-muted-foreground">{variation.explanation}</p>
-                </div>
+                <TitleVariationCard 
+                  key={`light-${index}`} 
+                  variation={variation} 
+                  badgeColor="blue"
+                />
               ))}
             </div>
           </div>
@@ -55,15 +52,11 @@ const TitleVariationsLevels: React.FC<TitleVariationsLevelsProps> = ({ variation
 
             <div className="space-y-3">
               {variations.medium.map((variation, index) => (
-                <div key={`medium-${index}`} className="border p-3 rounded-md">
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-medium text-md">{variation.title}</h4>
-                    <Badge variant="outline" className="bg-yellow-50 text-yellow-700">
-                      {variation.viralPotential}%
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-muted-foreground">{variation.explanation}</p>
-                </div>
+                <TitleVariationCard 
+                  key={`medium-${index}`} 
+                  variation={variation}
+                  badgeColor="yellow"
+                />
               ))}
             </div>
           </div>
@@ -77,15 +70,11 @@ const TitleVariationsLevels: React.FC<TitleVariationsLevelsProps> = ({ variation
 
             <div className="space-y-3">
               {variations.bold.map((variation, index) => (
-                <div key={`bold-${index}`} className="border p-3 rounded-md">
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-medium text-md">{variation.title}</h4>
-                    <Badge variant="outline" className="bg-green-50 text-green-700">
-                      {variation.viralPotential}%
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-muted-foreground">{variation.explanation}</p>
-                </div>
+                <TitleVariationCard 
+                  key={`bold-${index}`} 
+                  variation={variation}
+                  badgeColor="green"
+                />
               ))}
             </div>
           </div>
@@ -97,6 +86,46 @@ const TitleVariationsLevels: React.FC<TitleVariationsLevelsProps> = ({ variation
         Teste cada variação com o analisador de concorrência para identificar a melhor opção.</p>
       </div>
     </Card>
+  );
+};
+
+interface TitleVariationCardProps {
+  variation: TitleVariation;
+  badgeColor: 'blue' | 'yellow' | 'green';
+}
+
+const TitleVariationCard: React.FC<TitleVariationCardProps> = ({ variation, badgeColor }) => {
+  // Extract language from variation if available, default to Portuguese
+  const language = variation.language || 'pt';
+  const isNotPortuguese = language !== 'pt';
+
+  // Create Portuguese translation if title is not in Portuguese
+  const portugueseTranslation = isNotPortuguese 
+    ? "Tradução: " + variation.title.replace(/^\[.*?\]\s*/, '') 
+    : null;
+
+  return (
+    <div className="border p-3 rounded-md">
+      <div className="flex justify-between items-start mb-2">
+        <h4 className="font-medium text-md">{variation.title}</h4>
+        <Badge 
+          variant="outline" 
+          className={`bg-${badgeColor}-50 text-${badgeColor}-700`}
+        >
+          {variation.viralPotential}%
+        </Badge>
+      </div>
+      <p className="text-xs text-muted-foreground">{variation.explanation}</p>
+      
+      {isNotPortuguese && portugueseTranslation && (
+        <div className="mt-2 pt-2 border-t border-dashed border-border">
+          <div className="flex items-center gap-1">
+            <Translate className="h-3.5 w-3.5 text-muted-foreground" />
+            <p className="text-xs italic text-muted-foreground">{portugueseTranslation}</p>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

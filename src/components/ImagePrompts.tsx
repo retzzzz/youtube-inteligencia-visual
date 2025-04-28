@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
-import { Copy, Check } from 'lucide-react';
+import { Copy, Check, Translate } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 
@@ -26,6 +26,24 @@ const ImagePrompts = ({ thumbnailPrompts, supportPrompts }: ImagePromptsProps) =
     setTimeout(() => {
       setCopiedId(null);
     }, 2000);
+  };
+
+  // Convert prompts to English and add Portuguese translation
+  const formatPromptWithTranslation = (prompt: string): { english: string, portuguese: string } => {
+    // If the prompt already has a translation marked
+    if (prompt.includes("[EN]") && prompt.includes("[PT-BR]")) {
+      const parts = prompt.split("[PT-BR]");
+      return {
+        english: parts[0].replace("[EN]", "").trim(),
+        portuguese: parts[1].trim()
+      };
+    }
+    
+    // Default case - return the original as English and add a placeholder translation
+    return {
+      english: `[EN] ${prompt}`,
+      portuguese: `[PT-BR] Traduza este prompt para português`
+    };
   };
 
   return (
@@ -84,18 +102,39 @@ const PromptList = ({ prompts, copyToClipboard, copiedId, prefix }: PromptListPr
         const id = `${prefix}-${index}`;
         const isCopied = copiedId === id;
         
+        // Format prompt to have English and Portuguese versions
+        const formattedPrompt = prompt.includes("[EN]") ? 
+          prompt : `[EN] ${prompt}`;
+        
+        // Extract Portuguese translation if it exists
+        const translation = prompt.includes("[PT-BR]") ? 
+          prompt.split("[PT-BR]")[1].trim() : 
+          "Tradução não disponível";
+        
         return (
           <div 
             key={id}
             className="p-3 rounded-md bg-muted/50 border hover:border-primary/50 transition-colors"
           >
             <div className="flex justify-between items-start gap-4">
-              <p className="text-sm flex-1 whitespace-pre-wrap">{prompt}</p>
+              <div className="flex-1 space-y-2">
+                <p className="text-sm whitespace-pre-wrap">{formattedPrompt}</p>
+                
+                <div className="pt-2 border-t border-dashed border-border">
+                  <div className="flex items-center gap-1 mb-1">
+                    <Translate className="h-3.5 w-3.5 text-muted-foreground" />
+                    <p className="text-xs text-muted-foreground">Tradução:</p>
+                  </div>
+                  <p className="text-sm whitespace-pre-wrap italic">
+                    {translation}
+                  </p>
+                </div>
+              </div>
               
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => copyToClipboard(prompt, id)}
+                onClick={() => copyToClipboard(formattedPrompt, id)}
                 className="h-8 w-8 p-0 flex-shrink-0"
               >
                 {isCopied ? (

@@ -91,27 +91,107 @@ export const analyzeYoutubeVideo = async (videoUrl: string, apiKey: string): Pro
       message: saturationMessage,
       count: videoCount
     };
+
+    // Detectar se precisamos traduzir para o português ou a partir do português
+    const isPortuguese = language.startsWith('pt');
+    const isSpanish = language.startsWith('es');
+    const isEnglish = language.startsWith('en');
+    const isFrench = language.startsWith('fr');
+    const isItalian = language.startsWith('it');
+    
+    // Helper para gerar traduções com PT-BR incluído
+    const generateTranslations = () => {
+      const translations = {
+        english: {
+          title: isEnglish ? 
+            basicInfo.title : 
+            `[English] ${basicInfo.title}\nPT-BR: ${isPortuguese ? basicInfo.title : "Tradução para português do título em inglês"}`,
+          description: isEnglish ? 
+            basicInfo.description : 
+            `This is a translation of the description to English.\nPT-BR: ${isPortuguese ? basicInfo.description : "Tradução para português da descrição em inglês"}`
+        },
+        spanish: {
+          title: isSpanish ? 
+            basicInfo.title : 
+            `[Español] ${basicInfo.title}\nPT-BR: ${isPortuguese ? basicInfo.title : "Tradução para português do título em espanhol"}`,
+          description: isSpanish ? 
+            basicInfo.description : 
+            `Esta es una traducción de la descripción al español.\nPT-BR: ${isPortuguese ? basicInfo.description : "Tradução para português da descrição em espanhol"}`
+        },
+        french: {
+          title: isFrench ? 
+            basicInfo.title : 
+            `[Français] ${basicInfo.title}\nPT-BR: ${isPortuguese ? basicInfo.title : "Tradução para português do título em francês"}`,
+          description: isFrench ? 
+            basicInfo.description : 
+            `Ceci est une traduction de la description en français.\nPT-BR: ${isPortuguese ? basicInfo.description : "Tradução para português da descrição em francês"}`
+        },
+        italian: {
+          title: isItalian ? 
+            basicInfo.title : 
+            `[Italiano] ${basicInfo.title}\nPT-BR: ${isPortuguese ? basicInfo.title : "Tradução para português do título em italiano"}`,
+          description: isItalian ? 
+            basicInfo.description : 
+            `Questa è una traduzione della descrizione in italiano.\nPT-BR: ${isPortuguese ? basicInfo.description : "Tradução para português da descrição em italiano"}`
+        }
+      };
+
+      return translations;
+    };
+
+    // Helper para gerar ideias de roteiro com tradução
+    const generateScriptIdeas = () => {
+      const baseIdeas = [
+        `História pessoal: Minha jornada com ${basicInfo.title} e como isso mudou minha perspectiva.`,
+        `Análise aprofundada: Os 5 princípios fundamentais de ${basicInfo.title} que ninguém explica.`,
+        `Guia passo a passo: Como implementar ${basicInfo.title} em sua rotina diária.`,
+        `Debate: Prós e contras de diferentes abordagens para ${basicInfo.title}.`,
+        `Entrevista com especialista: Conversando com um profissional sobre ${basicInfo.title}.`
+      ];
+
+      // Se não for português, adicionar tradução
+      if (!isPortuguese) {
+        return baseIdeas.map(idea => {
+          let translatedIdea = idea;
+          if (isSpanish) {
+            return `Historia personal: Mi jornada con ${basicInfo.title} y cómo cambió mi perspectiva.\nTradução: ${translatedIdea}`;
+          } else if (isEnglish) {
+            return `Personal story: My journey with ${basicInfo.title} and how it changed my perspective.\nTradução: ${translatedIdea}`;
+          } else if (isFrench) {
+            return `Histoire personnelle: Mon voyage avec ${basicInfo.title} et comment cela a changé ma perspective.\nTradução: ${translatedIdea}`;
+          } else {
+            return `Storia personale: Il mio viaggio con ${basicInfo.title} e come ha cambiato la mia prospettiva.\nTradução: ${translatedIdea}`;
+          }
+        });
+      }
+      
+      return baseIdeas;
+    };
+
+    // Helper para gerar prompts de imagem com tradução
+    const generateImagePrompts = () => {
+      const basePrompts = [
+        `[EN] Person with surprised expression looking at large text '${basicInfo.title}' with blue to red gradient background\n[PT-BR] Pessoa com expressão de surpresa olhando para um texto grande '${basicInfo.title}' com fundo gradiente de azul para vermelho`,
+        `[EN] Close-up of expressive eyes with reflection showing '${basicInfo.title}', dark contrasting background\n[PT-BR] Close em olhos expressivos com reflexo mostrando '${basicInfo.title}', fundo escuro contrastante`,
+        `[EN] Before/after collage demonstrating the impact of '${basicInfo.title}', bold text in center\n[PT-BR] Colagem antes/depois demonstrando o impacto de '${basicInfo.title}', texto em negrito no centro`,
+        `[EN] Silhouette of person against sunset with inspirational text about '${basicInfo.title}' in modern fonts\n[PT-BR] Silhueta de pessoa contra pôr do sol com texto inspirador sobre '${basicInfo.title}' em fontes modernas`,
+        `[EN] Minimalist style with just one strong visual element related to '${basicInfo.title}' and large text on the side\n[PT-BR] Estilo minimalista com apenas um elemento visual forte relacionado a '${basicInfo.title}' e texto grande na lateral`
+      ];
+
+      return basePrompts;
+    };
+
+    const supportImagePrompts = [
+      `[EN] Infographic explaining the 5 main elements of '${basicInfo.title}'\n[PT-BR] Infográfico explicando os 5 elementos principais de '${basicInfo.title}'`,
+      `[EN] Comparative table showing different approaches to '${basicInfo.title}'\n[PT-BR] Tabela comparativa mostrando diferentes abordagens para '${basicInfo.title}'`,
+      `[EN] Visual timeline showing the evolution and important milestones of '${basicInfo.title}'\n[PT-BR] Linha do tempo visual mostrando a evolução e marcos importantes de '${basicInfo.title}'`,
+      `[EN] Flowchart illustrating the process of mastering '${basicInfo.title}' step by step\n[PT-BR] Diagrama de fluxo ilustrando o processo de dominar '${basicInfo.title}' passo a passo`,
+      `[EN] Set of custom icons representing key concepts of '${basicInfo.title}'\n[PT-BR] Conjunto de ícones personalizados representando os conceitos-chave de '${basicInfo.title}'`
+    ];
     
     return {
       basicInfo,
-      translations: {
-        english: {
-          title: `[English] ${basicInfo.title}`,
-          description: `This is a simulated translation of the description to English.`
-        },
-        spanish: {
-          title: `[Español] ${basicInfo.title}`,
-          description: `Esta es una traducción simulada de la descripción al español.`
-        },
-        french: {
-          title: `[Français] ${basicInfo.title}`,
-          description: `Ceci est une traduction simulée de la description en français.`
-        },
-        italian: {
-          title: `[Italiano] ${basicInfo.title}`,
-          description: `Questa è una traduzione simulata della descrizione in italiano.`
-        }
-      },
+      translations: generateTranslations(),
       titleVariations: {
         emotional: [
           `[Emoção] Como ${basicInfo.title} mudou minha vida`,
@@ -135,27 +215,9 @@ export const analyzeYoutubeVideo = async (videoUrl: string, apiKey: string): Pro
           `[Deutsch] ${basicInfo.title} leicht gemacht`
         ]
       },
-      scriptIdeas: [
-        `História pessoal: Minha jornada com ${basicInfo.title} e como isso mudou minha perspectiva.`,
-        `Análise aprofundada: Os 5 princípios fundamentais de ${basicInfo.title} que ninguém explica.`,
-        `Guia passo a passo: Como implementar ${basicInfo.title} em sua rotina diária.`,
-        `Debate: Prós e contras de diferentes abordagens para ${basicInfo.title}.`,
-        `Entrevista com especialista: Conversando com um profissional sobre ${basicInfo.title}.`
-      ],
-      thumbnailPrompts: [
-        `Imagem de uma pessoa com expressão surpresa olhando para texto grande '${basicInfo.title}' com fundo gradiente azul para vermelho`,
-        `Close-up em olhos expressivos com reflexo mostrando '${basicInfo.title}', fundo escuro contrastante`,
-        `Colagem antes/depois demonstrando o impacto de '${basicInfo.title}', texto em negrito no centro`,
-        `Silhueta de pessoa contra pôr do sol com texto inspirador sobre '${basicInfo.title}' em fontes modernas`,
-        `Estilo minimalista com apenas um elemento visual forte relacionado a '${basicInfo.title}' e texto grande na lateral`
-      ],
-      supportImagePrompts: [
-        `Infográfico explicando os 5 elementos principais de '${basicInfo.title}'`,
-        `Tabela comparativa mostrando diferentes abordagens para '${basicInfo.title}'`,
-        `Linha do tempo visual mostrando a evolução e marcos importantes de '${basicInfo.title}'`,
-        `Diagrama de fluxo ilustrando o processo de dominar '${basicInfo.title}' passo a passo`,
-        `Conjunto de ícones personalizados representando os conceitos-chave de '${basicInfo.title}'`
-      ],
+      scriptIdeas: generateScriptIdeas(),
+      thumbnailPrompts: generateImagePrompts(),
+      supportImagePrompts: supportImagePrompts,
       subNicheIdeas: [
         {
           name: `${basicInfo.title} para iniciantes`,

@@ -23,15 +23,18 @@ interface VideoAnalysisResultsProps {
 }
 
 const VideoAnalysisResults = ({ analysis }: VideoAnalysisResultsProps) => {
+  // Determine content language from video info
+  const contentLanguage = analysis.basicInfo.language || 'pt';
+  
   // Analisar estrutura do título
   const titleStructure = analyzeTitleStructure(analysis.basicInfo.title);
   
-  // Gerar variações de título em três níveis
+  // Gerar variações de título em três níveis, baseadas no idioma original
   const titleVariations = generateAllVariationLevels(
     analysis.basicInfo.title, 
     titleStructure, 
-    analysis.basicInfo.language?.startsWith('es') ? 'es' : 
-    analysis.basicInfo.language?.startsWith('en') ? 'en' : 'pt'
+    contentLanguage.startsWith('es') ? 'es' : 
+    contentLanguage.startsWith('en') ? 'en' : 'pt'
   );
 
   return (
@@ -68,7 +71,10 @@ const VideoAnalysisResults = ({ analysis }: VideoAnalysisResultsProps) => {
         </TabsContent>
         
         <TabsContent value="translations">
-          <TranslationSection translations={analysis.translations} />
+          <TranslationSection 
+            translations={analysis.translations} 
+            originalLanguage={contentLanguage}
+          />
         </TabsContent>
         
         <TabsContent value="title-variations">
@@ -88,11 +94,17 @@ const VideoAnalysisResults = ({ analysis }: VideoAnalysisResultsProps) => {
         </TabsContent>
         
         <TabsContent value="script-ideas">
-          <ScriptIdeas ideas={analysis.scriptIdeas} />
+          <ScriptIdeas 
+            ideas={analysis.scriptIdeas}
+            language={contentLanguage} 
+          />
         </TabsContent>
         
         <TabsContent value="image-prompts">
-          <ImagePrompts thumbnailPrompts={analysis.thumbnailPrompts} supportPrompts={analysis.supportImagePrompts} />
+          <ImagePrompts 
+            thumbnailPrompts={analysis.thumbnailPrompts} 
+            supportPrompts={analysis.supportImagePrompts} 
+          />
         </TabsContent>
         
         <TabsContent value="sub-niches">
