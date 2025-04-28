@@ -8,7 +8,6 @@ import { Button } from './ui/button';
 import { Separator } from './ui/separator';
 import SaturationIndicator from './SaturationIndicator';
 import VideoBasicInfo from './VideoBasicInfo';
-import TranslationSection from './TranslationSection';
 import TitleVariations from './TitleVariations';
 import ScriptIdeas from './ScriptIdeas';
 import ImagePrompts from './ImagePrompts';
@@ -55,10 +54,9 @@ const VideoAnalysisResults = ({ analysis }: VideoAnalysisResultsProps) => {
         )}
       </div>
 
-      <Tabs defaultValue="title-variations" className="w-full">
-        <TabsList className="grid grid-cols-3 md:grid-cols-7 mb-4">
+      <Tabs defaultValue="basic-info" className="w-full">
+        <TabsList className="grid grid-cols-3 md:grid-cols-6 mb-4">
           <TabsTrigger value="basic-info">🔎 Dados Básicos</TabsTrigger>
-          <TabsTrigger value="translations">🌎 Traduções</TabsTrigger>
           <TabsTrigger value="title-variations">🎯 Variações de Título</TabsTrigger>
           <TabsTrigger value="script-ideas">📝 Ideias de Roteiro</TabsTrigger>
           <TabsTrigger value="image-prompts">🎨 Imagens</TabsTrigger>
@@ -68,13 +66,6 @@ const VideoAnalysisResults = ({ analysis }: VideoAnalysisResultsProps) => {
         
         <TabsContent value="basic-info">
           <VideoBasicInfo basicInfo={analysis.basicInfo} />
-        </TabsContent>
-        
-        <TabsContent value="translations">
-          <TranslationSection 
-            translations={analysis.translations} 
-            originalLanguage={contentLanguage}
-          />
         </TabsContent>
         
         <TabsContent value="title-variations">
