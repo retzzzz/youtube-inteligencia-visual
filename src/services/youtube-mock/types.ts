@@ -32,4 +32,6 @@ export interface SavedSearch {
   date: string;
   params: YoutubeSearchParams;
   userId: string; // ID do usuário que salvou a pesquisa
+  dateCreated?: string; // Added this property for compatibility
+  results?: VideoResult[];
 }
