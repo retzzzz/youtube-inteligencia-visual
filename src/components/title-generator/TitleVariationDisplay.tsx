@@ -8,9 +8,14 @@ import { useToast } from "@/hooks/use-toast";
 
 export interface TitleVariation {
   title: string;
+  text?: string; // Added for compatibility with TitleVariationsList
   explanation: string;
   competitionLevel: "baixa" | "média" | "alta";
   viralPotential: number; // 0-100
+  type?: "dor" | "esperanca" | "curiosidade"; // Added
+  saturation?: "low" | "medium" | "high"; // Added
+  language?: "pt" | "en" | "es" | "fr"; // Added
+  translations?: Array<{ text: string; language: string }>; // Added
 }
 
 interface TitleVariationDisplayProps {

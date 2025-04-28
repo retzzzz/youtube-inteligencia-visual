@@ -165,12 +165,16 @@ const TitleVariationsList = ({
   };
 
   const translateTitle = (variation: TitleVariation, index: number) => {
+    // Make sure we're accessing the right property for the title text
+    const titleText = variation.text || variation.title;
+    const currentLanguage = variation.language || "pt";
+    
     const languages = (["pt", "es", "en", "fr"] as const).filter(
-      lang => lang !== variation.language
+      lang => lang !== currentLanguage
     );
 
     const translations = languages.map(lang => {
-      const translatedText = translateText(variation.text, lang);
+      const translatedText = translateText(titleText, lang);
       let prefixedText = "";
       
       if (lang === "pt") {
@@ -196,7 +200,7 @@ const TitleVariationsList = ({
 
   const copyAllTitles = () => {
     const titlesToDisplay = getFilteredAndSortedVariations();
-    const titleText = titlesToDisplay.map(v => v.text).join('\n\n');
+    const titleText = titlesToDisplay.map(v => v.text || v.title).join('\n\n');
     navigator.clipboard.writeText(titleText);
     toast({
       title: "Todos os títulos copiados!",
@@ -219,10 +223,10 @@ const TitleVariationsList = ({
     
     filtered.sort((a, b) => {
       if (sortBy === "emotion") {
-        return a.type.localeCompare(b.type);
+        return (a.type || '').localeCompare(b.type || '');
       } else if (sortBy === "saturation") {
         const satOrder = { low: 1, medium: 2, high: 3 };
-        return satOrder[a.saturation] - satOrder[b.saturation];
+        return satOrder[a.saturation || 'medium'] - satOrder[b.saturation || 'medium'];
       }
       return 0;
     });
@@ -296,6 +300,7 @@ const TitleVariationsList = ({
           {filteredVariations.map((variation, index) => {
             const id = `title-${index}`;
             const isCopied = copiedId === id;
+            const titleText = variation.text || variation.title;
             
             return (
               <div key={id} className="space-y-3">
@@ -355,7 +360,7 @@ const TitleVariationsList = ({
                         </Badge>
                       )}
                     </div>
-                    <p className="text-base">{variation.text}</p>
+                    <p className="text-base">{titleText}</p>
                   </div>
                   
                   <div className="flex gap-2">
@@ -370,7 +375,7 @@ const TitleVariationsList = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => copyToClipboard(variation.text, id)}
+                      onClick={() => copyToClipboard(titleText, id)}
                       className="h-8 w-8 p-0"
                     >
                       {isCopied ? (
