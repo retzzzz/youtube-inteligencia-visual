@@ -71,28 +71,26 @@ const ResultsTable = ({ results, onSelectVideo }: ResultsTableProps) => {
   });
 
   return (
-    <TooltipProvider>
+    <TooltipProvider delayDuration={300}>
       <div className="space-y-4 animate-fade-in">
-        <div className="overflow-x-auto" style={{ maxWidth: '95vw' }}>
-          <div className="min-w-[1400px]">
-            <Table>
-              <ResultsTableHeader
-                columns={columns}
-                sortColumn={sortColumn}
-                sortDirection={sortDirection}
-                onSort={handleSort}
-              />
-              <TableBody>
-                {sortedResults.map((result) => (
-                  <ResultsTableRow
-                    key={result.id}
-                    result={result}
-                    onSelectVideo={onSelectVideo}
-                  />
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+        <div className="overflow-auto w-full" style={{ maxWidth: '100%' }}>
+          <Table className="w-full">
+            <ResultsTableHeader
+              columns={columns}
+              sortColumn={sortColumn}
+              sortDirection={sortDirection}
+              onSort={handleSort}
+            />
+            <TableBody>
+              {sortedResults.map((result) => (
+                <ResultsTableRow
+                  key={result.id}
+                  result={result}
+                  onSelectVideo={onSelectVideo}
+                />
+              ))}
+            </TableBody>
+          </Table>
         </div>
 
         <div className="flex items-center justify-between">

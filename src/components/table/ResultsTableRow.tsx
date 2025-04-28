@@ -17,7 +17,7 @@ const ResultsTableRow = ({ result, onSelectVideo }: ResultsTableRowProps) => {
       className={onSelectVideo ? "cursor-pointer hover:bg-muted" : ""}
       onClick={() => onSelectVideo && onSelectVideo(result)}
     >
-      <TableCell className="max-w-[500px] min-w-[400px] pr-4">
+      <TableCell className="max-w-[400px] min-w-[300px]">
         <VideoTitleCell video={result} />
       </TableCell>
       <TableCell>

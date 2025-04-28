@@ -30,7 +30,7 @@ const ResultsTableHeader = ({
           <TableHead 
             key={column.id} 
             className={`whitespace-nowrap 
-              ${column.id === 'title' ? 'w-[500px] min-w-[400px]' : ''} 
+              ${column.id === 'title' ? 'w-[400px] min-w-[300px]' : ''} 
               ${column.id === 'videoAge' ? 'w-[60px]' : ''} 
               ${column.id === 'id' ? 'w-[80px] text-center' : ''}
               ${column.id === 'language' ? 'w-[120px]' : ''}
@@ -58,7 +58,7 @@ const ResultsTableHeader = ({
                     <TooltipTrigger>
                       <Info className="h-4 w-4 ml-1 text-muted-foreground" />
                     </TooltipTrigger>
-                    <TooltipContent className="w-80 p-3">
+                    <TooltipContent side="bottom" className="w-[350px] p-4 z-50">
                       <p className="font-medium mb-2">Como é calculada a Pontuação Viral?</p>
                       <ul className="space-y-2 text-sm">
                         <li>• Vídeos muito recentes (24-72h) recebem multiplicador especial</li>
