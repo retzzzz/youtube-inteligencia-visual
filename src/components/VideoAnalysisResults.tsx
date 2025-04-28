@@ -15,7 +15,7 @@ import SubNicheIdeas from './SubNicheIdeas';
 import TitleStructureAnalysis from './title-analyzer/TitleStructureAnalysis';
 import TitleVariationsLevels from './title-analyzer/TitleVariationsLevels';
 import { analyzeTitleStructure } from '@/utils/titleStructuralAnalysis';
-import { generateAllVariationLevels } from '@/utils/titleVariationLevels';
+import { generateAllVariationLevels } from '@/utils/titleVariations'; // Updated import
 
 interface VideoAnalysisResultsProps {
   analysis: VideoAnalysis;
