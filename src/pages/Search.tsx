@@ -66,7 +66,7 @@ const Search = () => {
 
   if (!youtubeApiKey) {
     return (
-      <div className="container mx-auto px-4 py-6 max-w-[1200px]">
+      <div className="min-h-screen w-full px-4 md:px-8 py-6">
         <Header />
         <Alert variant="destructive" className="mt-8 shadow-lg">
           <AlertCircle className="h-4 w-4" />
@@ -86,7 +86,7 @@ const Search = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-[1200px]">
+    <div className="min-h-screen w-full px-4 md:px-8 py-6">
       <Header />
       
       <ApiKeyHeader 

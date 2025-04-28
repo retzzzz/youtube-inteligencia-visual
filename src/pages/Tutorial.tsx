@@ -6,7 +6,7 @@ import TutorialHeader from '@/components/TutorialHeader';
 
 const Tutorial = () => {
   return (
-    <div className="container mx-auto px-4 py-6 max-w-[1200px] min-h-screen bg-background">
+    <div className="min-h-screen w-full px-4 md:px-8 py-6">
       <Header />
       <div className="mt-8 mb-16">
         <TutorialHeader />

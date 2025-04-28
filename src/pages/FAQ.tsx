@@ -1,12 +1,14 @@
 
 import React from 'react';
 import { Card } from "@/components/ui/card";
+import Header from "@/components/Header";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 const FAQ = () => {
   return (
-    <div className="container mx-auto py-8 px-4">
-      <Card className="p-6">
+    <div className="min-h-screen w-full px-4 md:px-8 py-6">
+      <Header />
+      <Card className="p-6 mt-8">
         <h1 className="text-3xl font-bold mb-6">Perguntas Frequentes (FAQ)</h1>
         
         <Accordion type="single" collapsible className="space-y-4">
@@ -66,4 +68,3 @@ const FAQ = () => {
 };
 
 export default FAQ;
-

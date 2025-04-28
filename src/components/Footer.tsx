@@ -5,8 +5,8 @@ import { Heart } from 'lucide-react';
 
 const Footer = () => {
   return (
-    <footer className="border-t mt-16 bg-gradient-to-b from-transparent to-muted/30">
-      <div className="container mx-auto py-8 px-4">
+    <footer className="border-t mt-16 bg-gradient-to-b from-transparent to-muted/30 w-full">
+      <div className="w-full py-8 px-4 md:px-8">
         <div className="flex flex-col space-y-6">
           <div className="text-muted-foreground text-sm text-center flex items-center justify-center gap-2">
             <span>© 2025 YTAnalyzer.</span> 

@@ -209,7 +209,7 @@ const ScriptGenerator = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="min-h-screen w-full px-4 md:px-8 py-6">
       <Header />
       
       <div className="grid gap-6 mt-6">
