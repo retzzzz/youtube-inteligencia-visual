@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import Header from "@/components/Header";
 import { Card } from "@/components/ui/card";
@@ -65,7 +66,7 @@ const TitleGenerator = () => {
       <Header />
       
       <main className="flex-grow w-full px-4 md:px-8 py-6 mb-8">
-        <div className="max-w-5xl mx-auto">
+        <div className="w-full mx-auto">
           <div className="mb-6">
             <h1 className="text-3xl font-bold mb-2">Gerador e Analisador de Títulos</h1>
             <p className="text-muted-foreground">
