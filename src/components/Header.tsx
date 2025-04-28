@@ -4,22 +4,24 @@ import { Link, useLocation } from 'react-router-dom';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, Zap, Youtube } from 'lucide-react';
+import { LogOut, Youtube } from 'lucide-react';
 
 const Header = () => {
   const location = useLocation();
   const { logout, user } = useAuth();
   
   return (
-    <header className="flex flex-col mb-16 relative">
-      <div className="p-4 rounded-xl glass-effect mb-6">
+    <header className="relative z-10">
+      <div className="p-4 rounded-xl bg-black/5 dark:bg-white/5 backdrop-blur-xl border border-white/10 shadow-xl mb-6">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold tracking-tight flex items-center">
             <Link to="/" className="flex items-center gap-2">
-              <div className="p-2 bg-gradient-to-br from-red-600 to-red-400 rounded-lg shadow-lg">
+              <div className="p-2 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg shadow-lg">
                 <Youtube className="h-6 w-6 text-white" />
               </div>
-              YT<span className="text-primary">Optimizer</span>
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-pink-500">
+                YTOptimizer
+              </span>
             </Link>
           </h1>
           
@@ -28,10 +30,10 @@ const Header = () => {
               Bem vindo, {user?.name || 'Usuário'}
             </span>
             <Button 
-              variant="outline" 
+              variant="ghost" 
               size="sm" 
               onClick={logout}
-              className="flex items-center gap-2 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300"
+              className="flex items-center gap-2 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-all duration-300"
             >
               <LogOut className="h-4 w-4" />
               Sair
@@ -39,32 +41,27 @@ const Header = () => {
           </div>
         </div>
         
-        <p className="text-muted-foreground mt-2 flex items-center gap-2 justify-center">
-          <Zap className="h-4 w-4 text-yellow-400" />
-          Ferramenta avançada de pesquisa e análise de YouTube
-        </p>
+        <nav className="flex gap-2 flex-wrap mt-4">
+          <NavLink to="/" currentPath={location.pathname}>
+            Início
+          </NavLink>
+          <NavLink to="/search" currentPath={location.pathname}>
+            Pesquisar
+          </NavLink>
+          <NavLink to="/video-analyzer" currentPath={location.pathname}>
+            Analisar Vídeo
+          </NavLink>
+          <NavLink to="/title-generator" currentPath={location.pathname}>
+            Títulos
+          </NavLink>
+          <NavLink to="/script-generator" currentPath={location.pathname}>
+            Roteirizador
+          </NavLink>
+          <NavLink to="/subnicho-validator" currentPath={location.pathname}>
+            Validador
+          </NavLink>
+        </nav>
       </div>
-      
-      <nav className="flex gap-3 flex-wrap p-2 rounded-xl bg-muted/30 backdrop-blur-sm">
-        <NavLink to="/" currentPath={location.pathname}>
-          Início
-        </NavLink>
-        <NavLink to="/search" currentPath={location.pathname}>
-          Pesquisar
-        </NavLink>
-        <NavLink to="/video-analyzer" currentPath={location.pathname}>
-          Analisar Vídeo
-        </NavLink>
-        <NavLink to="/title-generator" currentPath={location.pathname}>
-          Títulos
-        </NavLink>
-        <NavLink to="/script-generator" currentPath={location.pathname}>
-          Roteirizador Automático
-        </NavLink>
-        <NavLink to="/subnicho-validator" currentPath={location.pathname}>
-          Validador de Subnichos
-        </NavLink>
-      </nav>
     </header>
   );
 };
@@ -85,8 +82,8 @@ const NavLink = ({ to, currentPath, children }: NavLinkProps) => {
       className={cn(
         "transition-all duration-300",
         isActive 
-          ? "shadow-lg bg-gradient-to-r from-primary to-primary/80 text-white" 
-          : "hover:bg-muted backdrop-blur-sm bg-white/50 dark:bg-black/20"
+          ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg hover:shadow-purple-500/25" 
+          : "hover:bg-black/5 dark:hover:bg-white/5 backdrop-blur-sm bg-black/5 dark:bg-white/5 border-white/10"
       )}
     >
       <Link to={to}>{children}</Link>
