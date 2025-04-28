@@ -53,7 +53,7 @@ const VideoAnalyzer = () => {
       <ApiKeyDialog />
       <Header />
       
-      <div className="grid grid-cols-1 gap-6 mb-8">
+      <div className="grid grid-cols-1 gap-6 mb-8 w-full">
         <Card className="p-6">
           <h1 className="text-2xl font-bold mb-4">Analisador de Vídeos do YouTube</h1>
           

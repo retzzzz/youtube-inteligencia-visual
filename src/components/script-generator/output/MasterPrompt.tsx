@@ -10,7 +10,7 @@ interface MasterPromptProps {
 
 const MasterPrompt: React.FC<MasterPromptProps> = ({ prompt, id }) => {
   return (
-    <Card className="p-4 bg-blue-50 border-blue-200">
+    <Card className="p-4 bg-blue-50 border-blue-200 w-full">
       <div className="flex flex-wrap justify-between items-start gap-2">
         <div>
           <h4 className="font-medium text-blue-900 mb-1">Prompt Mestre para Ambientação Visual</h4>

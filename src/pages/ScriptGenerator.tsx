@@ -26,7 +26,7 @@ const ScriptGenerator = () => {
     <div className="min-h-screen w-full px-4 md:px-8 py-6">
       <Header />
       
-      <div className="grid gap-6 mt-6">
+      <div className="grid gap-6 mt-6 w-full">
         <ScriptGeneratorIntro />
         
         <Card className="p-6">

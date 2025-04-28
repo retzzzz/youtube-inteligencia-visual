@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -37,11 +38,11 @@ const ImportantLinks = () => {
     <div className="min-h-screen w-full px-4 md:px-8 py-6">
       <Header />
       
-      <div className="space-y-8 mt-8">
+      <div className="space-y-8 mt-8 w-full">
         <h1 className="text-4xl font-bold text-center mb-12">Links Importantes</h1>
         
         {importantLinks.map((link, index) => (
-          <Card key={index} className="p-6 hover:shadow-md transition-all">
+          <Card key={index} className="p-6 hover:shadow-md transition-all w-full">
             <div className="space-y-4">
               <h2 className="text-2xl font-semibold">{link.title}</h2>
               {link.description && <p className="text-muted-foreground">{link.description}</p>}

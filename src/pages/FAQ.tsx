@@ -8,10 +8,10 @@ const FAQ = () => {
   return (
     <div className="min-h-screen w-full px-4 md:px-8 py-6">
       <Header />
-      <Card className="p-6 mt-8">
+      <Card className="p-6 mt-8 w-full">
         <h1 className="text-3xl font-bold mb-6">Perguntas Frequentes (FAQ)</h1>
         
-        <Accordion type="single" collapsible className="space-y-4">
+        <Accordion type="single" collapsible className="space-y-4 w-full">
           <AccordionItem value="language-behavior">
             <AccordionTrigger className="text-lg">
               Comportamento variável por idioma

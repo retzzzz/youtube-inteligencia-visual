@@ -114,7 +114,7 @@ const TitleGenerator = () => {
     <div className="min-h-screen w-full px-4 md:px-8 py-6">
       <Header />
       
-      <div className="grid grid-cols-1 gap-6 mb-8">
+      <div className="grid grid-cols-1 gap-6 mb-8 w-full">
         <TitleGeneratorContainer
           variations={variations}
           titulosConcorrentes={titulosConcorrentes}

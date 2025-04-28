@@ -89,14 +89,7 @@ const Search = () => {
     <div className="min-h-screen w-full px-4 md:px-8 py-6">
       <Header />
       
-      <ApiKeyHeader 
-        onRetry={handleRetry}
-        isLoading={isLoading}
-        hasSearchParams={!!searchParams}
-        isNewKey={isNewKey && !forceNotNew}
-      />
-      
-      <div className="mt-6">
+      <div className="mt-6 w-full">
         <h2 className="text-2xl font-bold mb-6">Pesquisa Avançada</h2>
         <SearchForm onSearch={(params) => handleSearch(params, forceNotNew)} isLoading={isLoading} />
         
@@ -113,7 +106,7 @@ const Search = () => {
         />
         
         {results && results.length > 0 && (
-          <div className="mt-8">
+          <div className="mt-8 w-full">
             <ResultsSection 
               results={results} 
               selectedVideo={selectedVideo} 

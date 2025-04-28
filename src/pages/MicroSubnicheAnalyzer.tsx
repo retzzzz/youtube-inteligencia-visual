@@ -40,7 +40,7 @@ const MicroSubnicheAnalyzer = () => {
     <div className="min-h-screen w-full px-4 md:px-8 py-6">
       <Header />
       
-      <div className="grid grid-cols-1 gap-6 mb-8">
+      <div className="grid grid-cols-1 gap-6 mb-8 w-full">
         <Card className="p-6">
           <h1 className="text-2xl font-bold mb-4">Análise de Micro-Subnichos</h1>
           
@@ -48,7 +48,7 @@ const MicroSubnicheAnalyzer = () => {
             Identifique, avalie e planeje conteúdo baseado nos micro-subnichos mais promissores.
           </p>
           
-          <Tabs defaultValue="extract" className="space-y-6">
+          <Tabs defaultValue="extract" className="space-y-6 w-full">
             <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="extract">1. Extrair</TabsTrigger>
               <TabsTrigger value="evaluate">2. Avaliar</TabsTrigger>
