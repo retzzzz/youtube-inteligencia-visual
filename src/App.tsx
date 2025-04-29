@@ -21,6 +21,14 @@ import { Toaster } from './components/ui/toaster';
 import ApiKeyDialog from './components/ApiKeyDialog';
 import './App.css';
 
+// Importar os novos tutoriais
+import VideoAnalyzerTutorial from './pages/tutorials/VideoAnalyzerTutorial';
+import TitleGeneratorTutorial from './pages/tutorials/TitleGeneratorTutorial';
+import ScriptGeneratorTutorial from './pages/tutorials/ScriptGeneratorTutorial';
+import SubnicheValidatorTutorial from './pages/tutorials/SubnicheValidatorTutorial';
+import SearchTutorial from './pages/tutorials/SearchTutorial';
+import MicroSubnicheAnalyzerTutorial from './pages/tutorials/MicroSubnicheAnalyzerTutorial';
+
 function App() {
   return (
     <AuthProvider>
@@ -42,6 +50,14 @@ function App() {
               <Route path="/script-tutorial" element={<ScriptTutorial />} />
               <Route path="/important-links" element={<ImportantLinks />} />
               <Route path="/search" element={<Search />} />
+              
+              {/* Tutoriais detalhados */}
+              <Route path="/video-analyzer-tutorial" element={<VideoAnalyzerTutorial />} />
+              <Route path="/title-generator-tutorial" element={<TitleGeneratorTutorial />} />
+              <Route path="/script-generator-tutorial" element={<ScriptGeneratorTutorial />} />
+              <Route path="/subnicho-validator-tutorial" element={<SubnicheValidatorTutorial />} />
+              <Route path="/search-tutorial" element={<SearchTutorial />} />
+              <Route path="/micro-subnicho-analyzer-tutorial" element={<MicroSubnicheAnalyzerTutorial />} />
             </Route>
             
             {/* Routes that require subscription */}
