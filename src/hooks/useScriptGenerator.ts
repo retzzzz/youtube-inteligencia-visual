@@ -377,7 +377,7 @@ export const useScriptGenerator = () => {
       ],
       fr: [
         `Aujourd'hui, nous allons parler de quelque chose qui transforme des milliers de vies: ${microSubnicho}. Si vous regardez cette vidéo, vous avez probablement essayé plusieurs approches mais n'avez pas encore trouvé la solution idéale. Ne vous inquiétez pas, car aujourd'hui je vais partager avec vous la méthode qui fonctionne vraiment. Commentez ci-dessous si vous avez éprouvé des frustrations en essayant de maîtriser ce sujet.`,
-        `Bienvenue dans une nouvelle vidéo de la chaîne! Aujourd'hui, nous plongeons profondément dans ${microSubnicho}, un sujet sur lequel je reçois quotidiennement de nombreuses questions. Ce que je vais partager aujourd'hui a complètement changé ma perspective et je suis sûr que cela vous impactera aussi. Si vous avez eu des difficultés avec ${keyword}, laissez un commentaire partageant votre expérience.`,
+        `Bienvenue dans une nouvelle vidéo de la chaîne! Aujourd'hui, nous plongeons profondément dans ${microSubnicho}, un sujet sur lequel je reçois quotidiennement de nombreuses questions. Ce que je vais partager aujourd'hui a complètement changé ma perspective et je suis sûr que cela vous impactera aussi. Si vous avez eu des difficultés avec ${keyword}, laissez un commentaire partageant votre exp��rience.`,
         `Vous êtes-vous déjà senti perdu quand il s'agit de ${microSubnicho}? Vous n'êtes pas seul! Des milliers de personnes font face aux mêmes défis tous les jours. Mais aujourd'hui, je vais vous révéler une méthode éprouvée qui changera votre approche de ce sujet pour toujours. Si ce contenu vous aide déjà, laissez un like pour que l'algorithme le recommande à plus de personnes.`
       ]
     };
@@ -400,7 +400,19 @@ export const useScriptGenerator = () => {
     
     const keyword = keywords.length > 0 ? keywords[0] : microSubnicho;
     
-    const templates = {
+    type TemplateSection = {
+      situacao: string[];
+      conflito: string[];
+      solucao: string[];
+      pergunta: string[];
+      promessa: string[];
+    };
+    
+    type LanguageTemplates = {
+      [key: string]: TemplateSection;
+    };
+
+    const templates: LanguageTemplates = {
       pt: {
         situacao: [
           `Muitas pessoas enfrentam dificuldades quando se trata de ${keyword}.`,
@@ -509,11 +521,33 @@ export const useScriptGenerator = () => {
           `Sie werden nicht verpassen wollen, was als nächstes kommt: die Schritt-für-Schritt-Anleitung zur Beherrschung von ${microSubnicho}.`
         ]
       },
-      fr: [
-        `Aujourd'hui, nous allons parler de quelque chose qui transforme des milliers de vies: ${microSubnicho}. Si vous regardez cette vidéo, vous avez probablement essayé plusieurs approches mais n'avez pas encore trouvé la solution idéale. Ne vous inquiétez pas, car aujourd'hui je vais partager avec vous la méthode qui fonctionne vraiment. Commentez ci-dessous si vous avez éprouvé des frustrations en essayant de maîtriser ce sujet.`,
-        `Bienvenue dans une nouvelle vidéo de la chaîne! Aujourd'hui, nous plongeons profondément dans ${microSubnicho}, un sujet sur lequel je reçois quotidiennement de nombreuses questions. Ce que je vais partager aujourd'hui a complètement changé ma perspective et je suis sûr que cela vous impactera aussi. Si vous avez eu des difficultés avec ${keyword}, laissez un commentaire partageant votre expérience.`,
-        `Vous êtes-vous déjà senti perdu quand il s'agit de ${microSubnicho}? Vous n'êtes pas seul! Des milliers de personnes font face aux mêmes défis tous les jours. Mais aujourd'hui, je vais vous révéler une méthode éprouvée qui changera votre approche de ce sujet pour toujours. Si ce contenu vous aide déjà, laissez un like pour que l'algorithme le recommande à plus de personnes.`
-      ]
+      fr: {
+        situacao: [
+          `Beaucoup de personnes rencontrent des difficultés quand il s'agit de ${keyword}.`,
+          `Une situation fréquente que nous voyons quotidiennement est le manque de connaissances sur ${keyword}.`,
+          `Imaginez que vous essayez de vous améliorer dans ${keyword}, mais que vous continuez à faire les mêmes erreurs.`
+        ],
+        conflito: [
+          `Le problème est que la plupart des gens abordent ${keyword} de la mauvaise manière.`,
+          `La difficulté survient lorsque nous essayons d'appliquer des méthodes obsolètes à ${keyword}.`,
+          `Le plus grand défi est de séparer les mythes des faits concernant ${keyword}.`
+        ],
+        solucao: [
+          `La solution consiste à adopter une nouvelle perspective sur ${keyword}, en se concentrant sur des résultats prouvés.`,
+          `Le secret réside dans l'application de techniques spécifiques pour ${keyword} que peu connaissent.`,
+          `La méthode qui fonctionne vraiment implique une approche systématique pour ${keyword}.`
+        ],
+        pergunta: [
+          `Vous êtes-vous déjà arrêté pour réfléchir à la façon dont ${keyword} impacte votre vie quotidienne?`,
+          `Vous êtes-vous déjà demandé pourquoi tant de personnes échouent lorsqu'elles essaient de maîtriser ${keyword}?`,
+          `Que feriez-vous différemment si vous connaissiez le véritable secret derrière ${keyword}?`
+        ],
+        promessa: [
+          `Dans le prochain bloc, je partagerai la technique qui a transformé mon approche de ${microSubnicho}.`,
+          `Continuez à regarder pour découvrir la méthode exclusive qui révolutionnera votre vision de ${microSubnicho}.`,
+          `Vous ne voudrez pas manquer ce qui suit: le guide étape par étape pour maîtriser ${microSubnicho}.`
+        ]
+      }
     };
     
     const langTemplates = templates[language as keyof typeof templates] || templates.pt;
