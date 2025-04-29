@@ -1,52 +1,89 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { Download, Text } from "lucide-react";
+import { Download } from "lucide-react";
+import { ScriptBlock } from "@/hooks/useScriptGenerator";
 
 interface DownloadButtonsProps {
-  blocks: Array<{ text: string }>;
+  blocks: ScriptBlock[];
   srtContent?: string;
+  remodeledScript?: {
+    title?: string;
+    hook?: string;
+    introduction?: string;
+    conclusion?: string;
+  };
 }
 
-const DownloadButtons: React.FC<DownloadButtonsProps> = ({ blocks, srtContent }) => {
-  const { toast } = useToast();
-
-  const downloadAsText = () => {
-    const fullText = blocks.map(block => block.text).join("\n\n");
-    const blob = new Blob([fullText], { type: "text/plain" });
+const DownloadButtons = ({ blocks, srtContent, remodeledScript }: DownloadButtonsProps) => {
+  const downloadTextFile = (content: string, filename: string) => {
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "roteiro.txt";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    
-    toast({
-      title: "Download iniciado",
-      description: "O arquivo de texto foi baixado com sucesso."
-    });
   };
 
-  const downloadSrt = () => {
-    if (!srtContent) return;
+  const handleDownloadScript = () => {
+    let content = "";
     
-    const blob = new Blob([srtContent], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "roteiro.srt";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    if (remodeledScript) {
+      // Roteiro remodelado
+      content += `TÍTULO: ${remodeledScript.title || ""}\n\n`;
+      content += `HOOK: ${remodeledScript.hook || ""}\n\n`;
+      content += `INTRODUÇÃO: ${remodeledScript.introduction || ""}\n\n`;
+      
+      blocks.forEach((block, index) => {
+        content += `BLOCO ${index + 1}:\n${block.text}\n`;
+        if (block.mini_cta) {
+          content += `MINI-CTA: ${block.mini_cta}\n`;
+        }
+        content += "\n";
+      });
+      
+      content += `CONCLUSÃO: ${remodeledScript.conclusion || ""}\n`;
+    } else {
+      // Roteiro simples
+      blocks.forEach((block, index) => {
+        content += `BLOCO ${index + 1}:\n${block.text}\n\n`;
+      });
+    }
     
-    toast({
-      title: "Download iniciado",
-      description: "O arquivo SRT foi baixado com sucesso."
-    });
+    downloadTextFile(content, "roteiro.txt");
+  };
+
+  const handleDownloadSrt = () => {
+    if (srtContent) {
+      downloadTextFile(srtContent, "legendas.srt");
+    }
+  };
+  
+  const handleDownloadJson = () => {
+    if (!remodeledScript) return;
+    
+    const jsonData = {
+      titulo: remodeledScript.title,
+      hook: remodeledScript.hook,
+      introducao: remodeledScript.introduction,
+      blocos: blocks.map((block) => ({
+        texto: block.text,
+        mini_cta: block.mini_cta || ""
+      })),
+      conclusao: remodeledScript.conclusion,
+      stats: {
+        caracteres_com_espacos: blocks.reduce((acc, block) => acc + block.text.length, 0),
+        caracteres_sem_espacos: blocks.reduce((acc, block) => acc + block.text.replace(/\s/g, "").length, 0),
+        palavras: blocks.reduce((acc, block) => acc + block.text.split(/\s+/).filter(Boolean).length, 0),
+        duracao_min: Math.round(blocks.reduce((acc, block) => acc + block.text.split(/\s+/).filter(Boolean).length, 0) / 150)
+      }
+    };
+    
+    const content = JSON.stringify(jsonData, null, 2);
+    downloadTextFile(content, "roteiro.json");
   };
 
   return (
@@ -54,20 +91,34 @@ const DownloadButtons: React.FC<DownloadButtonsProps> = ({ blocks, srtContent })
       <Button
         variant="outline"
         size="sm"
-        onClick={downloadAsText}
+        onClick={handleDownloadScript}
+        className="flex items-center"
       >
-        <Text className="mr-2 h-4 w-4" />
+        <Download className="h-4 w-4 mr-2" />
         Baixar TXT
       </Button>
-      
+
       {srtContent && (
         <Button
           variant="outline"
           size="sm"
-          onClick={downloadSrt}
+          onClick={handleDownloadSrt}
+          className="flex items-center"
         >
-          <Download className="mr-2 h-4 w-4" />
+          <Download className="h-4 w-4 mr-2" />
           Baixar SRT
+        </Button>
+      )}
+      
+      {remodeledScript && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleDownloadJson}
+          className="flex items-center"
+        >
+          <Download className="h-4 w-4 mr-2" />
+          Baixar JSON
         </Button>
       )}
     </div>

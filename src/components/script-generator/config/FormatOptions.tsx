@@ -4,105 +4,111 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScriptConfig } from "@/hooks/useScriptGenerator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card } from "@/components/ui/card";
 
 interface FormatOptionsProps {
   config: ScriptConfig;
   onConfigChange: (field: keyof ScriptConfig, value: any) => void;
 }
 
-const FormatOptions: React.FC<FormatOptionsProps> = ({ 
-  config, 
-  onConfigChange 
+const FormatOptions: React.FC<FormatOptionsProps> = ({
+  config,
+  onConfigChange
 }) => {
   return (
-    <div className="space-y-3">
-      <h3 className="text-lg font-medium">Formatação e Customização</h3>
+    <div className="space-y-4">
+      <h3 className="text-lg font-medium">Opções de Formatação</h3>
       
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <Label>Deseja que seja incluído um CTA ao final?</Label>
-          <RadioGroup 
-            value={config.ctaStyle || ""}
-            onValueChange={(value) => onConfigChange('ctaStyle', value === "" ? null : value)}
-            className="grid grid-cols-1 sm:grid-cols-3 gap-3"
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card className="p-4">
+          <h4 className="font-medium mb-3">Tipo de Processamento</h4>
+          <RadioGroup
+            value={config.processingType}
+            onValueChange={(value) => onConfigChange("processingType", value)}
+            className="space-y-3"
           >
-            <div className="flex items-center space-x-2 border rounded-md p-3 hover:bg-muted/50">
-              <RadioGroupItem value="emocional" id="emocional" />
-              <Label htmlFor="emocional" className="cursor-pointer">Emocional</Label>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="simple" id="simple" />
+              <Label htmlFor="simple">Processamento Simples</Label>
             </div>
-            <div className="flex items-center space-x-2 border rounded-md p-3 hover:bg-muted/50">
-              <RadioGroupItem value="apelativo" id="apelativo" />
-              <Label htmlFor="apelativo" className="cursor-pointer">Apelativo</Label>
-            </div>
-            <div className="flex items-center space-x-2 border rounded-md p-3 hover:bg-muted/50">
-              <RadioGroupItem value="reflexivo" id="reflexivo" />
-              <Label htmlFor="reflexivo" className="cursor-pointer">Reflexivo</Label>
-            </div>
-            <div className="flex items-center space-x-2 border rounded-md p-3 hover:bg-muted/50">
-              <RadioGroupItem value="" id="sem-cta" />
-              <Label htmlFor="sem-cta" className="cursor-pointer">Sem CTA</Label>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="remodel" id="remodel" />
+              <Label htmlFor="remodel">Remodelar Roteiro</Label>
             </div>
           </RadioGroup>
+        </Card>
+        
+        <Card className="p-4">
+          <h4 className="font-medium mb-3">Idioma do Roteiro</h4>
+          <Select 
+            value={config.language} 
+            onValueChange={(value) => onConfigChange("language", value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Selecione o idioma" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="pt">Português</SelectItem>
+              <SelectItem value="en">Inglês</SelectItem>
+              <SelectItem value="es">Espanhol</SelectItem>
+              <SelectItem value="de">Alemão</SelectItem>
+              <SelectItem value="fr">Francês</SelectItem>
+            </SelectContent>
+          </Select>
+        </Card>
+      </div>
+      
+      <div className="grid grid-cols-1 gap-4 mt-4">
+        {config.processingType === "remodel" && (
+          <Card className="p-4">
+            <h4 className="font-medium mb-3">Estilo do CTA</h4>
+            <Select 
+              value={config.ctaStyle || ""} 
+              onValueChange={(value) => onConfigChange("ctaStyle", value === "" ? null : value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o estilo do CTA" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Sem CTA</SelectItem>
+                <SelectItem value="emocional">Emocional</SelectItem>
+                <SelectItem value="apelativo">Apelativo</SelectItem>
+                <SelectItem value="reflexivo">Reflexivo</SelectItem>
+              </SelectContent>
+            </Select>
+          </Card>
+        )}
+      </div>
+      
+      <div className="space-y-4 mt-4">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="generateMasterPrompt">Gerar Prompt Mestre</Label>
+          <Switch
+            id="generateMasterPrompt"
+            checked={config.generateMasterPrompt}
+            onCheckedChange={(checked) => onConfigChange("generateMasterPrompt", checked)}
+          />
         </div>
-        
-        <SwitchOption
-          id="masterPrompt"
-          label="Deseja criar um Prompt Mestre de ambientação visual?"
-          description="Para manter consistência nos cenários e atmosfera"
-          checked={config.generateMasterPrompt}
-          onCheckedChange={(checked) => onConfigChange('generateMasterPrompt', checked)}
-        />
-        
-        <SwitchOption
-          id="imagePrompts"
-          label="Deseja gerar prompts de imagem para cada bloco?"
-          description="Descrições completas em inglês para IA geradora de imagens"
-          checked={config.generateImagePrompts}
-          onCheckedChange={(checked) => onConfigChange('generateImagePrompts', checked)}
-        />
-        
-        <SwitchOption
-          id="convertToSrt"
-          label="Deseja converter o roteiro para formato .srt?"
-          description="Para uso como legendas em vídeos"
-          checked={config.convertToSrt}
-          onCheckedChange={(checked) => onConfigChange('convertToSrt', checked)}
-        />
-      </div>
-    </div>
-  );
-};
 
-interface SwitchOptionProps {
-  id: string;
-  label: string;
-  description: string;
-  checked: boolean;
-  onCheckedChange: (checked: boolean) => void;
-}
+        <div className="flex items-center justify-between">
+          <Label htmlFor="generateImagePrompts">Gerar Prompts de Imagem</Label>
+          <Switch
+            id="generateImagePrompts"
+            checked={config.generateImagePrompts}
+            onCheckedChange={(checked) => onConfigChange("generateImagePrompts", checked)}
+          />
+        </div>
 
-const SwitchOption: React.FC<SwitchOptionProps> = ({
-  id, 
-  label, 
-  description, 
-  checked, 
-  onCheckedChange
-}) => {
-  return (
-    <div className="flex items-center justify-between py-2 border-b">
-      <div>
-        <Label htmlFor={id} className="cursor-pointer">
-          {label}
-        </Label>
-        <p className="text-xs text-muted-foreground">
-          {description}
-        </p>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="convertToSrt">Converter para SRT</Label>
+          <Switch
+            id="convertToSrt"
+            checked={config.convertToSrt}
+            onCheckedChange={(checked) => onConfigChange("convertToSrt", checked)}
+          />
+        </div>
       </div>
-      <Switch 
-        id={id}
-        checked={checked}
-        onCheckedChange={onCheckedChange}
-      />
     </div>
   );
 };
