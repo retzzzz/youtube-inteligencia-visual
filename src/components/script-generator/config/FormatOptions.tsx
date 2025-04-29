@@ -64,14 +64,14 @@ const FormatOptions: React.FC<FormatOptionsProps> = ({
           <Card className="p-4">
             <h4 className="font-medium mb-3">Estilo do CTA</h4>
             <Select 
-              value={config.ctaStyle || ""} 
-              onValueChange={(value) => onConfigChange("ctaStyle", value === "" ? null : value)}
+              value={config.ctaStyle || "none"} 
+              onValueChange={(value) => onConfigChange("ctaStyle", value === "none" ? null : value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione o estilo do CTA" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Sem CTA</SelectItem>
+                <SelectItem value="none">Sem CTA</SelectItem>
                 <SelectItem value="emocional">Emocional</SelectItem>
                 <SelectItem value="apelativo">Apelativo</SelectItem>
                 <SelectItem value="reflexivo">Reflexivo</SelectItem>
