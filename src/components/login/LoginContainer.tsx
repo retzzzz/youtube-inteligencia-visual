@@ -12,7 +12,7 @@ export const LoginContainer: React.FC<LoginContainerProps> = ({ children }) => {
     <div 
       className="min-h-screen flex items-center justify-center w-full bg-cover bg-center bg-no-repeat"
       style={{
-        backgroundImage: "url('/lovable-uploads/2f60fdb4-67a4-40ec-a1c6-cfdb7b4b81c4.png')",
+        backgroundImage: "url('/lovable-uploads/db9d57dc-23a8-4269-b7e4-294eb0a8b7eb.png')",
       }}
     >
       <FloatingEffect intensity={5} className="w-full max-w-md px-4">
