@@ -101,7 +101,7 @@ const RemodeledScriptContent: React.FC<RemodeledScriptContentProps> = ({ script 
             <h3 className="text-lg font-semibold">Título</h3>
             <Badge>Principal</Badge>
           </div>
-          <CopyableText text={title || ""} className="p-4 bg-muted/50 rounded-md" />
+          <CopyableText text={title || ""} id="title" className="p-4 bg-muted/50 rounded-md" />
         </div>
         
         <div className="space-y-2">
@@ -109,7 +109,7 @@ const RemodeledScriptContent: React.FC<RemodeledScriptContentProps> = ({ script 
             <h3 className="text-lg font-semibold">Hook (0-15s)</h3>
             <Badge>Atenção</Badge>
           </div>
-          <CopyableText text={hook || ""} className="p-4 bg-muted/50 rounded-md" />
+          <CopyableText text={hook || ""} id="hook" className="p-4 bg-muted/50 rounded-md" />
         </div>
         
         <div className="space-y-2">
@@ -117,7 +117,7 @@ const RemodeledScriptContent: React.FC<RemodeledScriptContentProps> = ({ script 
             <h3 className="text-lg font-semibold">Introdução</h3>
             <Badge variant="outline">+ CTA leve</Badge>
           </div>
-          <CopyableText text={introduction || ""} className="p-4 bg-muted/50 rounded-md" />
+          <CopyableText text={introduction || ""} id="introduction" className="p-4 bg-muted/50 rounded-md" />
         </div>
         
         <div className="space-y-4">
@@ -130,12 +130,12 @@ const RemodeledScriptContent: React.FC<RemodeledScriptContentProps> = ({ script 
                 <Badge variant="outline">Bloco {index + 1}/{script.blocks.length}</Badge>
               </div>
               
-              <CopyableText text={block.text} className="text-sm mb-3 bg-muted/30 p-3 rounded-md" />
+              <CopyableText text={block.text} id={`block-${index}`} className="text-sm mb-3 bg-muted/30 p-3 rounded-md" />
               
               {block.mini_cta && (
                 <div className="mt-2">
                   <div className="text-xs text-muted-foreground mb-1">Mini-CTA:</div>
-                  <CopyableText text={block.mini_cta} className="text-sm italic bg-muted/20 p-2 rounded-md" />
+                  <CopyableText text={block.mini_cta} id={`mini-cta-${index}`} className="text-sm italic bg-muted/20 p-2 rounded-md" />
                 </div>
               )}
             </Card>
@@ -147,7 +147,7 @@ const RemodeledScriptContent: React.FC<RemodeledScriptContentProps> = ({ script 
             <h3 className="text-lg font-semibold">Conclusão</h3>
             <Badge variant="outline">+ CTA forte</Badge>
           </div>
-          <CopyableText text={conclusion || ""} className="p-4 bg-muted/50 rounded-md" />
+          <CopyableText text={conclusion || ""} id="conclusion" className="p-4 bg-muted/50 rounded-md" />
         </div>
         
         <Card className="p-4">
