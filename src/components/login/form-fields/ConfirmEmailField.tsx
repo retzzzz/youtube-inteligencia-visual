@@ -18,19 +18,19 @@ export const ConfirmEmailField: React.FC<ConfirmEmailFieldProps> = ({ control, n
       name={name}
       render={({ field }) => (
         <FormItem>
-          <FormLabel>{label}</FormLabel>
+          <FormLabel className="text-white">{label}</FormLabel>
           <FormControl>
             <div className="relative">
-              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Mail className="absolute left-3 top-3 h-4 w-4 text-white/70" />
               <Input 
-                className="pl-10" 
+                className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50 focus-visible:ring-primary/70" 
                 placeholder="Confirme seu email"
                 type="email"
                 {...field} 
               />
             </div>
           </FormControl>
-          <FormMessage />
+          <FormMessage className="text-red-300" />
         </FormItem>
       )}
     />
