@@ -5,14 +5,13 @@ import { Button } from './ui/button';
 import { Copy, Check } from 'lucide-react';
 import TranslationIcon from './icons/TranslationIcon';
 import { useToast } from '@/hooks/use-toast';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 
 interface ImagePromptsProps {
   thumbnailPrompts: string[];
-  supportPrompts: string[];
+  supportPrompts: string[]; // We'll keep this in the props but won't display it
 }
 
-const ImagePrompts = ({ thumbnailPrompts, supportPrompts }: ImagePromptsProps) => {
+const ImagePrompts = ({ thumbnailPrompts }: ImagePromptsProps) => {
   const { toast } = useToast();
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -31,42 +30,17 @@ const ImagePrompts = ({ thumbnailPrompts, supportPrompts }: ImagePromptsProps) =
 
   return (
     <Card className="p-6">
-      <h3 className="text-lg font-bold mb-4">Prompts para Imagens</h3>
+      <div className="space-y-1 mb-4">
+        <h3 className="text-lg font-bold">Prompts para Thumbnails</h3>
+        <p className="text-sm text-muted-foreground">Use estes prompts para gerar thumbnails chamativas para seu vídeo.</p>
+      </div>
       
-      <Tabs defaultValue="thumbnails">
-        <TabsList className="mb-4">
-          <TabsTrigger value="thumbnails">Thumbnails</TabsTrigger>
-          <TabsTrigger value="support">Imagens de Apoio</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="thumbnails">
-          <div className="space-y-1 mb-4">
-            <h4 className="font-medium">Prompts para Thumbnails</h4>
-            <p className="text-sm text-muted-foreground">Use estes prompts para gerar thumbnails chamativas para seu vídeo.</p>
-          </div>
-          
-          <PromptList
-            prompts={thumbnailPrompts}
-            copyToClipboard={copyToClipboard}
-            copiedId={copiedId}
-            prefix="thumb"
-          />
-        </TabsContent>
-        
-        <TabsContent value="support">
-          <div className="space-y-1 mb-4">
-            <h4 className="font-medium">Prompts para Imagens de Apoio</h4>
-            <p className="text-sm text-muted-foreground">Use estes prompts para gerar imagens que podem ser usadas no interior do vídeo.</p>
-          </div>
-          
-          <PromptList
-            prompts={supportPrompts}
-            copyToClipboard={copyToClipboard}
-            copiedId={copiedId}
-            prefix="support"
-          />
-        </TabsContent>
-      </Tabs>
+      <PromptList
+        prompts={thumbnailPrompts}
+        copyToClipboard={copyToClipboard}
+        copiedId={copiedId}
+        prefix="thumb"
+      />
     </Card>
   );
 };

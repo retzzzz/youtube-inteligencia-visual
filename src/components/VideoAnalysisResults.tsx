@@ -58,7 +58,7 @@ const VideoAnalysisResults = ({ analysis }: VideoAnalysisResultsProps) => {
           <TabsTrigger value="basic-info">🔎 Dados Básicos</TabsTrigger>
           <TabsTrigger value="title-variations">🎯 Variações de Título</TabsTrigger>
           <TabsTrigger value="script-ideas">📝 Ideias de Roteiro</TabsTrigger>
-          <TabsTrigger value="image-prompts">🎨 Imagens</TabsTrigger>
+          <TabsTrigger value="image-prompts">🎨 Thumbnails</TabsTrigger>
           <TabsTrigger value="sub-niches">📊 Subnichos</TabsTrigger>
           <TabsTrigger value="saturation">⚡ Saturação</TabsTrigger>
         </TabsList>

@@ -60,7 +60,10 @@ export function translateFrenchToPortuguese(text: string): string {
  * Main function to generate Portuguese translations from different source languages
  */
 export function getPortugueseTranslation(text: string, sourceLanguage: SupportedLanguage): string {
-  if (sourceLanguage === "pt") return ""; // No translation needed
+  if (!text || sourceLanguage === "pt") return ""; // No translation needed
+  
+  // Remove any existing translation markers like "[PT-BR]: "
+  text = text.replace(/\[PT-BR\]:\s*/g, "");
   
   if (sourceLanguage === "es") {
     return translateSpanishToPortuguese(text);

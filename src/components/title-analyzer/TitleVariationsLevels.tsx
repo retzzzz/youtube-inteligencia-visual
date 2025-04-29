@@ -149,6 +149,7 @@ const TitleVariationCard: React.FC<TitleVariationCardProps> = ({
           {variation.viralPotential}%
         </Badge>
       </div>
+      
       <p className="text-xs text-muted-foreground">{variation.explanation}</p>
       
       {hasTranslation && showTranslation && (
