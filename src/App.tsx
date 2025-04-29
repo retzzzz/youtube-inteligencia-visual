@@ -13,6 +13,7 @@ import FAQ from './pages/FAQ';
 import Tutorial from './pages/Tutorial';
 import ScriptTutorial from './pages/ScriptTutorial';
 import ImportantLinks from './pages/ImportantLinks';
+import LandingPage from './pages/LandingPage';
 import { AuthProvider } from './contexts/AuthContext';
 import { Toaster } from './components/ui/toaster';
 import ApiKeyDialog from './components/ApiKeyDialog';
@@ -25,6 +26,7 @@ function App() {
         <div className="flex-grow">
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/landing" element={<LandingPage />} />
             <Route path="/search" element={<Search />} />
             <Route path="/login" element={<Login />} />
             <Route path="/video-analyzer" element={<VideoAnalyzer />} />
