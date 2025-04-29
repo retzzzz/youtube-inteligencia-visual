@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -117,7 +116,7 @@ const LandingPage = () => {
               Ferramentas Poderosas para Seu Sucesso
             </h2>
             <p className="text-blue-100/70 max-w-3xl mx-auto">
-              O YTOptimizer reúne um conjunto completo de ferramentas projetadas para impulsionar sua presença no YouTube e descobrir nichos lucrativos.
+              O YTAnalyzerPro reúne um conjunto completo de ferramentas projetadas para impulsionar sua presença no YouTube e descobrir nichos lucrativos.
             </p>
           </div>
 
@@ -178,7 +177,7 @@ const LandingPage = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-300">
-              Como o YTOptimizer Transforma Seu Canal
+              Como o YTAnalyzerPro Transforma Seu Canal
             </h2>
             <p className="text-blue-100/70 max-w-3xl mx-auto">
               Economize tempo, tome decisões baseadas em dados e impulsione seus resultados com nossas ferramentas especializadas.
@@ -269,7 +268,7 @@ const LandingPage = () => {
                   Comece Sua Jornada para o Sucesso no YouTube
                 </h2>
                 <p className="text-blue-100/80 mb-6">
-                  Entre para milhares de criadores que estão transformando seus canais com o YTOptimizer. Descubra nichos inexplorados, crie conteúdo otimizado e acelere seu crescimento.
+                  Entre para milhares de criadores que estão transformando seus canais com o YTAnalyzerPro. Descubra nichos inexplorados, crie conteúdo otimizado e acelere seu crescimento.
                 </p>
                 <div className="flex flex-wrap gap-4">
                   <Button size="lg" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8">
@@ -299,7 +298,7 @@ const LandingPage = () => {
               O Que Nossos Usuários Dizem
             </h2>
             <p className="text-blue-100/70 max-w-3xl mx-auto">
-              Depoimentos de criadores que transformaram seus canais com o YTOptimizer.
+              Depoimentos de criadores que transformaram seus canais com o YTAnalyzerPro.
             </p>
           </div>
           
@@ -322,7 +321,7 @@ const LandingPage = () => {
               name="Pedro Mendes"
               role="Especialista em Marketing"
               image="https://i.pravatar.cc/150?img=3"
-              quote="Como consultor, recomendo o YTOptimizer para todos os meus clientes. É simplesmente o melhor pacote de ferramentas para Youtube."
+              quote="Como consultor, recomendo o YTAnalyzerPro para todos os meus clientes. É simplesmente o melhor pacote de ferramentas para Youtube."
             />
           </div>
         </div>
@@ -354,7 +353,7 @@ const LandingPage = () => {
                 <Youtube className="h-5 w-5 text-white" />
               </div>
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400">
-                YTOptimizer
+                YTAnalyzerPro
               </span>
             </div>
             
@@ -371,7 +370,7 @@ const LandingPage = () => {
             </div>
             
             <div className="text-blue-100/50 text-sm">
-              © {new Date().getFullYear()} YTOptimizer. Todos os direitos reservados.
+              © {new Date().getFullYear()} YTAnalyzerPro. Todos os direitos reservados.
             </div>
           </div>
         </div>

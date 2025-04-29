@@ -56,7 +56,7 @@ const Login = () => {
   return (
     <LoginContainer>
       <LoginHeader 
-        title={<>YT<span className="text-primary">Optimizer</span></>}
+        title={<>YT<span className="text-primary">AnalyzerPro</span></>}
         subtitle="Ferramenta de análise de vídeos"
       />
 

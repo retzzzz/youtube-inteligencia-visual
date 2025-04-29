@@ -21,7 +21,7 @@ const Header = () => {
                   <Youtube className="h-6 w-6 text-white" />
                 </div>
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400">
-                  YTOptimizer
+                  YTAnalyzerPro
                 </span>
               </Link>
             </h1>
