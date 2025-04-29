@@ -1,14 +1,14 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/lib/supabase"; // Make sure you've set up this file
+import { supabase } from "@/lib/supabase";
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { subscriptionService, SubscriptionDetails } from '@/services/subscription';
 
 // Define user type
 type User = {
   name: string;
-  id: string; // Add the id property that was missing
+  id: string;
   // Add other user properties as needed
 };
 
@@ -67,12 +67,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (savedUserName) {
         setUser({ 
           name: savedUserName,
-          id: localStorage.getItem("userId") || "" // Use saved ID or empty string
+          id: localStorage.getItem("userId") || "" 
         });
       } else {
         setUser({ 
           name: "Usuário",
-          id: localStorage.getItem("userId") || "" // Use saved ID or empty string
+          id: localStorage.getItem("userId") || "" 
         });
       }
       
@@ -85,52 +85,61 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Check subscription status on initial load
       checkSubscription();
     } else {
-      // Only redirect to login if not on the landing page
-      if (window.location.pathname !== '/landing') {
+      // Only redirect to login if not on public routes
+      if (window.location.pathname !== '/landing' && 
+          window.location.pathname !== '/login' && 
+          window.location.pathname !== '/subscribe') {
         navigate("/login");
       }
     }
   }, [navigate]);
 
   useEffect(() => {
-    // Set up auth state listener
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'SIGNED_IN' && session) {
-          // User signed in
-          const userId = session.user.id;
-          localStorage.setItem("userId", userId);
-          localStorage.setItem("isLoggedIn", "true");
-          
-          // Get user details from Supabase if needed
-          // For now, we'll just use a default name if none is provided
-          const userName = session.user.user_metadata?.name || "Usuário";
-          localStorage.setItem("userName", userName);
-          
-          setUser({
-            name: userName,
-            id: userId
-          });
-          
-          setIsLoggedIn(true);
-          
-          // Check subscription status after login
-          await checkSubscription();
-        } else if (event === 'SIGNED_OUT') {
-          // User signed out
-          localStorage.removeItem("isLoggedIn");
-          localStorage.removeItem("userName");
-          localStorage.removeItem("userId");
-          setIsLoggedIn(false);
-          setUser(null);
-          setSubscription(null);
+    try {
+      // Set up auth state listener
+      const { data: authListener } = supabase.auth.onAuthStateChange(
+        async (event, session) => {
+          if (event === 'SIGNED_IN' && session) {
+            // User signed in
+            const userId = session.user.id;
+            localStorage.setItem("userId", userId);
+            localStorage.setItem("isLoggedIn", "true");
+            
+            // Get user details from Supabase if needed
+            const userName = session.user.user_metadata?.name || "Usuário";
+            localStorage.setItem("userName", userName);
+            
+            setUser({
+              name: userName,
+              id: userId
+            });
+            
+            setIsLoggedIn(true);
+            
+            // Check subscription status after login
+            await checkSubscription();
+          } else if (event === 'SIGNED_OUT') {
+            // User signed out
+            localStorage.removeItem("isLoggedIn");
+            localStorage.removeItem("userName");
+            localStorage.removeItem("userId");
+            setIsLoggedIn(false);
+            setUser(null);
+            setSubscription(null);
+          }
         }
-      }
-    );
+      );
 
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
+      return () => {
+        // Only try to unsubscribe if authListener exists
+        if (authListener && authListener.subscription) {
+          authListener.subscription.unsubscribe();
+        }
+      };
+    } catch (error) {
+      console.error("Error setting up auth listener:", error);
+      // Don't break the app if Supabase auth is not available
+    }
   }, []);
 
   const handleSetYoutubeApiKey = (key: string) => {
