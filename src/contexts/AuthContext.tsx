@@ -2,10 +2,13 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase"; // Make sure you've set up this file
+import { User as SupabaseUser } from '@supabase/supabase-js';
+import { subscriptionService, SubscriptionDetails } from '@/services/subscription';
 
 // Define user type
 type User = {
   name: string;
+  id: string; // Add the id property that was missing
   // Add other user properties as needed
 };
 
@@ -23,8 +26,8 @@ type AuthContextType = {
   logout: () => void;
   needsApiKey: boolean;
   setNeedsApiKey: (value: boolean) => void;
-  user: User | null; // Add user property to context type
-  subscription: SubscriptionStatus | null;
+  user: User | null;
+  subscription: SubscriptionDetails | null;
   checkSubscription: () => Promise<void>;
 };
 
@@ -34,8 +37,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [youtubeApiKey, setYoutubeApiKey] = useState<string | null>(null);
   const [needsApiKey, setNeedsApiKey] = useState<boolean>(false);
-  const [user, setUser] = useState<User | null>(null); // Add user state
-  const [subscription, setSubscription] = useState<SubscriptionStatus | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [subscription, setSubscription] = useState<SubscriptionDetails | null>(null);
   const navigate = useNavigate();
 
   // Function to check subscription status
@@ -43,43 +46,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!isLoggedIn) return;
     
     try {
-      // Query the subscriptions table
-      const { data, error } = await supabase
-        .from('subscriptions')
-        .select('*')
-        .eq('user_id', user?.id)
-        .single();
-      
-      if (error) {
-        console.error("Error fetching subscription:", error);
-        return;
-      }
-      
-      if (data) {
-        const now = new Date();
-        const trialEnd = data.trial_end ? new Date(data.trial_end) : null;
-        const subscriptionEnd = data.subscription_end ? new Date(data.subscription_end) : null;
-        
-        // Check if in trial period
-        const isTrialing = trialEnd ? now < trialEnd : false;
-        
-        // Check if subscription is active
-        const isActive = subscriptionEnd ? now < subscriptionEnd : false;
-        
-        setSubscription({
-          isActive: isActive || isTrialing,
-          isTrialing,
-          trialEnd,
-          subscriptionEnd
-        });
-      } else {
-        // User has no subscription record yet
-        setSubscription({
-          isActive: false,
-          isTrialing: false,
-          trialEnd: null,
-          subscriptionEnd: null
-        });
+      const subscriptionDetails = await subscriptionService.getCurrentSubscription();
+      if (subscriptionDetails) {
+        setSubscription(subscriptionDetails);
       }
     } catch (error) {
       console.error("Error checking subscription:", error);
@@ -96,9 +65,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Set user info if available
       if (savedUserName) {
-        setUser({ name: savedUserName });
+        setUser({ 
+          name: savedUserName,
+          id: localStorage.getItem("userId") || "" // Use saved ID or empty string
+        });
       } else {
-        setUser({ name: "Usuário" }); // Default name if none saved
+        setUser({ 
+          name: "Usuário",
+          id: localStorage.getItem("userId") || "" // Use saved ID or empty string
+        });
       }
       
       if (savedApiKey) {
@@ -117,20 +92,68 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [navigate]);
 
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+          // User signed in
+          const userId = session.user.id;
+          localStorage.setItem("userId", userId);
+          localStorage.setItem("isLoggedIn", "true");
+          
+          // Get user details from Supabase if needed
+          // For now, we'll just use a default name if none is provided
+          const userName = session.user.user_metadata?.name || "Usuário";
+          localStorage.setItem("userName", userName);
+          
+          setUser({
+            name: userName,
+            id: userId
+          });
+          
+          setIsLoggedIn(true);
+          
+          // Check subscription status after login
+          await checkSubscription();
+        } else if (event === 'SIGNED_OUT') {
+          // User signed out
+          localStorage.removeItem("isLoggedIn");
+          localStorage.removeItem("userName");
+          localStorage.removeItem("userId");
+          setIsLoggedIn(false);
+          setUser(null);
+          setSubscription(null);
+        }
+      }
+    );
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
   const handleSetYoutubeApiKey = (key: string) => {
     setYoutubeApiKey(key);
     localStorage.setItem("youtubeApiKey", key);
     setNeedsApiKey(false);
   };
 
-  const logout = () => {
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("youtubeApiKey");
-    setIsLoggedIn(false);
-    setYoutubeApiKey(null);
-    setUser(null);
-    setSubscription(null);
-    navigate("/login");
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut();
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("youtubeApiKey");
+      localStorage.removeItem("userName");
+      localStorage.removeItem("userId");
+      setIsLoggedIn(false);
+      setYoutubeApiKey(null);
+      setUser(null);
+      setSubscription(null);
+      navigate("/login");
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
   };
 
   const value = {
