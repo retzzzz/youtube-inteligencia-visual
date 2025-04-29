@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { analyzeScriptNiche, estimateOptimalBlocksCount, estimateOptimalCharsPerBlock, identifyScriptTone } from "@/utils/script-niche-analyzer";
@@ -6,7 +5,7 @@ import { ScriptStats, ScriptBlock, ScriptConfig, ProcessedScript } from "./scrip
 import { calculateScriptStats } from "@/utils/script-utils/script-analyzer";
 import { processScript } from "@/utils/script-utils/script-processor";
 
-export { ScriptStats, ScriptBlock, ScriptConfig, ProcessedScript };
+export type { ScriptStats, ScriptBlock, ScriptConfig, ProcessedScript };
 
 export const useScriptGenerator = () => {
   const [scriptText, setScriptText] = useState<string>("");
