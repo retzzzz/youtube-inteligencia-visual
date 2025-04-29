@@ -1,9 +1,9 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// Get environment variables with fallbacks
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// Utilizar as credenciais fornecidas
+const supabaseUrl = 'https://idhtutcjkniszcsoyyrj.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkaHR1dGNqa25pc3pjc295eXJqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU5MjM2MjcsImV4cCI6MjA2MTQ5OTYyN30.7DvUoP1Cdfhed6iynfrtA4_4GhvjEypae28XqORdhn4';
 
 // Create a more comprehensive mock client
 const createMockClient = () => {
@@ -48,14 +48,7 @@ const createMockClient = () => {
 
 // Create and export the Supabase client with better error handling
 export const supabase = (() => {
-  // First, check if we have the required credentials
-  if (!supabaseUrl || !supabaseAnonKey) {
-    console.error('Missing Supabase environment variables. Check your .env file.');
-    console.info('Public routes will work, but authentication features will be disabled.');
-    return createMockClient();
-  }
-  
-  // If we have credentials, create a real client with error handling
+  // Agora nós temos credenciais Supabase válidas
   try {
     return createClient(supabaseUrl, supabaseAnonKey);
   } catch (error) {
