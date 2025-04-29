@@ -12,6 +12,7 @@ import { UsernameField } from "@/components/login/form-fields/UsernameField";
 import { PasswordField } from "@/components/login/form-fields/PasswordField";
 import { FormDivider } from "@/components/login/form-fields/FormDivider";
 import { SocialLoginButton } from "@/components/login/form-fields/SocialLoginButton";
+import { supabase } from "@/lib/supabase";
 
 // Schema for login form validation
 const loginSchema = z.object({
@@ -39,19 +40,39 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onGoogleLogin }) => {
   });
 
   // Handle login submission
-  const onSubmit = (values: LoginFormValues) => {
-    if (values.username === "admin" && values.password === "admin") {
-      localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("userName", values.username);
-      toast({
-        title: "Login bem-sucedido",
-        description: "Bem-vindo ao YTOptimizer!",
+  const onSubmit = async (values: LoginFormValues) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: values.username, // assuming username is email
+        password: values.password,
       });
-      navigate("/");
-    } else {
+      
+      if (error) {
+        toast({
+          title: "Erro de login",
+          description: error.message || "Nome de usuário ou senha incorretos.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      if (data && data.user) {
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("userName", data.user.user_metadata?.name || values.username);
+        localStorage.setItem("userId", data.user.id);
+        
+        toast({
+          title: "Login bem-sucedido",
+          description: "Bem-vindo ao YTOptimizer!",
+        });
+        
+        navigate("/");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
       toast({
         title: "Erro de login",
-        description: "Nome de usuário ou senha incorretos.",
+        description: "Ocorreu um erro durante o login. Tente novamente.",
         variant: "destructive",
       });
     }

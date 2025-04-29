@@ -1,27 +1,46 @@
 
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoginContainer } from "@/components/login/LoginContainer";
 import { LoginHeader } from "@/components/login/LoginHeader";
 import { LoginForm } from "@/components/login/LoginForm";
 import { SignupForm } from "@/components/login/SignupForm";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 
 const Login = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  // Function to handle login with Gmail
-  const handleGoogleLogin = () => {
-    // Em um ambiente real, isso seria implementado com OAuth
-    toast({
-      title: "Login com Google",
-      description: "Implementação de OAuth do Google seria integrada aqui.",
-    });
-    
-    // Simulando login bem-sucedido
-    localStorage.setItem("isLoggedIn", "true");
-    localStorage.setItem("userName", "Usuário Google");
-    window.location.href = "/";
+  // Function to handle login with Google
+  const handleGoogleLogin = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/`
+        }
+      });
+      
+      if (error) {
+        console.error("OAuth error:", error);
+        toast({
+          title: "Erro no login com Google",
+          description: "Não foi possível fazer login com o Google. Tente novamente.",
+          variant: "destructive",
+        });
+      }
+      
+      // O redirecionamento será manipulado pelo próprio Supabase
+    } catch (error) {
+      console.error("Google login error:", error);
+      toast({
+        title: "Erro no login",
+        description: "Ocorreu um erro durante o processo de login. Tente novamente.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
