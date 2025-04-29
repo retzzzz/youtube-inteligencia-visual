@@ -16,23 +16,16 @@ const Login = () => {
   // Function to handle login with Google
   const handleGoogleLogin = async () => {
     try {
-      // Check if we're using the mock client (development without Supabase credentials)
-      const isMockClient = !import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY;
-      
-      if (isMockClient) {
-        console.warn("Using mock Supabase client - OAuth not available");
-        toast({
-          title: "Configuração necessária",
-          description: "O login com Google requer a configuração do Supabase. Tente usar o cadastro com email e senha.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/`
+          redirectTo: `${window.location.origin}/`,
+          queryParams: {
+            // Informações confidenciais, certifique-se de que estão configuradas no Supabase
+            // Estas credenciais são gerenciadas pelo Supabase, não precisamos incluí-las aqui
+            // access_type: 'offline',
+            // prompt: 'consent',
+          }
         }
       });
       
