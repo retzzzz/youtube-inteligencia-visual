@@ -1,8 +1,8 @@
 
-import React from "react";
+import React, { ReactNode } from "react";
 
 interface LoginHeaderProps {
-  title: string;
+  title: ReactNode;
   subtitle: string;
 }
 
