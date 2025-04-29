@@ -9,7 +9,6 @@ import { Separator } from './ui/separator';
 import SaturationIndicator from './SaturationIndicator';
 import VideoBasicInfo from './VideoBasicInfo';
 import TitleVariations from './TitleVariations';
-import ScriptIdeas from './ScriptIdeas';
 import ImagePrompts from './ImagePrompts';
 import SubNicheIdeas from './SubNicheIdeas';
 import TitleStructureAnalysis from './title-analyzer/TitleStructureAnalysis';
@@ -54,10 +53,9 @@ const VideoAnalysisResults = ({ analysis }: VideoAnalysisResultsProps) => {
       </div>
 
       <Tabs defaultValue="basic-info" className="w-full">
-        <TabsList className="grid grid-cols-3 md:grid-cols-6 mb-4">
+        <TabsList className="grid grid-cols-3 md:grid-cols-5 mb-4">
           <TabsTrigger value="basic-info">🔎 Dados Básicos</TabsTrigger>
           <TabsTrigger value="title-variations">🎯 Variações de Título</TabsTrigger>
-          <TabsTrigger value="script-ideas">📝 Ideias de Roteiro</TabsTrigger>
           <TabsTrigger value="image-prompts">🎨 Thumbnails</TabsTrigger>
           <TabsTrigger value="sub-niches">📊 Subnichos</TabsTrigger>
           <TabsTrigger value="saturation">⚡ Saturação</TabsTrigger>
@@ -81,13 +79,6 @@ const VideoAnalysisResults = ({ analysis }: VideoAnalysisResultsProps) => {
             
             <TitleVariationsLevels variations={titleVariations} />
           </div>
-        </TabsContent>
-        
-        <TabsContent value="script-ideas">
-          <ScriptIdeas 
-            ideas={analysis.scriptIdeas}
-            language={contentLanguage} 
-          />
         </TabsContent>
         
         <TabsContent value="image-prompts">
