@@ -19,7 +19,9 @@ const createMockClient = () => {
       }),
       signOut: () => Promise.resolve({ error: null }),
       signInWithPassword: () => Promise.resolve({ data: null, error: { message: 'Auth disabled in mock mode' } }),
-      signUp: () => Promise.resolve({ data: null, error: { message: 'Auth disabled in mock mode' } })
+      signUp: () => Promise.resolve({ data: null, error: { message: 'Auth disabled in mock mode' } }),
+      // Add the missing signInWithOAuth method
+      signInWithOAuth: () => Promise.resolve({ data: null, error: { message: 'OAuth disabled in mock mode' } })
     },
     from: (table) => ({
       select: (columns) => ({
