@@ -28,6 +28,7 @@ function App() {
         <div className="flex-grow">
           <Routes>
             {/* Public routes */}
+            <Route path="/" element={<Login />} />
             <Route path="/landing" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/subscribe" element={<Subscribe />} />
@@ -35,7 +36,7 @@ function App() {
             
             {/* Routes that require login */}
             <Route element={<PrivateRoute />}>
-              <Route path="/" element={<Index />} />
+              <Route path="/dashboard" element={<Index />} />
               <Route path="/faq" element={<FAQ />} />
               <Route path="/tutorial" element={<Tutorial />} />
               <Route path="/script-tutorial" element={<ScriptTutorial />} />
