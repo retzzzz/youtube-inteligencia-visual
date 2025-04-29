@@ -1,3 +1,4 @@
+
 import { supabase } from '../lib/supabase';
 
 export interface SubscriptionDetails {
@@ -15,9 +16,14 @@ export const subscriptionService = {
    */
   async getCurrentSubscription(): Promise<SubscriptionDetails | null> {
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       
-      if (!sessionData.session) {
+      if (sessionError) {
+        console.error("Session error:", sessionError);
+        return null;
+      }
+      
+      if (!sessionData?.session) {
         return null;
       }
       
