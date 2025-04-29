@@ -8,16 +8,21 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UserPlus } from "lucide-react";
-import { UsernameField } from "./form-fields/UsernameField";
+import { EmailField } from "./form-fields/EmailField";
+import { ConfirmEmailField } from "./form-fields/ConfirmEmailField";
 import { PasswordField } from "./form-fields/PasswordField";
 import { supabase } from "@/lib/supabase";
 
 // Schema for signup form validation
 const signupSchema = z.object({
-  username: z.string().email("Digite um email válido").min(1, "Email é obrigatório"),
+  email: z.string().email("Digite um email válido").min(1, "Email é obrigatório"),
+  confirmEmail: z.string().email("Digite um email válido").min(1, "Confirmação de email é obrigatória"),
   password: z.string()
     .min(8, "A senha deve ter pelo menos 8 caracteres")
     .max(100, "A senha não pode ter mais de 100 caracteres")
+}).refine((data) => data.email === data.confirmEmail, {
+  message: "Os emails não coincidem",
+  path: ["confirmEmail"],
 });
 
 export type SignupFormValues = z.infer<typeof signupSchema>;
@@ -30,7 +35,8 @@ export const SignupForm: React.FC = () => {
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
-      username: "",
+      email: "",
+      confirmEmail: "",
       password: "",
     },
   });
@@ -39,12 +45,13 @@ export const SignupForm: React.FC = () => {
   const onSubmit = async (values: SignupFormValues) => {
     try {
       const { data, error } = await supabase.auth.signUp({
-        email: values.username,
+        email: values.email,
         password: values.password,
         options: {
           data: {
-            name: values.username.split('@')[0], // Usar a parte do email antes do @ como nome
-          }
+            name: values.email.split('@')[0], // Usar a parte do email antes do @ como nome
+          },
+          emailRedirectTo: `${window.location.origin}/login`
         }
       });
 
@@ -63,14 +70,8 @@ export const SignupForm: React.FC = () => {
           description: "Sua conta foi criada com sucesso! Verifique seu email para confirmação.",
         });
         
-        // Em ambientes de desenvolvimento, podemos permitir login imediato
-        localStorage.setItem("isLoggedIn", "true");
-        localStorage.setItem("userName", values.username.split('@')[0]);
-        if (data.user) {
-          localStorage.setItem("userId", data.user.id);
-        }
-        
-        navigate("/");
+        // Redirecionamos o usuário para a página de login após o cadastro
+        navigate("/login");
       }
     } catch (error) {
       console.error("Signup error:", error);
@@ -85,7 +86,8 @@ export const SignupForm: React.FC = () => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <UsernameField control={form.control} />
+        <EmailField control={form.control} name="email" label="Email" />
+        <ConfirmEmailField control={form.control} name="confirmEmail" label="Confirma Email" />
         <PasswordField control={form.control} />
 
         <Button type="submit" className="w-full flex items-center gap-2">
