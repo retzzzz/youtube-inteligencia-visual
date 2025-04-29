@@ -16,10 +16,14 @@ const Login = () => {
   // Function to handle login with Google
   const handleGoogleLogin = async () => {
     try {
+      // Obter a URL atual com a porta correta
+      const currentUrl = window.location.origin;
+      console.log("Redirecionando para:", currentUrl);
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/`,
+          redirectTo: currentUrl,
           queryParams: {
             // Informações confidenciais, certifique-se de que estão configuradas no Supabase
             // Estas credenciais são gerenciadas pelo Supabase, não precisamos incluí-las aqui
