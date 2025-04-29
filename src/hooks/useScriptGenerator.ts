@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { analyzeScriptNiche, estimateOptimalBlocksCount, estimateOptimalCharsPerBlock, identifyScriptTone } from "@/utils/script-niche-analyzer";
@@ -70,19 +69,14 @@ export const useScriptGenerator = () => {
     const stats = calculateScriptStats(text);
     setScriptStats(stats);
     
-    // Identificar automaticamente nicho, subnicho e micro-subnicho
     const nicheInfo = analyzeScriptNiche(text);
     
-    // Estimar número ideal de blocos
     const optimalBlocks = estimateOptimalBlocksCount(text);
     
-    // Estimar caracteres por bloco
     const optimalCharsPerBlock = estimateOptimalCharsPerBlock(text, optimalBlocks);
     
-    // Identificar tom predominante
     const predominantTone = identifyScriptTone(text);
     
-    // Atualizar a configuração com os valores detectados
     setScriptConfig(prev => ({
       ...prev,
       blocks: optimalBlocks,
@@ -129,7 +123,6 @@ export const useScriptGenerator = () => {
   };
 
   const processSimpleScript = (text: string, config: ScriptConfig): ProcessedScript => {
-    // Dividir o texto em blocos com base na configuração
     const words = text.split(/\s+/).filter(word => word.length > 0);
     const blocksCount = config.blocks;
     const wordsPerBlock = Math.ceil(words.length / blocksCount);
@@ -152,7 +145,6 @@ export const useScriptGenerator = () => {
       });
     }
     
-    // Se solicitado, adicionar CTA ao final
     if (config.ctaStyle) {
       const ctaText = generateCTA(config.ctaStyle);
       blocks.push({
@@ -163,7 +155,6 @@ export const useScriptGenerator = () => {
       });
     }
     
-    // Gerar SRT se solicitado
     let srtContent: string | undefined = undefined;
     if (config.convertToSrt) {
       srtContent = convertToSrt(blocks);
@@ -186,41 +177,25 @@ export const useScriptGenerator = () => {
     const subnicho = config.autoIdentifiedNiche?.subniche || "Crescimento";
     const microSubnicho = config.autoIdentifiedNiche?.microSubniche || `${subnicho} especializado`;
     
-    // Gerar título com base nos nichos identificados
     const titulo = generateTitle(nicho, subnicho, microSubnicho, config.language);
     
-    // Gerar hook
     const hook = generateHook(microSubnicho, config.language);
     
-    // Gerar introdução
     const introducao = generateIntroduction(text, microSubnicho, config.language);
-    
-    // Dividir o texto original em seções para usar como base para os blocos
-    const sentences = text.split(/(?<=[.!?])\s+/);
-    const sentencesPerBlock = Math.ceil(sentences.length / config.blocks);
     
     const blocks: ScriptBlock[] = [];
     
-    // Criar blocos temáticos
+    const keywords = extractKeywords(text, 10);
+    
     for (let i = 0; i < config.blocks; i++) {
-      const startIdx = i * sentencesPerBlock;
-      const endIdx = Math.min(startIdx + sentencesPerBlock, sentences.length);
-      
-      if (startIdx >= sentences.length) break;
-      
-      // Extrair o conteúdo base para este bloco
-      const blockBaseContent = sentences.slice(startIdx, endIdx).join(" ");
-      
-      // Gerar bloco remodelado
       const remodelado = remodelScriptBlock(
-        blockBaseContent,
+        keywords.join(" "),
         i + 1,
         config.blocks,
         microSubnicho,
         config.language
       );
       
-      // Gerar mini-CTA para o final do bloco
       const miniCta = generateMiniCTA(i + 1, config.blocks, config.language);
       
       blocks.push({
@@ -232,10 +207,10 @@ export const useScriptGenerator = () => {
       });
     }
     
-    // Gerar conclusão
     const conclusao = generateConclusion(microSubnicho, config.ctaStyle, config.language);
     
-    // Gerar SRT se solicitado
+    const newStats = calculateStatsFromContent(titulo, hook, introducao, blocks, conclusao);
+    
     let srtContent: string | undefined = undefined;
     if (config.convertToSrt) {
       srtContent = convertRemodeledScriptToSrt(titulo, hook, introducao, blocks, conclusao);
@@ -244,7 +219,7 @@ export const useScriptGenerator = () => {
     return {
       originalText: text,
       blocks: blocks,
-      stats: stats,
+      stats: newStats,
       masterPrompt: config.generateMasterPrompt 
         ? generateMasterPrompt(text) 
         : undefined,
@@ -258,8 +233,45 @@ export const useScriptGenerator = () => {
     };
   };
 
+  const extractKeywords = (text: string, count: number): string[] => {
+    const stopwords = ["de", "a", "o", "que", "e", "do", "da", "em", "um", "para", "com", "não", "uma", "os", "no", "se", "na", "por", "mais", "as", "dos", "como", "mas"];
+    
+    const words = text.toLowerCase()
+      .replace(/[^\w\s]/g, '')
+      .split(/\s+/)
+      .filter(word => word.length > 3 && !stopwords.includes(word));
+    
+    const wordFreq: {[key: string]: number} = {};
+    words.forEach(word => {
+      wordFreq[word] = (wordFreq[word] || 0) + 1;
+    });
+    
+    return Object.keys(wordFreq)
+      .sort((a, b) => wordFreq[b] - wordFreq[a])
+      .slice(0, count);
+  };
+
+  const calculateStatsFromContent = (title: string, hook: string, intro: string, blocks: ScriptBlock[], conclusion: string): ScriptStats => {
+    let fullText = title + " " + hook + " " + intro;
+    
+    blocks.forEach(block => {
+      fullText += " " + block.text;
+      if (block.mini_cta) {
+        fullText += " " + block.mini_cta;
+      }
+    });
+    
+    fullText += " " + conclusion;
+    
+    return {
+      charactersWithSpaces: fullText.length,
+      charactersWithoutSpaces: fullText.replace(/\s/g, "").length,
+      words: fullText.split(/\s+/).filter(word => word.length > 0).length,
+      lines: fullText.split(/\r\n|\r|\n/).length,
+    };
+  };
+
   const generateTitle = (nicho: string, subnicho: string, microSubnicho: string, language: string): string => {
-    // Definir componentes de título por idioma
     const components = {
       pt: {
         personagens: ["O Especialista", "O Mestre", "O Profissional", "O Iniciante", "O Guru", "O Coach"],
@@ -288,13 +300,11 @@ export const useScriptGenerator = () => {
       }
     };
     
-    // Selecionar componentes aleatoriamente para o título no idioma escolhido
     const langComponents = components[language as keyof typeof components] || components.pt;
     const personagem = langComponents.personagens[Math.floor(Math.random() * langComponents.personagens.length)];
     const acao = langComponents.acoes[Math.floor(Math.random() * langComponents.acoes.length)];
     const emocao = langComponents.emocoes[Math.floor(Math.random() * langComponents.emocoes.length)];
     
-    // Construir título no formato: Personagem + Ação + [Micronicho] + Emoção/Curiosidade
     return `${personagem} ${acao} ${microSubnicho} ${emocao}`;
   };
 
@@ -337,7 +347,6 @@ export const useScriptGenerator = () => {
   };
 
   const generateIntroduction = (originalText: string, microSubnicho: string, language: string): string => {
-    // Extrair algumas palavras-chave do texto original para personalizar a introdução
     const keywords = originalText
       .split(/\s+/)
       .filter(word => word.length > 4)
@@ -364,12 +373,12 @@ export const useScriptGenerator = () => {
       de: [
         `Heute sprechen wir über etwas, das Tausende von Leben verändert hat: ${microSubnicho}. Wenn Sie dieses Video ansehen, haben Sie wahrscheinlich bereits mehrere Ansätze ausprobiert, aber noch keine ideale Lösung gefunden. Keine Sorge, denn heute werde ich Ihnen die Methode vorstellen, die wirklich funktioniert. Kommentieren Sie unten, wenn Sie bei der Beherrschung dieses Themas Frustrationen erlebt haben.`,
         `Willkommen zu einem weiteren Video auf diesem Kanal! Heute tauchen wir tief in ${microSubnicho} ein, ein Thema, zu dem ich täglich viele Fragen bekomme. Was ich heute teilen werde, hat meine Perspektive völlig verändert, und ich bin sicher, dass es auch Sie beeinflussen wird. Wenn Sie Schwierigkeiten mit ${keyword} hatten, hinterlassen Sie einen Kommentar und teilen Sie Ihre Erfahrung.`,
-        `Haben Sie sich jemals verloren gefühlt, wenn es um ${microSubnicho} geht? Sie sind nicht allein! Tausende von Menschen stehen jeden Tag vor den gleichen Herausforderungen. Aber heute werde ich eine bewährte Methode enthüllen, die Ihren Ansatz zu diesem Thema für immer verändern wird. Wenn Ihnen dieser Inhalt bereits hilft, hinterlassen Sie ein Like, damit der Algorithmus ihn mehr Menschen empfiehlt.`
+        `Haben Sie sich jemals verloren gefühlt, wenn es um ${microSubnicho} geht? Sie sind nicht allein! Tausende von Menschen standen jeden Tag vor den gleichen Herausforderungen. Aber heute werde ich eine bewährte Methode enthüllen, die Ihren Ansatz zu diesem Thema für immer verändern wird. Wenn Ihnen dieser Inhalt bereits hilft, hinterlassen Sie ein Like, damit der Algorithmus ihn mehr Menschen empfiehlt.`
       ],
       fr: [
         `Aujourd'hui, nous allons parler de quelque chose qui transforme des milliers de vies: ${microSubnicho}. Si vous regardez cette vidéo, vous avez probablement essayé plusieurs approches mais n'avez pas encore trouvé la solution idéale. Ne vous inquiétez pas, car aujourd'hui je vais partager avec vous la méthode qui fonctionne vraiment. Commentez ci-dessous si vous avez éprouvé des frustrations en essayant de maîtriser ce sujet.`,
         `Bienvenue dans une nouvelle vidéo de la chaîne! Aujourd'hui, nous plongeons profondément dans ${microSubnicho}, un sujet sur lequel je reçois quotidiennement de nombreuses questions. Ce que je vais partager aujourd'hui a complètement changé ma perspective et je suis sûr que cela vous impactera aussi. Si vous avez eu des difficultés avec ${keyword}, laissez un commentaire partageant votre expérience.`,
-        `Vous êtes-vous déjà senti perdu quand il s'agit de ${microSubnicho}? Vous n'êtes pas seul! Des milliers de personnes font face aux mêmes défis chaque jour. Mais aujourd'hui, je vais vous révéler une méthode éprouvée qui changera votre approche de ce sujet pour toujours. Si ce contenu vous aide déjà, laissez un like pour que l'algorithme le recommande à plus de personnes.`
+        `Vous êtes-vous déjà senti perdu quand il s'agit de ${microSubnicho}? Vous n'êtes pas seul! Des milliers de personnes font face aux mêmes défis tous les jours. Mais aujourd'hui, je vais vous révéler une méthode éprouvée qui changera votre approche de ce sujet pour toujours. Si ce contenu vous aide déjà, laissez un like pour que l'algorithme le recommande à plus de personnes.`
       ]
     };
     
@@ -384,7 +393,6 @@ export const useScriptGenerator = () => {
     microSubnicho: string,
     language: string
   ): string => {
-    // Extrair conceitos-chave do conteúdo original
     const keywords = originalContent
       .split(/\s+/)
       .filter(word => word.length > 4)
@@ -392,7 +400,6 @@ export const useScriptGenerator = () => {
     
     const keyword = keywords.length > 0 ? keywords[0] : microSubnicho;
     
-    // Templates para situação, conflito e solução
     const templates = {
       pt: {
         situacao: [
@@ -502,50 +509,24 @@ export const useScriptGenerator = () => {
           `Sie werden nicht verpassen wollen, was als nächstes kommt: die Schritt-für-Schritt-Anleitung zur Beherrschung von ${microSubnicho}.`
         ]
       },
-      fr: {
-        situacao: [
-          `Beaucoup de personnes rencontrent des difficultés quand il s'agit de ${keyword}.`,
-          `Une situation courante que nous voyons quotidiennement est le manque de connaissances sur ${keyword}.`,
-          `Imaginez que vous essayez de vous améliorer en ${keyword}, mais que vous continuez à faire les mêmes erreurs.`
-        ],
-        conflito: [
-          `Le problème est que la plupart des gens abordent ${keyword} de la mauvaise manière.`,
-          `La difficulté survient lorsque nous essayons d'appliquer des méthodes dépassées à ${keyword}.`,
-          `Le plus grand défi est de séparer les mythes des faits concernant ${keyword}.`
-        ],
-        solucao: [
-          `La solution est d'adopter une nouvelle perspective sur ${keyword}, en se concentrant sur des résultats prouvés.`,
-          `Le secret réside dans l'application de techniques spécifiques pour ${keyword} que peu de gens connaissent.`,
-          `La méthode qui fonctionne vraiment implique une approche systématique de ${keyword}.`
-        ],
-        pergunta: [
-          `Vous êtes-vous déjà arrêté pour réfléchir à la façon dont ${keyword} impacte votre vie quotidiennement?`,
-          `Vous êtes-vous déjà demandé pourquoi tant de personnes échouent lorsqu'elles essaient de maîtriser ${keyword}?`,
-          `Que feriez-vous différemment si vous connaissiez le véritable secret derrière ${keyword}?`
-        ],
-        promessa: [
-          `Dans le prochain bloc, je partagerai la technique qui a transformé mon approche de ${microSubnicho}.`,
-          `Continuez à regarder pour découvrir la méthode exclusive qui révolutionnera votre vision de ${microSubnicho}.`,
-          `Vous ne voudrez pas manquer ce qui suit: le guide étape par étape pour maîtriser ${microSubnicho}.`
-        ]
-      }
+      fr: [
+        `Aujourd'hui, nous allons parler de quelque chose qui transforme des milliers de vies: ${microSubnicho}. Si vous regardez cette vidéo, vous avez probablement essayé plusieurs approches mais n'avez pas encore trouvé la solution idéale. Ne vous inquiétez pas, car aujourd'hui je vais partager avec vous la méthode qui fonctionne vraiment. Commentez ci-dessous si vous avez éprouvé des frustrations en essayant de maîtriser ce sujet.`,
+        `Bienvenue dans une nouvelle vidéo de la chaîne! Aujourd'hui, nous plongeons profondément dans ${microSubnicho}, un sujet sur lequel je reçois quotidiennement de nombreuses questions. Ce que je vais partager aujourd'hui a complètement changé ma perspective et je suis sûr que cela vous impactera aussi. Si vous avez eu des difficultés avec ${keyword}, laissez un commentaire partageant votre expérience.`,
+        `Vous êtes-vous déjà senti perdu quand il s'agit de ${microSubnicho}? Vous n'êtes pas seul! Des milliers de personnes font face aux mêmes défis tous les jours. Mais aujourd'hui, je vais vous révéler une méthode éprouvée qui changera votre approche de ce sujet pour toujours. Si ce contenu vous aide déjà, laissez un like pour que l'algorithme le recommande à plus de personnes.`
+      ]
     };
     
-    // Selecionar idioma ou usar o padrão (português)
     const langTemplates = templates[language as keyof typeof templates] || templates.pt;
     
-    // Selecionar aleatoriamente um template para cada parte
     const situacao = langTemplates.situacao[Math.floor(Math.random() * langTemplates.situacao.length)];
     const conflito = langTemplates.conflito[Math.floor(Math.random() * langTemplates.conflito.length)];
     const solucao = langTemplates.solucao[Math.floor(Math.random() * langTemplates.solucao.length)];
     const pergunta = langTemplates.pergunta[Math.floor(Math.random() * langTemplates.pergunta.length)];
     
-    // Adicionar promessa no final do bloco, exceto no último bloco
     const promessa = blockNumber < totalBlocks 
       ? langTemplates.promessa[Math.floor(Math.random() * langTemplates.promessa.length)] 
       : "";
     
-    // Construir texto do bloco
     return `${situacao} ${conflito} ${solucao} ${pergunta} ${promessa}`;
   };
 
@@ -573,7 +554,7 @@ export const useScriptGenerator = () => {
         "Wenn Sie dem zustimmen, hinterlassen Sie ein Like für das Video!",
         "Kommentieren Sie unten, wenn Sie eine ähnliche Situation erlebt haben.",
         "Wenn Ihnen dieser Inhalt hilft, teilen Sie ihn mit jemandem, der dies sehen muss.",
-        "Wenn es Ihnen gefällt, aktivieren Sie die Glocke, um mehr Videos wie dieses zu erhalten."
+        "Wenn es Ihnen gefällt, aktivieren Sie die Glocke, um mehr Inhalte zu erhalten."
       ],
       fr: [
         "Si vous êtes d'accord avec cela, laissez un like sur la vidéo!",
@@ -611,7 +592,7 @@ export const useScriptGenerator = () => {
         base: `Wir sind am Ende dieses Videos über ${microSubnicho} angelangt. Ich hoffe, Sie haben etwas Neues und Wertvolles gelernt. Denken Sie daran, dass Konsequenz der Schlüssel zum Erfolg in diesem Bereich ist.`,
         emocional: ` Wenn dieser Inhalt Ihr Herz berührt hat, teilen Sie Ihre Erfahrung in den Kommentaren. Ihre Geschichte könnte andere Menschen inspirieren, die dasselbe durchmachen. Vergessen Sie nicht, den Kanal zu abonnieren und die Glocke zu aktivieren, um mehr Inhalte zu erhalten, die Ihre Seele berühren werden.`,
         apelativo: ` KLICKEN SIE JETZT auf die Abonnieren-Schaltfläche und aktivieren Sie die Glocke! JETZT ist es Zeit für Sie, Teil dieser erstaunlichen Community zu werden. Hinterlassen Sie Ihr LIKE und KOMMENTIEREN Sie, was Sie gedacht haben! Ihre Kommentare motivieren mich, weiterhin mehr Inhalte wie diesen zu bringen. TEILEN Sie mit Ihren Freunden, sie MÜSSEN das sehen!`,
-        reflexivo: ` Bevor wir enden, möchte ich, dass Sie nachdenken: Wie verbindet sich diese Botschaft mit Ihrer eigenen Reise? Vielleicht gibt es einen Grund, warum Sie dieses Video gerade jetzt ansehen. Wenn dieser Inhalt Sie zum Nachdenken gebracht hat, erwägen Sie ein Abonnement, damit wir dieses Gespräch fortsetzen können. Vielen Dank, dass Sie Ihre Zeit hier verbracht haben.`
+        reflexivo: ` Bevor wir enden, möchte ich, dass Sie nachdenken: Wie verbindet sich diese Botschaft mit Ihrer eigenen Reise? Vielleicht gibt es eine Reason, warum Sie dieses Video gerade jetzt ansehen. Wenn dieser Inhalt Sie zum Nachdenken gebracht hat, erwägen Sie ein Abonnement, damit wir dieses Gespräch fortsetzen können. Vielen Dank, dass Sie Ihre Zeit hier verbracht haben.`
       },
       fr: {
         base: `Nous sommes arrivés à la fin de cette vidéo sur ${microSubnicho}. J'espère que vous avez appris quelque chose de nouveau et de précieux. N'oubliez pas que la constance est la clé du succès dans ce domaine.`,
@@ -621,7 +602,6 @@ export const useScriptGenerator = () => {
       }
     };
     
-    // Selecionar conclusão base + estilo de CTA apropriado
     const langConclusion = conclusions[language as keyof typeof conclusions] || conclusions.pt;
     const baseConclusao = langConclusion.base;
     
@@ -651,7 +631,6 @@ export const useScriptGenerator = () => {
   };
 
   const generateImagePrompt = (text: string): string => {
-    // Simplificado para demonstração
     const keywords = text
       .split(' ')
       .filter(word => word.length > 3)
@@ -662,7 +641,6 @@ export const useScriptGenerator = () => {
   };
 
   const generateMasterPrompt = (text: string): string => {
-    // Análise simplificada do texto para gerar um prompt mestre
     const isPositive = text.match(/feliz|alegr|sorri|conquist|supera|venc/gi);
     const isNegative = text.match(/trist|dor|sofr|perda|lut|difícil/gi);
     const isNeutral = !isPositive && !isNegative;
@@ -677,13 +655,11 @@ export const useScriptGenerator = () => {
   };
 
   const convertToSrt = (blocks: ScriptBlock[]): string => {
-    // Implementação simplificada de conversão para SRT
     let srt = "";
     let index = 1;
     let currentTime = 0;
     
     blocks.forEach(block => {
-      // Estima 10 segundos por bloco para este exemplo
       const startTime = formatSrtTime(currentTime);
       currentTime += 10;
       const endTime = formatSrtTime(currentTime);
@@ -706,31 +682,26 @@ export const useScriptGenerator = () => {
     let index = 1;
     let currentTime = 0;
     
-    // Título
     const titleStartTime = formatSrtTime(currentTime);
     currentTime += 3;
     const titleEndTime = formatSrtTime(currentTime);
     srt += `${index}\n${titleStartTime} --> ${titleEndTime}\n${title}\n\n`;
     index++;
     
-    // Hook
     const hookStartTime = formatSrtTime(currentTime);
     currentTime += 7;
     const hookEndTime = formatSrtTime(currentTime);
     srt += `${index}\n${hookStartTime} --> ${hookEndTime}\n${hook}\n\n`;
     index++;
     
-    // Introdução
     const introStartTime = formatSrtTime(currentTime);
     currentTime += 15;
     const introEndTime = formatSrtTime(currentTime);
     srt += `${index}\n${introStartTime} --> ${introEndTime}\n${introduction}\n\n`;
     index++;
     
-    // Blocos
     blocks.forEach(block => {
       const blockStartTime = formatSrtTime(currentTime);
-      // Estimar tempo baseado no tamanho do texto (10s por 400 caracteres)
       const blockDuration = Math.max(10, Math.ceil(block.text.length / 40));
       currentTime += blockDuration;
       const blockEndTime = formatSrtTime(currentTime);
@@ -738,7 +709,6 @@ export const useScriptGenerator = () => {
       srt += `${index}\n${blockStartTime} --> ${blockEndTime}\n${block.text}\n\n`;
       index++;
       
-      // Mini-CTA
       if (block.mini_cta) {
         const miniCtaStartTime = formatSrtTime(currentTime);
         currentTime += 5;
@@ -749,7 +719,6 @@ export const useScriptGenerator = () => {
       }
     });
     
-    // Conclusão
     const conclusionStartTime = formatSrtTime(currentTime);
     currentTime += 20;
     const conclusionEndTime = formatSrtTime(currentTime);

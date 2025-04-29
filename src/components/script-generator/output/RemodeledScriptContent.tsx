@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clipboard, Check } from "lucide-react";
+import { Clipboard, Check, Sparkles } from "lucide-react";
 import { ProcessedScript } from "@/hooks/useScriptGenerator";
 import { Badge } from "@/components/ui/badge";
 import CopyableText from "./CopyableText";
@@ -74,25 +74,31 @@ const RemodeledScriptContent: React.FC<RemodeledScriptContentProps> = ({ script 
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-end space-x-3 mb-4">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={handleCopyFull}
-          className="flex items-center"
-        >
-          {copied ? <Check className="h-4 w-4 mr-2" /> : <Clipboard className="h-4 w-4 mr-2" />}
-          Copiar Tudo
-        </Button>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={handleCopyJSON}
-          className="flex items-center"
-        >
-          {copied ? <Check className="h-4 w-4 mr-2" /> : <Clipboard className="h-4 w-4 mr-2" />}
-          Copiar como JSON
-        </Button>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center">
+          <Sparkles className="h-5 w-5 text-amber-500 mr-2" />
+          <span className="text-sm font-medium">Roteiro inteiramente remodelado com técnicas de storytelling</span>
+        </div>
+        <div className="flex space-x-3">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleCopyFull}
+            className="flex items-center"
+          >
+            {copied ? <Check className="h-4 w-4 mr-2" /> : <Clipboard className="h-4 w-4 mr-2" />}
+            Copiar Tudo
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleCopyJSON}
+            className="flex items-center"
+          >
+            {copied ? <Check className="h-4 w-4 mr-2" /> : <Clipboard className="h-4 w-4 mr-2" />}
+            Copiar como JSON
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-4">
