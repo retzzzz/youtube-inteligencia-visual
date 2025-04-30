@@ -1,6 +1,7 @@
 
 import React from 'react';
 import TutorialPage from '@/components/tutorial/TutorialPage';
+import { Info } from 'lucide-react';
 
 const ScriptGeneratorTutorial = () => {
   const steps = [
