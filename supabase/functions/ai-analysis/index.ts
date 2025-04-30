@@ -14,15 +14,8 @@ serve(async (req) => {
   }
 
   try {
-    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+    // Não precisamos de API key para este endpoint público do HuggingFace
     
-    if (!openaiApiKey) {
-      return new Response(
-        JSON.stringify({ error: 'API key não configurada' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
     const { searchTerms, results } = await req.json();
 
     if (!searchTerms || !results || !Array.isArray(results)) {
@@ -52,38 +45,28 @@ serve(async (req) => {
       Responda em formato estruturado em português do Brasil.
     `;
 
-    // Call OpenAI API
-    console.log('Enviando requisição para OpenAI');
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Call Hugging Face API usando seu endpoint público
+    console.log('Enviando requisição para HuggingFace Inference API');
+    
+    // Endpoint público gratuito do HuggingFace Inference
+    const response = await fetch('https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3-8B-Instruct', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openaiApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo', // Alterando para um modelo mais econômico
-        messages: [
-          { role: 'system', content: 'Você é um especialista em análise de conteúdo viral para YouTube. Seu trabalho é identificar padrões, tendências e ganchos emocionais em títulos de vídeos para ajudar criadores de conteúdo.' },
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.3,
+        inputs: prompt,
+        parameters: {
+          max_new_tokens: 1024,
+          temperature: 0.3,
+          return_full_text: false
+        }
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('Erro na requisição OpenAI:', errorData);
-      
-      // Verificar especificamente erros de cota
-      if (errorData.error && errorData.error.type === "insufficient_quota") {
-        return new Response(
-          JSON.stringify({ 
-            error: 'Erro de cota da OpenAI', 
-            message: 'A cota da sua conta OpenAI foi excedida. Por favor, verifique sua assinatura ou use outra chave API.'
-          }),
-          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
+      console.error('Erro na requisição HuggingFace:', errorData);
       
       return new Response(
         JSON.stringify({ error: 'Erro ao processar análise de IA', details: errorData }),
@@ -92,7 +75,7 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    const analysis = data.choices[0].message.content;
+    const analysis = data[0]?.generated_text || '';
 
     // Extract specific sections for structured return
     const patternMatch = analysis.match(/Padrões[\s\S]*?(?=Ganchos|$)/i);
