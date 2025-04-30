@@ -4,15 +4,22 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, Sparkles, Search, Globe } from 'lucide-react';
+import { TrendingUp, Sparkles, Search, Globe, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { VideoResult } from '@/types/youtube-types';
+import { toast } from '@/hooks/use-toast';
 
 interface TrendingTopic {
   title: string;
   value: number;
   category?: string;
-  relatedVideos?: VideoResult[];
+  relatedVideos?: Array<{
+    id: string;
+    title: string;
+    thumbnail: string;
+    channelTitle: string;
+    views?: number;
+    publishedAt?: string;
+  }>;
 }
 
 interface TrendingRegion {
@@ -32,6 +39,7 @@ const TrendingTopicsSection = () => {
   const [trendingTopics, setTrendingTopics] = useState<TrendingTopic[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTopic, setSelectedTopic] = useState<number>(0);
 
   const fetchTrendingTopics = async (region: string) => {
     setIsLoading(true);
@@ -46,11 +54,36 @@ const TrendingTopicsSection = () => {
       if (error) throw error;
       
       console.log('Trending topics received:', data);
-      setTrendingTopics(data?.topics || []);
+      
+      if (data?.topics && data.topics.length > 0) {
+        setTrendingTopics(data.topics);
+        setSelectedTopic(0); // Reset to first topic when region changes
+        
+        toast({
+          title: "Tópicos atualizados",
+          description: `Tópicos em alta para ${regions.find(r => r.code === region)?.name || region} carregados com sucesso.`,
+          variant: "default",
+        });
+      } else {
+        setTrendingTopics([]);
+        setError('Nenhum tópico em alta encontrado para esta região.');
+        
+        toast({
+          title: "Sem tópicos",
+          description: `Não foi possível encontrar tópicos em alta para ${regions.find(r => r.code === region)?.name || region}.`,
+          variant: "destructive",
+        });
+      }
     } catch (err) {
       console.error('Error fetching trending topics:', err);
       setError('Não foi possível carregar os tópicos em alta no momento.');
       setTrendingTopics([]);
+      
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao carregar os tópicos em alta. Tente novamente mais tarde.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -69,6 +102,10 @@ const TrendingTopicsSection = () => {
     window.location.href = `/search?keywords=${encodeURIComponent(topic)}`;
   };
 
+  const handleRefresh = () => {
+    fetchTrendingTopics(selectedRegion);
+  };
+
   return (
     <Card className="bg-gradient-to-b from-[#141b41]/50 to-[#1a1f40]/50 border-none shadow-lg overflow-hidden">
       <CardHeader className="pb-2">
@@ -77,7 +114,7 @@ const TrendingTopicsSection = () => {
             <TrendingUp className="h-6 w-6 text-blue-400" />
             <CardTitle className="text-xl text-white">Tópicos em Alta</CardTitle>
           </div>
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center gap-1">
             {regions.map(region => (
               <Button 
                 key={region.code}
@@ -90,6 +127,15 @@ const TrendingTopicsSection = () => {
                 {region.name}
               </Button>
             ))}
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-xs"
+              onClick={handleRefresh}
+              disabled={isLoading}
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+            </Button>
           </div>
         </div>
       </CardHeader>
@@ -121,8 +167,14 @@ const TrendingTopicsSection = () => {
               {trendingTopics.slice(0, 10).map((topic, index) => (
                 <Badge 
                   key={index} 
-                  className="bg-blue-500/20 hover:bg-blue-500/40 text-blue-300 border border-blue-500/30 cursor-pointer flex items-center gap-1"
-                  onClick={() => handleSearchTopic(topic.title)}
+                  className={`${
+                    selectedTopic === index 
+                      ? 'bg-blue-500/40 text-blue-100 border-blue-400' 
+                      : 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border-blue-500/30'
+                  } cursor-pointer flex items-center gap-1 transition-colors`}
+                  onClick={() => {
+                    setSelectedTopic(index);
+                  }}
                 >
                   <span className="text-xs font-normal">{index + 1}</span>
                   <span>{topic.title}</span>
@@ -138,16 +190,16 @@ const TrendingTopicsSection = () => {
                 </h3>
                 <p className="text-sm text-blue-200/80">
                   Crie conteúdo sobre temas em alta para aumentar suas chances de alcançar novos espectadores. 
-                  Clique em um tópico para pesquisar e analisar vídeos relacionados.
+                  Clique em um tópico para ver vídeos relacionados ou pesquisar mais sobre o tema.
                 </p>
               </div>
             )}
             
-            {trendingTopics.length > 0 && trendingTopics[0]?.relatedVideos?.length > 0 && (
+            {trendingTopics.length > 0 && trendingTopics[selectedTopic]?.relatedVideos?.length > 0 && (
               <div className="pt-2">
-                <h3 className="text-sm font-medium mb-2">Vídeos populares sobre "{trendingTopics[0].title}"</h3>
+                <h3 className="text-sm font-medium mb-2">Vídeos populares sobre "{trendingTopics[selectedTopic].title}"</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  {trendingTopics[0].relatedVideos.slice(0, 2).map((video, idx) => (
+                  {trendingTopics[selectedTopic].relatedVideos.slice(0, 2).map((video, idx) => (
                     <a 
                       key={idx}
                       href={`https://youtube.com/watch?v=${video.id}`}
@@ -179,10 +231,10 @@ const TrendingTopicsSection = () => {
                 variant="outline" 
                 size="sm" 
                 className="bg-blue-900/20 border-blue-700/30 hover:bg-blue-900/40"
-                onClick={() => window.location.href = "/search"}
+                onClick={() => handleSearchTopic(trendingTopics[selectedTopic]?.title || "")}
               >
                 <Search className="h-3.5 w-3.5 mr-1" />
-                Pesquisar no YouTube
+                Pesquisar "{trendingTopics[selectedTopic]?.title || "YouTube"}"
               </Button>
             </div>
           </div>
