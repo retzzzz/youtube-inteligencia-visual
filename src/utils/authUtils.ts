@@ -2,6 +2,7 @@
 import { subscriptionService } from '@/services/subscription';
 import { supabase } from '@/lib/supabase';
 import { User } from '@/types/auth';
+import { Session } from '@supabase/supabase-js';
 
 /**
  * Save user data to local storage
