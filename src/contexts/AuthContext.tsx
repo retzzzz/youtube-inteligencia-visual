@@ -2,21 +2,13 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
-import { User as SupabaseUser } from '@supabase/supabase-js';
+import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { subscriptionService, SubscriptionDetails } from '@/services/subscription';
 
 // Define user type
 type User = {
   name: string;
   id: string;
-  // Add other user properties as needed
-};
-
-type SubscriptionStatus = {
-  isActive: boolean;
-  isTrialing: boolean;
-  trialEnd: Date | null;
-  subscriptionEnd: Date | null;
 };
 
 type AuthContextType = {
@@ -27,6 +19,7 @@ type AuthContextType = {
   needsApiKey: boolean;
   setNeedsApiKey: (value: boolean) => void;
   user: User | null;
+  session: Session | null;
   subscription: SubscriptionDetails | null;
   checkSubscription: () => Promise<void>;
 };
@@ -38,6 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [youtubeApiKey, setYoutubeApiKey] = useState<string | null>(null);
   const [needsApiKey, setNeedsApiKey] = useState<boolean>(false);
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [subscription, setSubscription] = useState<SubscriptionDetails | null>(null);
   const navigate = useNavigate();
 
@@ -56,100 +50,101 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    // Only setup auth related features if we're not on public routes
-    const isPublicRoute = 
-      window.location.pathname === '/landing' || 
-      window.location.pathname === '/login' || 
-      window.location.pathname === '/subscribe';
-      
-    const loginStatus = localStorage.getItem("isLoggedIn");
-    const savedApiKey = localStorage.getItem("youtubeApiKey");
-    const savedUserName = localStorage.getItem("userName");
-    
-    if (loginStatus === "true") {
-      setIsLoggedIn(true);
-      
-      // Set user info if available
-      if (savedUserName) {
-        setUser({ 
-          name: savedUserName,
-          id: localStorage.getItem("userId") || "" 
-        });
-      } else {
-        setUser({ 
-          name: "Usuário",
-          id: localStorage.getItem("userId") || "" 
-        });
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, sessionData) => {
+        console.log("Auth state changed:", event);
+        
+        if (event === 'SIGNED_IN' && sessionData) {
+          // User signed in
+          const userId = sessionData.user.id;
+          localStorage.setItem("userId", userId);
+          localStorage.setItem("isLoggedIn", "true");
+          
+          // Get user details from Supabase if needed
+          const userName = sessionData.user.user_metadata?.name || "Usuário";
+          localStorage.setItem("userName", userName);
+          
+          setUser({
+            name: userName,
+            id: userId
+          });
+          
+          setSession(sessionData);
+          setIsLoggedIn(true);
+          
+          // Check subscription status after login
+          await checkSubscription().catch(console.error);
+          
+          // Get API key from local storage if available
+          const savedApiKey = localStorage.getItem("youtubeApiKey");
+          if (savedApiKey) {
+            setYoutubeApiKey(savedApiKey);
+          } else {
+            setNeedsApiKey(true);
+          }
+        } else if (event === 'SIGNED_OUT') {
+          // User signed out
+          localStorage.removeItem("isLoggedIn");
+          localStorage.removeItem("userName");
+          localStorage.removeItem("userId");
+          setIsLoggedIn(false);
+          setUser(null);
+          setSession(null);
+          setSubscription(null);
+        }
       }
-      
-      if (savedApiKey) {
-        setYoutubeApiKey(savedApiKey);
-      } else {
-        setNeedsApiKey(true);
-      }
-      
-      // Check subscription status on initial load
-      checkSubscription().catch(err => {
-        console.error("Failed to check subscription:", err);
-      });
-    } else if (!isPublicRoute) {
-      // Only redirect to login if not on public routes
-      navigate("/login");
-    }
-  }, [navigate]);
+    );
 
-  useEffect(() => {
-    let authListener: { subscription?: { unsubscribe: () => void } } = {};
-
-    try {
-      // Set up auth state listener
-      const { data } = supabase.auth.onAuthStateChange(
-        async (event, session) => {
-          if (event === 'SIGNED_IN' && session) {
-            // User signed in
-            const userId = session.user.id;
-            localStorage.setItem("userId", userId);
-            localStorage.setItem("isLoggedIn", "true");
+    // THEN check for existing session
+    const initializeAuth = async () => {
+      try {
+        // Check if user has an existing session
+        const { data: { session: existingSession } } = await supabase.auth.getSession();
+        
+        if (existingSession) {
+          setSession(existingSession);
+          setIsLoggedIn(true);
+          
+          setUser({ 
+            name: existingSession.user.user_metadata?.name || "Usuário",
+            id: existingSession.user.id 
+          });
+          
+          // Check for API key in local storage
+          const savedApiKey = localStorage.getItem("youtubeApiKey");
+          if (savedApiKey) {
+            setYoutubeApiKey(savedApiKey);
+          } else {
+            setNeedsApiKey(true);
+          }
+          
+          // Check subscription
+          await checkSubscription();
+        } else {
+          // Not logged in, check current route
+          const isPublicRoute = 
+            window.location.pathname === '/landing' || 
+            window.location.pathname === '/login' || 
+            window.location.pathname === '/' ||
+            window.location.pathname === '/subscribe';
             
-            // Get user details from Supabase if needed
-            const userName = session.user.user_metadata?.name || "Usuário";
-            localStorage.setItem("userName", userName);
-            
-            setUser({
-              name: userName,
-              id: userId
-            });
-            
-            setIsLoggedIn(true);
-            
-            // Check subscription status after login
-            await checkSubscription().catch(console.error);
-          } else if (event === 'SIGNED_OUT') {
-            // User signed out
-            localStorage.removeItem("isLoggedIn");
-            localStorage.removeItem("userName");
-            localStorage.removeItem("userId");
-            setIsLoggedIn(false);
-            setUser(null);
-            setSubscription(null);
+          // Redirect to login if not on a public route and not logged in
+          if (!isPublicRoute) {
+            navigate('/login');
           }
         }
-      );
+      } catch (error) {
+        console.error("Error initializing auth:", error);
+      }
+    };
 
-      authListener = data;
+    initializeAuth();
 
-      return () => {
-        // Only try to unsubscribe if authListener exists
-        if (authListener && authListener.subscription) {
-          authListener.subscription.unsubscribe();
-        }
-      };
-    } catch (error) {
-      console.error("Error setting up auth listener:", error);
-      // Don't break the app if Supabase auth is not available
-      return () => {};
-    }
-  }, []);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate]);
 
   const handleSetYoutubeApiKey = (key: string) => {
     setYoutubeApiKey(key);
@@ -161,12 +156,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await supabase.auth.signOut();
       localStorage.removeItem("isLoggedIn");
-      localStorage.removeItem("youtubeApiKey");
       localStorage.removeItem("userName");
       localStorage.removeItem("userId");
       setIsLoggedIn(false);
-      setYoutubeApiKey(null);
       setUser(null);
+      setSession(null);
       setSubscription(null);
       navigate("/login");
     } catch (error) {
@@ -174,12 +168,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Fallback manual logout if Supabase auth fails
       localStorage.removeItem("isLoggedIn");
-      localStorage.removeItem("youtubeApiKey");
       localStorage.removeItem("userName");
       localStorage.removeItem("userId");
       setIsLoggedIn(false);
-      setYoutubeApiKey(null);
       setUser(null);
+      setSession(null);
       setSubscription(null);
       navigate("/login");
     }
@@ -193,6 +186,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     needsApiKey,
     setNeedsApiKey,
     user,
+    session,
     subscription,
     checkSubscription,
   };

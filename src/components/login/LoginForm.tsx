@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 
 // Schema for login form validation
 const loginSchema = z.object({
-  username: z.string().min(1, "Nome de usuário é obrigatório"),
+  username: z.string().email("Digite um email válido").min(1, "Email é obrigatório"),
   password: z.string().min(1, "Senha é obrigatória"),
 });
 
@@ -34,6 +34,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onGoogleLogin }) => {
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loginInProgress, setLoginInProgress] = useState(false);
 
   // Form setup
   const form = useForm<LoginFormValues>({
@@ -46,9 +47,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onGoogleLogin }) => {
 
   // Handle login submission
   const onSubmit = async (values: LoginFormValues) => {
+    if (loginInProgress) return;
+    
+    setLoginInProgress(true);
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: values.username, // assuming username is email
+        email: values.username,
         password: values.password,
       });
       
@@ -71,7 +75,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onGoogleLogin }) => {
           description: "Bem-vindo ao YTOptimizer!",
         });
         
-        navigate("/");
+        // Redirect to dashboard
+        navigate("/dashboard");
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -80,6 +85,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onGoogleLogin }) => {
         description: "Ocorreu um erro durante o login. Tente novamente.",
         variant: "destructive",
       });
+    } finally {
+      setLoginInProgress(false);
     }
   };
 
@@ -97,8 +104,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onGoogleLogin }) => {
     setIsSubmitting(true);
     
     try {
+      // Define redirect URL for password reset
+      const redirectTo = "https://ytanalyzer.pro/login" || `${window.location.origin}/login`;
+
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: `${window.location.origin}/login`,
+        redirectTo: redirectTo,
       });
       
       if (error) {
@@ -146,8 +156,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onGoogleLogin }) => {
           </div>
 
           <div className="space-y-2">
-            <Button type="submit" className="w-full flex items-center gap-2">
-              <LogIn className="h-4 w-4" /> Entrar
+            <Button 
+              type="submit" 
+              className="w-full flex items-center gap-2"
+              disabled={loginInProgress}
+            >
+              <LogIn className="h-4 w-4" /> {loginInProgress ? "Entrando..." : "Entrar"}
             </Button>
             
             <FormDivider text="ou continue com" />

@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
@@ -30,6 +29,7 @@ export type SignupFormValues = z.infer<typeof signupSchema>;
 export const SignupForm: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form setup
   const form = useForm<SignupFormValues>({
@@ -43,22 +43,35 @@ export const SignupForm: React.FC = () => {
 
   // Handle signup submission
   const onSubmit = async (values: SignupFormValues) => {
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
     try {
+      // Define redirect URL
+      const redirectTo = "https://ytanalyzer.pro/dashboard" || `${window.location.origin}/dashboard`;
+
       const { data, error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
         options: {
           data: {
-            name: values.email.split('@')[0], // Usar a parte do email antes do @ como nome
+            name: values.email.split('@')[0], // Use email part before @ as name
           },
-          emailRedirectTo: `${window.location.origin}/login`
+          emailRedirectTo: redirectTo
         }
       });
 
       if (error) {
+        console.error("Signup error details:", error);
+        let errorMessage = "Não foi possível criar sua conta.";
+        
+        if (error.message.includes("already")) {
+          errorMessage = "Este email já está cadastrado. Tente fazer login.";
+        }
+        
         toast({
           title: "Erro no cadastro",
-          description: error.message || "Não foi possível criar sua conta.",
+          description: errorMessage,
           variant: "destructive",
         });
         return;
@@ -70,8 +83,18 @@ export const SignupForm: React.FC = () => {
           description: "Sua conta foi criada com sucesso! Verifique seu email para confirmação.",
         });
         
-        // Redirecionamos o usuário para a página de login após o cadastro
-        navigate("/login");
+        // Store session data if auto-confirmed
+        if (data.session) {
+          localStorage.setItem("isLoggedIn", "true");
+          localStorage.setItem("userId", data.user.id);
+          localStorage.setItem("userName", data.user.user_metadata?.name || values.email.split('@')[0]);
+          
+          // Redirect to dashboard directly if auto-confirmed
+          navigate("/dashboard");
+        } else {
+          // Show success but keep on signup page
+          form.reset();
+        }
       }
     } catch (error) {
       console.error("Signup error:", error);
@@ -80,6 +103,8 @@ export const SignupForm: React.FC = () => {
         description: "Ocorreu um erro durante o cadastro. Tente novamente.",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -90,8 +115,13 @@ export const SignupForm: React.FC = () => {
         <ConfirmEmailField control={form.control} name="confirmEmail" label="Confirma Email" />
         <PasswordField control={form.control} />
 
-        <Button type="submit" className="w-full flex items-center gap-2">
-          <UserPlus className="h-4 w-4" /> Cadastrar
+        <Button 
+          type="submit" 
+          className="w-full flex items-center gap-2"
+          disabled={isSubmitting}
+        >
+          <UserPlus className="h-4 w-4" /> 
+          {isSubmitting ? "Cadastrando..." : "Cadastrar"}
         </Button>
       </form>
     </Form>

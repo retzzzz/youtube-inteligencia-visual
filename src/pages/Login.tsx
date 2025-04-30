@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoginContainer } from "@/components/login/LoginContainer";
@@ -8,27 +8,33 @@ import { LoginForm } from "@/components/login/LoginForm";
 import { SignupForm } from "@/components/login/SignupForm";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { isLoggedIn } = useAuth();
+  
+  // Redirect to dashboard if already logged in
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate("/dashboard");
+    }
+  }, [isLoggedIn, navigate]);
 
   // Function to handle login with Google
   const handleGoogleLogin = async () => {
     try {
-      // Obter a URL atual com a porta correta
-      const currentUrl = window.location.origin;
-      console.log("Redirecionando para:", currentUrl);
+      // Get the production domain if available, otherwise use current origin
+      const redirectUrl = "https://ytanalyzer.pro" || window.location.origin;
+      console.log("Redirecionando para:", redirectUrl);
       
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: currentUrl,
+          redirectTo: redirectUrl + "/dashboard",
           queryParams: {
-            // Informações confidenciais, certifique-se de que estão configuradas no Supabase
-            // Estas credenciais são gerenciadas pelo Supabase, não precisamos incluí-las aqui
-            // access_type: 'offline',
-            // prompt: 'consent',
+            // Oauth query parameters managed by Supabase
           }
         }
       });
@@ -42,7 +48,7 @@ const Login = () => {
         });
       }
       
-      // O redirecionamento será manipulado pelo próprio Supabase
+      // Redirection is handled by Supabase
     } catch (error) {
       console.error("Google login error:", error);
       toast({
