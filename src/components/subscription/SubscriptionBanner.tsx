@@ -56,30 +56,32 @@ export const SubscriptionBanner: React.FC = () => {
     );
   }
   
-  // Usuário está em período de teste com dias restantes
-  if (subscription.isTrialing && subscription.trialEnd) {
-    const daysLeft = subscriptionService.getDaysRemaining(subscription.trialEnd);
+  // Usuário está em período de teste
+  if (subscription.isTrialing) {
+    const daysLeft = subscription.trialEnd 
+      ? subscriptionService.getDaysRemaining(subscription.trialEnd)
+      : 7;
     
-    if (daysLeft > 0) {
-      return (
-        <Alert className="bg-blue-50 border-blue-200 mb-4">
-          <Clock className="h-4 w-4 text-blue-500 mr-2" />
-          <AlertDescription className="text-blue-700 flex items-center justify-between w-full">
-            <span>
-              Seu período de avaliação gratuita termina em {daysLeft} {daysLeft === 1 ? 'dia' : 'dias'} 
-              ({subscriptionService.formatEndDate(subscription.trialEnd)})
-            </span>
-            <Button 
-              className="ml-2" 
-              onClick={() => navigate('/subscribe')}
-            >
-              <CreditCard className="h-4 w-4 mr-2" />
-              Assinar Agora
-            </Button>
-          </AlertDescription>
-        </Alert>
-      );
-    }
+    // Sempre mostrar o banner do trial, independente dos dias restantes
+    return (
+      <Alert className="bg-blue-50 border-blue-200 mb-4">
+        <Clock className="h-4 w-4 text-blue-500 mr-2" />
+        <AlertDescription className="text-blue-700 flex items-center justify-between w-full">
+          <span>
+            {daysLeft > 0 
+              ? `Seu período de avaliação gratuita termina em ${daysLeft} ${daysLeft === 1 ? 'dia' : 'dias'} (${subscription.trialEnd ? subscriptionService.formatEndDate(subscription.trialEnd) : ''})`
+              : 'Seu período de avaliação gratuita terminou hoje'}
+          </span>
+          <Button 
+            className="ml-2" 
+            onClick={() => navigate('/subscribe')}
+          >
+            <CreditCard className="h-4 w-4 mr-2" />
+            Assinar Agora
+          </Button>
+        </AlertDescription>
+      </Alert>
+    );
   }
   
   return null;

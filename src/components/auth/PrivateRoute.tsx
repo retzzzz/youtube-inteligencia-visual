@@ -31,17 +31,18 @@ export const PrivateRoute: React.FC<PrivateRouteProps> = ({ requireSubscription 
     return <Outlet />;
   }
   
-  // Verificar se o usuário está no período de teste válido
+  // Verificar se o usuário tem assinatura ou está em período de teste
   const trialDaysLeft = subscription?.isTrialing && subscription?.trialEnd
     ? subscriptionService.getDaysRemaining(subscription.trialEnd)
-    : 0;
+    : null;
   
-  // Verificar se o usuário tem uma assinatura ativa ou está em período de teste
+  // Qualquer usuário em período de teste (independente dos dias restantes) 
+  // ou com assinatura ativa deve ter acesso
   const hasActiveAccess = 
     (subscription?.isActive && !subscription.isTrialing) || // Assinatura paga ativa
-    (subscription?.isTrialing && trialDaysLeft > 0); // Em período de teste válido
-  
-  // Página requer assinatura mas usuário não tem assinatura ativa ou teste válido
+    (subscription?.isTrialing === true); // Em período de teste (mesmo que seja 0 dias)
+
+  // Página requer assinatura/teste mas usuário não tem acesso ativo
   if (requireSubscription && !hasActiveAccess) {
     return <Navigate to="/subscribe" replace />;
   }

@@ -34,11 +34,13 @@ const Header = () => {
             </h1>
             
             <div className="flex items-center gap-3">
-              {subscription?.isTrialing && trialDaysLeft > 0 && (
+              {subscription?.isTrialing && (
                 <div className="hidden md:flex items-center gap-1 px-2 py-1 bg-blue-500/10 rounded-md text-blue-300">
                   <Clock className="h-3.5 w-3.5" />
                   <span className="text-xs">
-                    {trialDaysLeft} {trialDaysLeft === 1 ? 'dia' : 'dias'} restantes
+                    {trialDaysLeft > 0 
+                      ? `${trialDaysLeft} ${trialDaysLeft === 1 ? 'dia' : 'dias'} restantes` 
+                      : 'Último dia de teste'}
                   </span>
                 </div>
               )}
@@ -64,39 +66,19 @@ const Header = () => {
             <NavLink to="/search" currentPath={location.pathname}>
               Pesquisar
             </NavLink>
-            <NavLink 
-              to="/video-analyzer" 
-              currentPath={location.pathname} 
-              requiresSubscription={true}
-            >
+            <NavLink to="/video-analyzer" currentPath={location.pathname}>
               Analisar Vídeo
             </NavLink>
-            <NavLink 
-              to="/title-generator" 
-              currentPath={location.pathname} 
-              requiresSubscription={true}
-            >
+            <NavLink to="/title-generator" currentPath={location.pathname}>
               Títulos
             </NavLink>
-            <NavLink 
-              to="/script-generator" 
-              currentPath={location.pathname} 
-              requiresSubscription={true}
-            >
+            <NavLink to="/script-generator" currentPath={location.pathname}>
               Roteirizador
             </NavLink>
-            <NavLink 
-              to="/subnicho-validator" 
-              currentPath={location.pathname} 
-              requiresSubscription={true}
-            >
+            <NavLink to="/subnicho-validator" currentPath={location.pathname}>
               Validador
             </NavLink>
-            <NavLink 
-              to="/micro-subnicho-analyzer" 
-              currentPath={location.pathname} 
-              requiresSubscription={true}
-            >
+            <NavLink to="/micro-subnicho-analyzer" currentPath={location.pathname}>
               Micro Subnichos
             </NavLink>
           </nav>

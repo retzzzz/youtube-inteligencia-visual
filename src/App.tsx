@@ -51,6 +51,13 @@ function App() {
               <Route path="/important-links" element={<ImportantLinks />} />
               <Route path="/search" element={<Search />} />
               
+              {/* Páginas de ferramentas - disponíveis durante o período de trial */}
+              <Route path="/video-analyzer" element={<VideoAnalyzer />} />
+              <Route path="/title-generator" element={<TitleGenerator />} />
+              <Route path="/script-generator" element={<ScriptGenerator />} />
+              <Route path="/subnicho-validator" element={<SubnicheValidator />} />
+              <Route path="/micro-subnicho-analyzer" element={<MicroSubnicheAnalyzer />} />
+              
               {/* Tutoriais detalhados */}
               <Route path="/video-analyzer-tutorial" element={<VideoAnalyzerTutorial />} />
               <Route path="/title-generator-tutorial" element={<TitleGeneratorTutorial />} />
@@ -58,15 +65,6 @@ function App() {
               <Route path="/subnicho-validator-tutorial" element={<SubnicheValidatorTutorial />} />
               <Route path="/search-tutorial" element={<SearchTutorial />} />
               <Route path="/micro-subnicho-analyzer-tutorial" element={<MicroSubnicheAnalyzerTutorial />} />
-            </Route>
-            
-            {/* Routes that require subscription or valid trial */}
-            <Route element={<PrivateRoute requireSubscription={true} />}>
-              <Route path="/video-analyzer" element={<VideoAnalyzer />} />
-              <Route path="/title-generator" element={<TitleGenerator />} />
-              <Route path="/script-generator" element={<ScriptGenerator />} />
-              <Route path="/subnicho-validator" element={<SubnicheValidator />} />
-              <Route path="/micro-subnicho-analyzer" element={<MicroSubnicheAnalyzer />} />
             </Route>
           </Routes>
         </div>
