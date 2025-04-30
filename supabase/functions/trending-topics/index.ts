@@ -7,7 +7,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const GOOGLE_TRENDS_DAILY_URL = "https://trends.google.com/trends/api/dailytrends";
 const YOUTUBE_API_BASE_URL = "https://www.googleapis.com/youtube/v3/search";
 
 serve(async (req) => {
@@ -53,7 +52,7 @@ serve(async (req) => {
       throw new Error("YouTube API key not configured");
     }
     
-    // For Brazil
+    // For Brazil or US
     let geoParam = "";
     if (region === 'BR') {
       geoParam = "&regionCode=BR";
@@ -80,7 +79,7 @@ serve(async (req) => {
     }
     
     // Transform YouTube response into our trending topics format
-    const trendingTopics = data.items.map((item: any, index: number) => {
+    const trendingTopics = data.items.map((item, index) => {
       // Extract useful information from each video
       return {
         title: item.snippet.title.split('|')[0].split('-')[0].split('(')[0].trim(),
@@ -94,8 +93,8 @@ serve(async (req) => {
     });
     
     // Sometimes YouTube titles can be very specific, so let's try to extract keywords as topics
-    const topicsFromTitles = new Set<string>();
-    trendingTopics.forEach((video: any) => {
+    const topicsFromTitles = new Set();
+    trendingTopics.forEach((video) => {
       const words = video.title.split(' ');
       
       // Extract potential topics (words with 4+ characters, max 3 words)
@@ -107,7 +106,7 @@ serve(async (req) => {
       }
       
       // Look for important words
-      words.forEach((word: string) => {
+      words.forEach((word) => {
         if (word.length > 5 && /^[A-Za-zÀ-ú]+$/.test(word)) {
           topicsFromTitles.add(word);
         }
@@ -119,7 +118,7 @@ serve(async (req) => {
       return {
         title: topic,
         value: 10000 - (i * 800),
-        relatedVideos: trendingTopics.filter((video: any) => 
+        relatedVideos: trendingTopics.filter((video) => 
           video.title.toLowerCase().includes(topic.toLowerCase())
         ).slice(0, 3)
       };

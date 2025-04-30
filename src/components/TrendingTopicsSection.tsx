@@ -1,13 +1,12 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Sparkles, TrendingUp, Search, Globe } from 'lucide-react';
-import { VideoResult } from '@/types/youtube-types';
+import { TrendingUp, Sparkles, Search, Globe } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { VideoResult } from '@/types/youtube-types';
 
 interface TrendingTopic {
   title: string;
@@ -45,6 +44,7 @@ const TrendingTopicsSection = () => {
       
       if (error) throw error;
       
+      console.log('Trending topics received:', data);
       setTrendingTopics(data?.topics || []);
     } catch (err) {
       console.error('Error fetching trending topics:', err);
@@ -64,7 +64,7 @@ const TrendingTopicsSection = () => {
   };
 
   const handleSearchTopic = (topic: string) => {
-    // This would navigate to the search page with the topic pre-filled
+    // Navigate to the search page with the topic pre-filled
     window.location.href = `/search?keywords=${encodeURIComponent(topic)}`;
   };
 
