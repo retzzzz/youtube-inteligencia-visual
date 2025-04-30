@@ -67,23 +67,23 @@ const SearchTutorial = () => {
           
           <div className="space-y-3 mt-3">
             <div className="p-2 bg-slate-50 rounded-md border-l-4 border-slate-400">
-              <strong>Filtrar por Duração</strong>
-              <p className="text-sm">Escolha se quer ver vídeos curtos (menos de 4 minutos), médios (4-10 minutos) ou longos (mais de 10 minutos).</p>
+              <strong className="text-black">Filtrar por Duração</strong>
+              <p className="text-sm text-black">Escolha se quer ver vídeos curtos (menos de 4 minutos), médios (4-10 minutos) ou longos (mais de 10 minutos).</p>
             </div>
             
             <div className="p-2 bg-slate-50 rounded-md border-l-4 border-slate-400">
-              <strong>Ordenar por</strong>
-              <p className="text-sm">Decida se quer ver primeiro os vídeos mais populares, mais recentes ou mais relevantes.</p>
+              <strong className="text-black">Ordenar por</strong>
+              <p className="text-sm text-black">Decida se quer ver primeiro os vídeos mais populares, mais recentes ou mais relevantes.</p>
             </div>
             
             <div className="p-2 bg-slate-50 rounded-md border-l-4 border-slate-400">
-              <strong>Número máximo de resultados</strong>
-              <p className="text-sm">Escolha quantos vídeos quer ver (5, 10, 25 ou 50).</p>
+              <strong className="text-black">Número máximo de resultados</strong>
+              <p className="text-sm text-black">Escolha quantos vídeos quer ver (5, 10, 25 ou 50).</p>
             </div>
             
             <div className="p-2 bg-slate-50 rounded-md border-l-4 border-slate-400">
-              <strong>Filtros de Popularidade</strong>
-              <p className="text-sm">Defina um mínimo de visualizações, likes ou comentários para filtrar só os vídeos mais populares.</p>
+              <strong className="text-black">Filtros de Popularidade</strong>
+              <p className="text-sm text-black">Defina um mínimo de visualizações, likes ou comentários para filtrar só os vídeos mais populares.</p>
             </div>
           </div>
         </div>

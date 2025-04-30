@@ -15,8 +15,8 @@ const ScriptGeneratorIntro: React.FC = () => {
       
       <Alert className="mb-6 bg-gradient-to-br from-blue-900/40 to-purple-900/30 border border-blue-500/30">
         <Info className="h-4 w-4 text-blue-300" />
-        <AlertTitle className="text-black">Como funciona</AlertTitle>
-        <AlertDescription className="text-black">
+        <AlertTitle>Como funciona</AlertTitle>
+        <AlertDescription>
           Cole seu texto ou faça upload de um arquivo .txt, configure as opções do roteiro 
           e receba um roteiro estruturado com blocos otimizados e prompts para imagens.
         </AlertDescription>
