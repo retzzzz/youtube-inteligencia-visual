@@ -8,6 +8,7 @@ import ApiKeyInput from './dialog/ApiKeyInput';
 import ApiKeyInstructions from './dialog/ApiKeyInstructions';
 import ApiKeyAlerts from './dialog/ApiKeyAlerts';
 import RememberKeyCheckbox from './dialog/RememberKeyCheckbox';
+import { useApiKeyValidation } from '@/hooks/useApiKeyValidation';
 
 const ApiKeyDialog = () => {
   const { isLoggedIn, youtubeApiKey, setYoutubeApiKey, needsApiKey, setNeedsApiKey } = useAuth();
@@ -16,6 +17,17 @@ const ApiKeyDialog = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // Hook para validação da API Key com valores iniciais vazios
+  const { isValidating, error, warning, validateAndSaveApiKey } = useApiKeyValidation((key) => {
+    setYoutubeApiKey(key);
+    setIsOpen(false);
+    
+    // Verificar se o usuário está na página inicial e redirecionar para o dashboard
+    if (location.pathname === '/' || location.pathname === '/login') {
+      navigate('/dashboard');
+    }
+  });
 
   // Verificar se precisa mostrar o diálogo
   useEffect(() => {
@@ -29,13 +41,7 @@ const ApiKeyDialog = () => {
   // Salvar a chave API e fechar o diálogo
   const handleSaveApiKey = () => {
     if (apiKey.trim()) {
-      setYoutubeApiKey(apiKey);
-      setIsOpen(false);
-
-      // Verificar se o usuário está na página inicial e redirecionar para o dashboard
-      if (location.pathname === '/' || location.pathname === '/login') {
-        navigate('/dashboard');
-      }
+      validateAndSaveApiKey(apiKey, rememberApiKey);
     }
   };
 
@@ -66,9 +72,16 @@ const ApiKeyDialog = () => {
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          <ApiKeyAlerts />
-          <ApiKeyInput apiKey={apiKey} setApiKey={setApiKey} />
-          <RememberKeyCheckbox checked={rememberApiKey} onChange={setRememberApiKey} />
+          <ApiKeyAlerts error={error} warning={warning} />
+          <ApiKeyInput 
+            apiKey={apiKey} 
+            isValidating={isValidating} 
+            onChange={setApiKey} 
+          />
+          <RememberKeyCheckbox 
+            checked={rememberApiKey} 
+            onCheckedChange={setRememberApiKey}
+          />
           <ApiKeyInstructions />
         </div>
 
@@ -83,9 +96,9 @@ const ApiKeyDialog = () => {
           <Button 
             onClick={handleSaveApiKey} 
             className="sm:w-auto w-full"
-            disabled={!apiKey.trim()}
+            disabled={!apiKey.trim() || isValidating}
           >
-            Salvar chave API
+            {isValidating ? "Validando..." : "Salvar chave API"}
           </Button>
         </DialogFooter>
       </DialogContent>
