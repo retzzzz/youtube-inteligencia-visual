@@ -1,52 +1,71 @@
-
 import Stripe from 'stripe';
+import { toast } from "@/hooks/use-toast";
 
-// Esta função seria normalmente implementada em uma função Edge do Supabase ou API serverless
-export const createCheckoutSession = async (userId: string, priceId: string) => {
-  // Substitua pela sua chave secreta do Stripe
-  const stripe = new Stripe('sk_test_your_stripe_secret_key', {
-    apiVersion: '2025-03-31.basil',
-  });
+// Initialize Stripe with the secret key and configure API version
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+  apiVersion: '2025-04-30.basil',
+});
 
+export const createCheckoutSession = async (priceId: string, customerId?: string) => {
   try {
-    // Crie uma sessão de checkout
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [
-        {
-          price: priceId, // ID do preço no Stripe
-          quantity: 1,
-        },
-      ],
+    const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: 'subscription',
-      success_url: `${window.location.origin}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${window.location.origin}/subscribe`,
-      customer_email: userId, // Idealmente, usar o email do usuário em vez do ID
-      metadata: {
-        userId: userId,
-      },
-      subscription_data: {
-        metadata: {
-          userId: userId,
-        },
-      },
-    });
+      line_items: [{ price: priceId, quantity: 1 }],
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/account/billing?success=true`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/account/billing?canceled=true`,
+    };
 
-    return session;
-  } catch (error) {
-    console.error('Erro ao criar sessão de checkout:', error);
-    throw error;
+    if (customerId) {
+      sessionParams.customer = customerId;
+    } else {
+      sessionParams.customer_creation = 'required';
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams);
+    return session.url;
+  } catch (error: any) {
+    console.error("Erro ao criar sessão de checkout:", error);
+    toast({
+      title: "Erro ao iniciar o pagamento",
+      description: error.message || "Ocorreu um erro ao processar o pagamento. Por favor, tente novamente.",
+      variant: "destructive",
+    });
+    return null;
   }
 };
 
-// Esta função seria usada para atualizar o status da assinatura no banco de dados após o pagamento bem-sucedido
-export const updateSubscriptionStatus = async (userId: string, subscriptionId: string) => {
-  // Implemente a lógica para atualizar o status da assinatura no banco de dados
-  // Por exemplo, usando o Supabase para atualizar a tabela de assinaturas
-};
+export const handleSubscriptionUpdateOrCancel = async (action: 'update' | 'cancel', subscriptionId: string) => {
+  try {
+    if (!subscriptionId) {
+      throw new Error("Subscription ID não fornecido.");
+    }
 
-// Webhooks para processar eventos do Stripe, como pagamentos bem-sucedidos, falhas, etc.
-export const handleStripeWebhook = async (event: any) => {
-  // Implemente a lógica para processar eventos do webhook do Stripe
-  // Por exemplo, quando um pagamento é bem-sucedido, atualize o status da assinatura
+    if (action === 'cancel') {
+      await stripe.subscriptions.cancel(subscriptionId);
+      toast({
+        title: "Assinatura cancelada",
+        description: "Sua assinatura foi cancelada com sucesso.",
+      });
+    } else if (action === 'update') {
+      // Implementar lógica de atualização se necessário
+      console.log("Atualização de assinatura não implementada.");
+      toast({
+        title: "Atualização não suportada",
+        description: "A atualização da assinatura não está disponível no momento.",
+        variant: "warning",
+      });
+      return;
+    } else {
+      throw new Error("Ação inválida especificada.");
+    }
+    return { success: true, message: `Subscription ${action} initiated successfully.` };
+  } catch (error: any) {
+    console.error(`Erro ao ${action} assinatura:`, error);
+    toast({
+      title: `Erro ao ${action} assinatura`,
+      description: error.message || `Ocorreu um erro ao ${action} a assinatura. Por favor, tente novamente.`,
+      variant: "destructive",
+    });
+    return { success: false, message: `Failed to ${action} subscription.`, error: error.message };
+  }
 };
