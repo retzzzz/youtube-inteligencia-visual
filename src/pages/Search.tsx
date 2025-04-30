@@ -1,19 +1,19 @@
 
+import React, { useEffect, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
-import Header from '@/components/Header';
 import SearchForm from '@/components/SearchForm';
 import { useYouTubeSearch } from '@/hooks/useYouTubeSearch';
 import ResultsSection from '@/components/ResultsSection';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { useEffect, useState } from 'react';
 import ApiKeyHeader from '@/components/search/ApiKeyHeader';
 import ErrorDisplay from '@/components/search/ErrorDisplay';
 import LoadingAndEmptyStates from '@/components/search/LoadingAndEmptyStates';
 import NewKeyNotice from '@/components/search/NewKeyNotice';
 import { markKeyAsNotNew } from '@/services/youtube/validators/key-validator';
-import Footer from '@/components/Footer';
+import MainLayout from '@/components/layout/MainLayout';
+import ContentArea from '@/components/layout/ContentArea';
 
 const Search = () => {
   const { 
@@ -67,9 +67,8 @@ const Search = () => {
 
   if (!youtubeApiKey) {
     return (
-      <div className="flex flex-col min-h-screen">
-        <Header />
-        <main className="flex-grow w-full px-4 md:px-8 py-6 mb-8">
+      <MainLayout>
+        <ContentArea title="Pesquisa Avançada">
           <Alert variant="destructive" className="mt-8 shadow-lg">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
@@ -83,18 +82,14 @@ const Search = () => {
               </Button>
             </AlertDescription>
           </Alert>
-        </main>
-        <Footer />
-      </div>
+        </ContentArea>
+      </MainLayout>
     );
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <Header />
-      
-      <main className="flex-grow w-full px-4 md:px-8 py-6 mb-8">
-        <h2 className="text-2xl font-bold mb-6">Pesquisa Avançada</h2>
+    <MainLayout>
+      <ContentArea title="Pesquisa Avançada">
         <SearchForm onSearch={(params) => handleSearch(params, forceNotNew)} isLoading={isLoading} />
         
         <NewKeyNotice 
@@ -126,10 +121,8 @@ const Search = () => {
           hasSearchParams={!!searchParams}
           error={error}
         />
-      </main>
-      
-      <Footer />
-    </div>
+      </ContentArea>
+    </MainLayout>
   );
 };
 
