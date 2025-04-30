@@ -155,9 +155,9 @@ const TrendingTopicsSection = () => {
                       className="flex items-start gap-2 p-2 rounded-md hover:bg-white/5 transition-colors"
                     >
                       <div className="flex-shrink-0 w-16 h-10 bg-gray-800 rounded overflow-hidden">
-                        {video.thumbnails?.default && (
+                        {video.thumbnail && (
                           <img 
-                            src={video.thumbnails.default.url} 
+                            src={video.thumbnail} 
                             alt={video.title}
                             className="w-full h-full object-cover"
                           />
