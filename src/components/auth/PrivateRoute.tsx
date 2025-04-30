@@ -14,16 +14,21 @@ export const PrivateRoute: React.FC<PrivateRouteProps> = ({ requireSubscription 
   const navigate = useNavigate();
   
   useEffect(() => {
-    // If we're not logged in, immediately redirect to login
+    // Se não estiver logado, redirecionar para login
     if (!isLoggedIn) {
       navigate('/login', { state: { from: location.pathname }, replace: true });
     }
   }, [isLoggedIn, navigate, location.pathname]);
 
-  // Not logged in
+  // Não logado
   if (!isLoggedIn) {
-    // Return null while the redirect effect takes place
+    // Retornar null enquanto o efeito de redirecionamento acontece
     return null;
+  }
+  
+  // Se não precisar de assinatura, permitir acesso
+  if (!requireSubscription) {
+    return <Outlet />;
   }
   
   // Verificar se o usuário está no período de teste válido
@@ -36,11 +41,11 @@ export const PrivateRoute: React.FC<PrivateRouteProps> = ({ requireSubscription 
     (subscription?.isActive && !subscription.isTrialing) || // Assinatura paga ativa
     (subscription?.isTrialing && trialDaysLeft > 0); // Em período de teste válido
   
-  // Page requires subscription but user doesn't have an active subscription or valid trial
+  // Página requer assinatura mas usuário não tem assinatura ativa ou teste válido
   if (requireSubscription && !hasActiveAccess) {
     return <Navigate to="/subscribe" replace />;
   }
   
-  // User is authenticated and has required subscription level or valid trial
+  // Usuário está autenticado e tem o nível de assinatura necessário ou teste válido
   return <Outlet />;
 };

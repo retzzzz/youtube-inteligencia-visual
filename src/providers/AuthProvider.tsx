@@ -23,38 +23,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     subscription, setSubscription
   } = useAuthState();
 
-  // Function to check subscription status
+  // Função para verificar status da assinatura
   const checkSubscription = async () => {
     if (!isLoggedIn) return;
     
-    const subscriptionDetails = await fetchSubscriptionDetails();
-    if (subscriptionDetails) {
-      setSubscription(subscriptionDetails);
-      
-      // Verificar se o período de teste expirou
-      if (subscriptionDetails.isTrialing && 
-          subscriptionDetails.trialEnd && 
-          new Date() > new Date(subscriptionDetails.trialEnd)) {
-        
-        // Não redirecionar automaticamente para a página de assinatura
-        // Deixar o Header.tsx cuidar disso quando o usuário tentar acessar páginas restritas
-        console.log("Período de teste expirado");
+    try {
+      const subscriptionDetails = await fetchSubscriptionDetails();
+      if (subscriptionDetails) {
+        setSubscription(subscriptionDetails);
       }
+    } catch (error) {
+      console.error("Erro ao verificar assinatura:", error);
     }
   };
 
-  // Handle authentication changes
+  // Lidar com mudanças de autenticação
   useEffect(() => {
     let authSubscription: { unsubscribe: () => void } = { unsubscribe: () => {} };
 
-    // Set up auth state listener FIRST
+    // Configurar ouvinte de estado de autenticação PRIMEIRO
     try {
       const { data: { subscription } } = supabase.auth.onAuthStateChange(
         async (event, sessionData) => {
-          console.log("Auth state changed:", event);
+          console.log("Estado de autenticação alterado:", event);
           
           if (sessionData) {
-            // User signed in or session updated
+            // Usuário logado ou sessão atualizada
             const userId = sessionData.user.id;
             const userName = sessionData.user.user_metadata?.name || "Usuário";
             
@@ -68,10 +62,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setSession(sessionData);
             setIsLoggedIn(true);
             
-            // Check subscription status after login
-            await checkSubscription().catch(console.error);
+            // Verificar status de assinatura após login
+            await checkSubscription();
             
-            // Get API key from local storage if available
+            // Obter chave API do local storage se disponível
             const savedApiKey = localStorage.getItem("youtubeApiKey");
             if (savedApiKey) {
               setYoutubeApiKey(savedApiKey);
@@ -85,31 +79,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               navigate('/dashboard');
             }
           } else if (event === 'SIGNED_OUT') {
-            // User signed out
+            // Usuário deslogado
             clearUserFromLocalStorage();
             setIsLoggedIn(false);
             setUser(null);
             setSession(null);
             setSubscription(null);
             
-            // Redirect to login page when signed out
+            // Redirecionar para página de login quando deslogado
             navigate("/login");
           }
         }
       );
       authSubscription = subscription;
     } catch (error) {
-      console.error("Error setting up auth state change listener:", error);
+      console.error("Erro ao configurar o listener de mudança de estado de autenticação:", error);
     }
 
-    // THEN check for existing session
+    // ENTÃO verificar se há sessão existente
     const initializeAuth = async () => {
       try {
-        // Check if user has an existing session
+        // Verificar se o usuário tem uma sessão existente
         const { data, error } = await supabase.auth.getSession();
         
         if (error) {
-          console.error("Error getting session:", error);
+          console.error("Erro ao obter sessão:", error);
           return;
         }
         
@@ -119,7 +113,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
           setUser(createUserFromSession(data.session));
           
-          // Check for API key in local storage
+          // Verificar se há chave API no armazenamento local
           const savedApiKey = localStorage.getItem("youtubeApiKey");
           if (savedApiKey) {
             setYoutubeApiKey(savedApiKey);
@@ -128,11 +122,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setNeedsApiKey(true);
           }
           
-          // Check subscription
+          // Verificar assinatura
           await checkSubscription();
         }
       } catch (error) {
-        console.error("Error initializing auth:", error);
+        console.error("Erro ao inicializar autenticação:", error);
       }
     };
 
@@ -161,9 +155,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSubscription(null);
       navigate("/login");
     } catch (error) {
-      console.error("Error during logout:", error);
+      console.error("Erro durante logout:", error);
       
-      // Fallback manual logout if Supabase auth fails
+      // Fallback para logout manual se a autenticação do Supabase falhar
       clearUserFromLocalStorage();
       setIsLoggedIn(false);
       setUser(null);

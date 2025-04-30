@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -10,47 +10,12 @@ import { subscriptionService } from '@/services/subscription';
 
 const Header = () => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const { logout, user, subscription, checkSubscription } = useAuth();
-  
-  const requiresSubscription = [
-    '/video-analyzer',
-    '/title-generator',
-    '/script-generator',
-    '/subnicho-validator',
-    '/micro-subnicho-analyzer'
-  ];
-  
-  // Verificar se a rota atual requer assinatura
-  const currentPathRequiresSubscription = requiresSubscription.some(path => 
-    location.pathname.startsWith(path)
-  );
+  const { logout, user, subscription } = useAuth();
   
   // Calcular dias restantes de teste
   const trialDaysLeft = subscription?.isTrialing && subscription?.trialEnd
     ? subscriptionService.getDaysRemaining(subscription.trialEnd)
     : 0;
-  
-  // Verificar se o usuário está no último dia de teste
-  const isLastDayOfTrial = trialDaysLeft === 0 && subscription?.isTrialing;
-  
-  // Verificar se o usuário tem uma assinatura ativa
-  const hasActiveSubscription = subscription?.isActive || 
-    (subscription?.isTrialing && trialDaysLeft > 0);
-  
-  // Verificar se o usuário deve ser redirecionado para a página de assinatura
-  // Quando o usuário não tem assinatura ativa OU quando o período de teste expirou
-  const shouldRedirectToSubscribe = 
-    currentPathRequiresSubscription && !hasActiveSubscription && location.pathname !== '/subscribe';
-  
-  // Redirecionar para a página de assinatura se necessário
-  React.useEffect(() => {
-    // Apenas redirecionar se o usuário estiver em uma página que requer assinatura
-    // e não tiver acesso a ela
-    if (shouldRedirectToSubscribe) {
-      navigate('/subscribe');
-    }
-  }, [shouldRedirectToSubscribe, navigate]);
   
   return (
     <header className="relative z-10 mb-6">
@@ -102,8 +67,7 @@ const Header = () => {
             <NavLink 
               to="/video-analyzer" 
               currentPath={location.pathname} 
-              requiresSubscription={true} 
-              hasSubscription={hasActiveSubscription}
+              requiresSubscription={true}
             >
               Analisar Vídeo
             </NavLink>
@@ -111,7 +75,6 @@ const Header = () => {
               to="/title-generator" 
               currentPath={location.pathname} 
               requiresSubscription={true}
-              hasSubscription={hasActiveSubscription}
             >
               Títulos
             </NavLink>
@@ -119,7 +82,6 @@ const Header = () => {
               to="/script-generator" 
               currentPath={location.pathname} 
               requiresSubscription={true}
-              hasSubscription={hasActiveSubscription}
             >
               Roteirizador
             </NavLink>
@@ -127,7 +89,6 @@ const Header = () => {
               to="/subnicho-validator" 
               currentPath={location.pathname} 
               requiresSubscription={true}
-              hasSubscription={hasActiveSubscription}
             >
               Validador
             </NavLink>
@@ -135,7 +96,6 @@ const Header = () => {
               to="/micro-subnicho-analyzer" 
               currentPath={location.pathname} 
               requiresSubscription={true}
-              hasSubscription={hasActiveSubscription}
             >
               Micro Subnichos
             </NavLink>
@@ -153,15 +113,10 @@ interface NavLinkProps {
   currentPath: string;
   children: React.ReactNode;
   requiresSubscription?: boolean;
-  hasSubscription?: boolean;
 }
 
-const NavLink = ({ to, currentPath, children, requiresSubscription, hasSubscription }: NavLinkProps) => {
+const NavLink = ({ to, currentPath, children, requiresSubscription }: NavLinkProps) => {
   const isActive = to === '/dashboard' ? currentPath === '/dashboard' : currentPath.startsWith(to);
-  
-  // Corrigido: Não redirecionar automaticamente, deixar o componente Link fazer seu trabalho
-  // Se a rota requer assinatura e o usuário não tem, o efeito no componente Header lidará com o redirecionamento
-  const linkTo = to;
   
   return (
     <Button
@@ -174,7 +129,7 @@ const NavLink = ({ to, currentPath, children, requiresSubscription, hasSubscript
           : "hover:bg-black/5 dark:hover:bg-white/5 backdrop-blur-sm bg-black/5 dark:bg-white/5 border-white/10"
       )}
     >
-      <Link to={linkTo}>{children}</Link>
+      <Link to={to}>{children}</Link>
     </Button>
   );
 };

@@ -9,16 +9,15 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 export const SubscriptionBanner: React.FC = () => {
   const { isLoggedIn, subscription } = useAuth();
-  const location = useLocation();
   const navigate = useNavigate();
   
   if (!isLoggedIn || !subscription) {
     return null;
   }
   
-  // Trial expired - show banner
+  // Trial expirado - mostrar banner
   if (subscription.isTrialing && subscription.trialEnd && 
-      subscriptionService.getDaysRemaining(subscription.trialEnd) === 0) {
+      subscriptionService.getDaysRemaining(subscription.trialEnd) <= 0) {
     return (
       <Alert className="bg-red-50 border-red-200 mb-4">
         <AlertTriangle className="h-4 w-4 text-red-500 mr-2" />
@@ -37,7 +36,7 @@ export const SubscriptionBanner: React.FC = () => {
     );
   }
   
-  // User has an active paid subscription
+  // Usuário tem assinatura paga ativa
   if (subscription.isActive && !subscription.isTrialing) {
     return (
       <Alert className="bg-green-50 border-green-200 mb-4">
@@ -57,7 +56,7 @@ export const SubscriptionBanner: React.FC = () => {
     );
   }
   
-  // User is in trial period with days remaining
+  // Usuário está em período de teste com dias restantes
   if (subscription.isTrialing && subscription.trialEnd) {
     const daysLeft = subscriptionService.getDaysRemaining(subscription.trialEnd);
     
