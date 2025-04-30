@@ -122,6 +122,7 @@ const TrendingTopicsSection = () => {
                 variant={selectedRegion === region.code ? "secondary" : "ghost"}
                 className="flex items-center gap-1 text-xs"
                 onClick={() => handleRegionChange(region.code)}
+                style={{ pointerEvents: 'auto' }}
               >
                 <Globe className="h-3.5 w-3.5" />
                 {region.name}
@@ -133,6 +134,7 @@ const TrendingTopicsSection = () => {
               className="text-xs"
               onClick={handleRefresh}
               disabled={isLoading}
+              style={{ pointerEvents: 'auto' }}
             >
               <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? 'animate-spin' : ''}`} />
             </Button>
@@ -157,6 +159,7 @@ const TrendingTopicsSection = () => {
               variant="outline" 
               size="sm"
               onClick={() => fetchTrendingTopics(selectedRegion)}
+              style={{ pointerEvents: 'auto' }}
             >
               Tentar Novamente
             </Button>
@@ -175,6 +178,7 @@ const TrendingTopicsSection = () => {
                   onClick={() => {
                     setSelectedTopic(index);
                   }}
+                  style={{ pointerEvents: 'auto' }}
                 >
                   <span className="text-xs font-normal">{index + 1}</span>
                   <span>{topic.title}</span>
@@ -206,6 +210,7 @@ const TrendingTopicsSection = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-start gap-2 p-2 rounded-md hover:bg-white/5 transition-colors"
+                      style={{ pointerEvents: 'auto' }}
                     >
                       <div className="flex-shrink-0 w-16 h-10 bg-gray-800 rounded overflow-hidden">
                         {video.thumbnail && (
@@ -232,6 +237,7 @@ const TrendingTopicsSection = () => {
                 size="sm" 
                 className="bg-blue-900/20 border-blue-700/30 hover:bg-blue-900/40"
                 onClick={() => handleSearchTopic(trendingTopics[selectedTopic]?.title || "")}
+                style={{ pointerEvents: 'auto' }}
               >
                 <Search className="h-3.5 w-3.5 mr-1" />
                 Pesquisar "{trendingTopics[selectedTopic]?.title || "YouTube"}"

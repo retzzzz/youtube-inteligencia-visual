@@ -47,9 +47,10 @@ serve(async (req) => {
     }
 
     // Use the YouTube Data API to get trending videos
-    const youtubeApiKey = Deno.env.get('GEMINI_API_KEY'); // Using the existing API key slot
+    const youtubeApiKey = Deno.env.get('GEMINI_API_KEY') || Deno.env.get('YOUTUBE_API_KEY'); 
     
     if (!youtubeApiKey) {
+      console.log("API key not configured, returning fallback data");
       throw new Error("YouTube API key not configured");
     }
     
