@@ -112,10 +112,10 @@ const NavLink = ({ to, currentPath, children, requiresSubscription }: NavLinkPro
   const isActive = to === '/dashboard' ? currentPath === '/dashboard' : currentPath.startsWith(to);
   const { subscription } = useAuth();
   
-  // Verificação simplificada do status da assinatura
+  // Verificação do status da assinatura
   const hasActiveSubscription = subscription?.isActive || subscription?.isTrialing;
   
-  // Se requer assinatura e o usuário não tem, redirecionar para a página de assinatura
+  // Só redirecionar para a página de assinatura se requer assinatura E o usuário NÃO tem assinatura ativa
   const actualTo = (requiresSubscription && !hasActiveSubscription) ? '/subscribe' : to;
   
   return (

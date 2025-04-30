@@ -24,7 +24,7 @@ export const SubscriptionBanner: React.FC = () => {
             variant="outline" 
             size="sm" 
             className="border-green-500 text-green-700"
-            onClick={() => window.open('/subscribe', '_blank')}
+            onClick={() => window.location.href = '/subscribe'}
           >
             Gerenciar Assinatura
           </Button>
