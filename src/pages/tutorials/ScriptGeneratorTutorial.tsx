@@ -34,9 +34,9 @@ const ScriptGeneratorTutorial = () => {
           
           <div className="space-y-4">
             <div className="p-4 rounded-lg bg-gradient-to-br from-purple-900/40 to-blue-900/30 border border-purple-500/30">
-              <h4 className="font-semibold text-purple-200">Modo 1: Processar Roteiro Existente</h4>
-              <p className="text-purple-100">Use quando você já tem um texto e só quer organizá-lo melhor:</p>
-              <ul className="list-disc pl-6 text-purple-100">
+              <h4 className="font-semibold text-black">Modo 1: Processar Roteiro Existente</h4>
+              <p className="text-black">Use quando você já tem um texto e só quer organizá-lo melhor:</p>
+              <ul className="list-disc pl-6 text-black">
                 <li>Cole seu texto já escrito</li>
                 <li>A ferramenta organiza em blocos</li>
                 <li>Você pode ajustar tamanhos e formatos</li>
@@ -44,9 +44,9 @@ const ScriptGeneratorTutorial = () => {
             </div>
             
             <div className="p-4 rounded-lg bg-gradient-to-br from-blue-900/40 to-indigo-900/30 border border-blue-500/30">
-              <h4 className="font-semibold text-blue-200">Modo 2: Criar Roteiro Completo</h4>
-              <p className="text-blue-100">Use quando quer criar um roteiro do zero:</p>
-              <ul className="list-disc pl-6 text-blue-100">
+              <h4 className="font-semibold text-black">Modo 2: Criar Roteiro Completo</h4>
+              <p className="text-black">Use quando quer criar um roteiro do zero:</p>
+              <ul className="list-disc pl-6 text-black">
                 <li>Informe apenas o tema ou título do vídeo</li>
                 <li>A ferramenta cria um roteiro completo</li>
                 <li>Você pode personalizar o tom e estilo</li>
@@ -130,7 +130,7 @@ const ScriptGeneratorTutorial = () => {
           <div className="mt-4 p-4 rounded-lg bg-gradient-to-br from-green-900/40 to-blue-900/30 border border-green-500/30">
             <div className="flex items-start gap-2">
               <Info className="h-5 w-5 text-green-300 flex-shrink-0 mt-0.5" />
-              <p className="text-green-100">
+              <p className="text-black">
                 <strong>Super dica:</strong> Mesmo quando a ferramenta gera um roteiro completo, releia e personalize um pouco para adicionar seu próprio estilo!
               </p>
             </div>
@@ -164,7 +164,7 @@ const ScriptGeneratorTutorial = () => {
           <div className="mt-3 p-4 rounded-lg bg-gradient-to-br from-amber-900/40 to-red-900/30 border border-amber-500/30">
             <div className="flex items-start gap-2">
               <Info className="h-5 w-5 text-amber-300 flex-shrink-0 mt-0.5" />
-              <p className="text-amber-100">
+              <p className="text-black">
                 <strong>Lembre-se:</strong> Experimente todos esses recursos para descobrir qual funciona melhor para seus vídeos!
               </p>
             </div>

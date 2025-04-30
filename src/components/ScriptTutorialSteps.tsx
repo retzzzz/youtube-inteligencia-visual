@@ -113,7 +113,7 @@ const ScriptTutorialSteps = () => {
                 <div className="mt-2 p-4 rounded-lg bg-gradient-to-br from-blue-900/40 to-purple-900/30 border border-blue-500/30">
                   <div className="flex items-start gap-2">
                     <Info className="h-5 w-5 text-blue-300 flex-shrink-0 mt-0.5" />
-                    <p className="text-blue-100">
+                    <p className="text-black">
                       <strong>Dica:</strong> A introdução é crucial! Os primeiros 15 segundos decidem se o espectador continuará assistindo. Use um gatilho emocional forte relacionado ao tema.
                     </p>
                   </div>
@@ -124,7 +124,7 @@ const ScriptTutorialSteps = () => {
                 <div className="mt-2 p-4 rounded-lg bg-gradient-to-br from-green-900/40 to-blue-900/30 border border-green-500/30">
                   <div className="flex items-start gap-2">
                     <Info className="h-5 w-5 text-green-300 flex-shrink-0 mt-0.5" />
-                    <p className="text-green-100">
+                    <p className="text-black">
                       <strong>Conselho profissional:</strong> Antes de finalizar, sempre inclua uma call-to-action forte no fechamento do roteiro. Algo como "Se esse vídeo te ajudou, deixe seu like e se inscreva para mais conteúdo sobre [tema]".
                     </p>
                   </div>

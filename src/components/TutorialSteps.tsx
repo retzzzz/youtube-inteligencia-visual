@@ -120,7 +120,7 @@ const TutorialSteps = () => {
               <div className="mt-2 p-4 rounded-lg bg-gradient-to-br from-purple-900/20 to-blue-900/10 border border-purple-500/30 ml-6">
                 <div className="flex items-start gap-2">
                   <Info className="h-5 w-5 text-purple-400 flex-shrink-0 mt-0.5" />
-                  <p className="text-purple-300">
+                  <p className="text-black">
                     <strong>Dica de especialista:</strong> Ao escolher seu subnicho, procure temas com baixa concorrência mas alta demanda. Use o Validador de Subnichos para encontrar essas oportunidades!
                   </p>
                 </div>
@@ -131,7 +131,7 @@ const TutorialSteps = () => {
               <div className="mt-2 p-4 rounded-lg bg-gradient-to-br from-amber-900/20 to-red-900/10 border border-amber-500/30 ml-6">
                 <div className="flex items-start gap-2">
                   <Info className="h-5 w-5 text-amber-400 flex-shrink-0 mt-0.5" />
-                  <p className="text-amber-300">
+                  <p className="text-black">
                     <strong>Importante:</strong> Seu título e miniatura são responsáveis por mais de 80% dos cliques! Invista tempo para criar combinações impactantes usando o Gerador de Títulos.
                   </p>
                 </div>
