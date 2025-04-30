@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -48,7 +49,7 @@ export const SignupForm: React.FC = () => {
     setIsSubmitting(true);
     try {
       // Define redirect URL
-      const redirectTo = "https://ytanalyzer.pro/dashboard" || `${window.location.origin}/dashboard`;
+      const redirectUrl = "https://ytanalyzer.pro/dashboard";
 
       const { data, error } = await supabase.auth.signUp({
         email: values.email,
@@ -57,7 +58,7 @@ export const SignupForm: React.FC = () => {
           data: {
             name: values.email.split('@')[0], // Use email part before @ as name
           },
-          emailRedirectTo: redirectTo
+          emailRedirectTo: redirectUrl
         }
       });
 

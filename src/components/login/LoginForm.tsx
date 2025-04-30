@@ -105,10 +105,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onGoogleLogin }) => {
     
     try {
       // Define redirect URL for password reset
-      const redirectTo = "https://ytanalyzer.pro/login" || `${window.location.origin}/login`;
+      const redirectUrl = "https://ytanalyzer.pro/login";
 
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: redirectTo,
+        redirectTo: redirectUrl,
       });
       
       if (error) {

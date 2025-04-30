@@ -25,14 +25,14 @@ const Login = () => {
   // Function to handle login with Google
   const handleGoogleLogin = async () => {
     try {
-      // Get the production domain if available, otherwise use current origin
+      // Get the production domain or current origin
       const redirectUrl = "https://ytanalyzer.pro" || window.location.origin;
       console.log("Redirecionando para:", redirectUrl);
       
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: redirectUrl + "/dashboard",
+          redirectTo: `${redirectUrl}/dashboard`,
           queryParams: {
             // Oauth query parameters managed by Supabase
           }
