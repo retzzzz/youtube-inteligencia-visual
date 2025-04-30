@@ -22,7 +22,7 @@ const Subscribe = () => {
       const { url } = await subscriptionService.startSubscription();
       window.location.href = url;
     } catch (error) {
-      console.error("Error starting subscription:", error);
+      console.error("Erro ao iniciar assinatura:", error);
     }
   };
   
@@ -102,11 +102,9 @@ const Subscribe = () => {
                 className="w-full md:w-auto"
               >
                 <CreditCard className="mr-2 h-4 w-4" />
-                {subscription?.isTrialing && !trialExpired
-                  ? "Assinar Agora" 
-                  : trialExpired 
-                    ? "Iniciar Assinatura - R$ 69,99/mês"
-                    : "Iniciar Assinatura - R$ 69,99/mês"}
+                {trialExpired 
+                  ? "Iniciar Assinatura - R$ 69,99/mês"
+                  : "Assinar Agora - R$ 69,99/mês"}
               </Button>
             </CardFooter>
           </Card>

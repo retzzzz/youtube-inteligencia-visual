@@ -36,7 +36,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           subscriptionDetails.trialEnd && 
           new Date() > new Date(subscriptionDetails.trialEnd)) {
         // Redirecionar para página de assinatura se o período de teste expirou
-        navigate('/subscribe');
+        // e se o usuário não estiver na página de assinatura
+        if (window.location.pathname !== '/subscribe' &&
+            window.location.pathname !== '/login' &&
+            window.location.pathname !== '/') {
+          navigate('/subscribe');
+        }
       }
     }
   };
@@ -78,10 +83,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               setNeedsApiKey(true);
             }
 
-            // Only redirect to dashboard from login page if trial has not expired
+            // Se o usuário está na página de login ou na raiz, redirecionar para o dashboard
+            // Não redirecionar se o período de teste expirou (isso é tratado em checkSubscription)
             if ((window.location.pathname === '/login' || window.location.pathname === '/') && savedApiKey) {
-              // Essa redireção será condicional à validade do período de teste,
-              // pois checkSubscription já redireciona para /subscribe se o trial expirou
               navigate('/dashboard');
             }
           } else if (event === 'SIGNED_OUT') {

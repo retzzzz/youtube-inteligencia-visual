@@ -11,7 +11,7 @@ import { subscriptionService } from '@/services/subscription';
 const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { logout, user, subscription } = useAuth();
+  const { logout, user, subscription, checkSubscription } = useAuth();
   
   const requiresSubscription = [
     '/video-analyzer',
@@ -34,20 +34,27 @@ const Header = () => {
   // Verificar se o usuário está no último dia de teste
   const isLastDayOfTrial = trialDaysLeft === 0 && subscription?.isTrialing;
   
-  // Verificar se o usuário não tem uma assinatura ativa e está tentando acessar uma rota que requer assinatura
-  // Ou se está no último dia de teste
-  const shouldRedirectToSubscribe = (currentPathRequiresSubscription && 
-    subscription && 
-    !subscription.isActive && 
-    !subscription.isTrialing) || 
-    (isLastDayOfTrial && location.pathname !== '/subscribe');
+  // Verificar se o usuário tem uma assinatura ativa
+  const hasActiveSubscription = subscription?.isActive || 
+    (subscription?.isTrialing && trialDaysLeft > 0);
+  
+  // Verificar se o usuário deve ser redirecionado para a página de assinatura
+  // Quando o usuário não tem assinatura ativa OU quando o período de teste expirou
+  const shouldRedirectToSubscribe = 
+    currentPathRequiresSubscription && !hasActiveSubscription && location.pathname !== '/subscribe';
   
   // Redirecionar para a página de assinatura se necessário
   React.useEffect(() => {
     if (shouldRedirectToSubscribe) {
       navigate('/subscribe');
     }
-  }, [shouldRedirectToSubscribe, navigate]);
+    
+    // Se o período de teste expirou e o usuário não está na página de assinatura, 
+    // redirecionar para a página de assinatura
+    if (isLastDayOfTrial && location.pathname !== '/subscribe') {
+      navigate('/subscribe');
+    }
+  }, [shouldRedirectToSubscribe, isLastDayOfTrial, navigate, location.pathname]);
   
   return (
     <header className="relative z-10 mb-6">
@@ -96,19 +103,44 @@ const Header = () => {
             <NavLink to="/search" currentPath={location.pathname}>
               Pesquisar
             </NavLink>
-            <NavLink to="/video-analyzer" currentPath={location.pathname} requiresSubscription>
+            <NavLink 
+              to="/video-analyzer" 
+              currentPath={location.pathname} 
+              requiresSubscription={true} 
+              hasSubscription={hasActiveSubscription}
+            >
               Analisar Vídeo
             </NavLink>
-            <NavLink to="/title-generator" currentPath={location.pathname} requiresSubscription>
+            <NavLink 
+              to="/title-generator" 
+              currentPath={location.pathname} 
+              requiresSubscription={true}
+              hasSubscription={hasActiveSubscription}
+            >
               Títulos
             </NavLink>
-            <NavLink to="/script-generator" currentPath={location.pathname} requiresSubscription>
+            <NavLink 
+              to="/script-generator" 
+              currentPath={location.pathname} 
+              requiresSubscription={true}
+              hasSubscription={hasActiveSubscription}
+            >
               Roteirizador
             </NavLink>
-            <NavLink to="/subnicho-validator" currentPath={location.pathname} requiresSubscription>
+            <NavLink 
+              to="/subnicho-validator" 
+              currentPath={location.pathname} 
+              requiresSubscription={true}
+              hasSubscription={hasActiveSubscription}
+            >
               Validador
             </NavLink>
-            <NavLink to="/micro-subnicho-analyzer" currentPath={location.pathname} requiresSubscription>
+            <NavLink 
+              to="/micro-subnicho-analyzer" 
+              currentPath={location.pathname} 
+              requiresSubscription={true}
+              hasSubscription={hasActiveSubscription}
+            >
               Micro Subnichos
             </NavLink>
           </nav>
@@ -125,17 +157,15 @@ interface NavLinkProps {
   currentPath: string;
   children: React.ReactNode;
   requiresSubscription?: boolean;
+  hasSubscription?: boolean;
 }
 
-const NavLink = ({ to, currentPath, children, requiresSubscription }: NavLinkProps) => {
+const NavLink = ({ to, currentPath, children, requiresSubscription, hasSubscription }: NavLinkProps) => {
   const isActive = to === '/dashboard' ? currentPath === '/dashboard' : currentPath.startsWith(to);
-  const { subscription } = useAuth();
   
-  // Verificação do status da assinatura
-  const hasActiveSubscription = subscription?.isActive || subscription?.isTrialing;
-  
-  // Só redirecionar para a página de assinatura se requer assinatura E o usuário NÃO tem assinatura ativa
-  const actualTo = (requiresSubscription && !hasActiveSubscription) ? '/subscribe' : to;
+  // Determinar para onde o link deve apontar
+  // Se a página requer assinatura e o usuário não tem uma assinatura ativa, redirecionar para /subscribe
+  const linkTo = (requiresSubscription && !hasSubscription) ? '/subscribe' : to;
   
   return (
     <Button
@@ -148,7 +178,7 @@ const NavLink = ({ to, currentPath, children, requiresSubscription }: NavLinkPro
           : "hover:bg-black/5 dark:hover:bg-white/5 backdrop-blur-sm bg-black/5 dark:bg-white/5 border-white/10"
       )}
     >
-      <Link to={actualTo}>{children}</Link>
+      <Link to={linkTo}>{children}</Link>
     </Button>
   );
 };

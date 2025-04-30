@@ -16,10 +16,9 @@ export const SubscriptionBanner: React.FC = () => {
     return null;
   }
   
-  // Trial expired - show banner only on /subscribe page to avoid duplicate alerts
+  // Trial expired - show banner
   if (subscription.isTrialing && subscription.trialEnd && 
-      subscriptionService.getDaysRemaining(subscription.trialEnd) === 0 && 
-      location.pathname === '/subscribe') {
+      subscriptionService.getDaysRemaining(subscription.trialEnd) === 0) {
     return (
       <Alert className="bg-red-50 border-red-200 mb-4">
         <AlertTriangle className="h-4 w-4 text-red-500 mr-2" />
@@ -74,24 +73,6 @@ export const SubscriptionBanner: React.FC = () => {
         </Alert>
       );
     }
-  }
-  
-  // Trial expired or no subscription (for pages other than /subscribe)
-  if (location.pathname !== '/subscribe') {
-    return (
-      <Alert className="bg-amber-50 border-amber-200 mb-4">
-        <AlertDescription className="text-amber-700 flex items-center justify-between w-full">
-          <span>Seu período de avaliação terminou. Assine para continuar utilizando todos os recursos.</span>
-          <Button 
-            className="ml-2" 
-            onClick={() => navigate('/subscribe')}
-          >
-            <CreditCard className="h-4 w-4 mr-2" />
-            Assinar por R$ 69,99/mês
-          </Button>
-        </AlertDescription>
-      </Alert>
-    );
   }
   
   return null;
