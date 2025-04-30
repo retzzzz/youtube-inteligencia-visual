@@ -1,143 +1,95 @@
 
-import React, { useState, useEffect } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { AlertCircle, Key, ShieldCheck } from "lucide-react";
-import BaseDialog from "./common/BaseDialog";
-import ApiKeyInstructions from "./dialog/ApiKeyInstructions";
-import ApiKeyInput from "./dialog/ApiKeyInput";
-import ApiKeyAlerts from "./dialog/ApiKeyAlerts";
-import RememberKeyCheckbox from "./dialog/RememberKeyCheckbox";
-import { useApiKeyValidation } from "@/hooks/useApiKeyValidation";
+import React, { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import ApiKeyInput from './dialog/ApiKeyInput';
+import ApiKeyInstructions from './dialog/ApiKeyInstructions';
+import ApiKeyAlerts from './dialog/ApiKeyAlerts';
+import RememberKeyCheckbox from './dialog/RememberKeyCheckbox';
 
 const ApiKeyDialog = () => {
-  const { needsApiKey, setNeedsApiKey, youtubeApiKey, setYoutubeApiKey } = useAuth();
-  const [apiKey, setApiKey] = useState("");
-  const [rememberKey, setRememberKey] = useState(true);
-  const [forceNotNew, setForceNotNew] = useState(false);
-  
-  const {
-    isValidating,
-    error,
-    warning,
-    validateAndSaveApiKey,
-    forceValidation,
-    clearValidationState
-  } = useApiKeyValidation((validatedKey) => {
-    setYoutubeApiKey(validatedKey);
-    setNeedsApiKey(false);
-  });
+  const { isLoggedIn, youtubeApiKey, setYoutubeApiKey, needsApiKey, setNeedsApiKey } = useAuth();
+  const [apiKey, setApiKey] = useState('');
+  const [rememberApiKey, setRememberApiKey] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
+  // Verificar se precisa mostrar o diálogo
   useEffect(() => {
-    if (youtubeApiKey && needsApiKey) {
-      setApiKey(youtubeApiKey);
-      
-      // Verificar se a chave já é conhecida
-      const keyMarker = localStorage.getItem(`apiKey_${youtubeApiKey.substring(0, 8)}_added`);
-      if (keyMarker) {
-        const keyAge = (Date.now() - parseInt(keyMarker)) / (1000 * 60);
-        setForceNotNew(keyAge > 20);
+    if (isLoggedIn && needsApiKey && !youtubeApiKey) {
+      setIsOpen(true);
+    } else {
+      setIsOpen(false);
+    }
+  }, [isLoggedIn, needsApiKey, youtubeApiKey]);
+
+  // Salvar a chave API e fechar o diálogo
+  const handleSaveApiKey = () => {
+    if (apiKey.trim()) {
+      setYoutubeApiKey(apiKey);
+      setIsOpen(false);
+
+      // Verificar se o usuário está na página inicial e redirecionar para o dashboard
+      if (location.pathname === '/' || location.pathname === '/login') {
+        navigate('/dashboard');
       }
     }
-  }, [youtubeApiKey, needsApiKey]);
-
-  const handleValidateAndSaveApiKey = () => {
-    validateAndSaveApiKey(apiKey, rememberKey, forceNotNew);
   };
 
-  const handleForceValidation = () => {
-    forceValidation(apiKey, rememberKey);
-  };
-
-  const handleApiKeyChange = (value: string) => {
-    setApiKey(value);
-    clearValidationState();
+  // Fechar o diálogo sem salvar (cancelar)
+  const handleSkip = () => {
+    setIsOpen(false);
+    setNeedsApiKey(false);
     
-    // Verificar se a nova chave já é conhecida
-    const keyMarker = localStorage.getItem(`apiKey_${value.substring(0, 8)}_added`);
-    if (keyMarker) {
-      const keyAge = (Date.now() - parseInt(keyMarker)) / (1000 * 60);
-      setForceNotNew(keyAge > 20);
-    } else {
-      setForceNotNew(false);
+    // Verificar se o usuário está na página inicial e redirecionar para o dashboard
+    if (location.pathname === '/' || location.pathname === '/login') {
+      navigate('/dashboard');
     }
   };
-  
-  const handleForceNotNewToggle = () => {
-    setForceNotNew(prev => !prev);
-    clearValidationState();
-  };
+
+  // Não mostrar o diálogo se não estiver logado
+  if (!isLoggedIn) {
+    return null;
+  }
 
   return (
-    <BaseDialog
-      open={needsApiKey}
-      onOpenChange={setNeedsApiKey}
-      title="Configurar API do YouTube"
-      description="Para usar o YTAnalyzer, você precisa configurar sua chave de API do YouTube Data v3."
-      footer={
-        <div className="flex flex-col sm:flex-row gap-2">
-          <Button 
-            onClick={handleValidateAndSaveApiKey} 
-            disabled={isValidating}
-            className="w-full relative overflow-hidden group bg-gradient-to-r from-primary to-primary/80 hover:shadow-lg transition-all duration-300"
-          >
-            <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-            <ShieldCheck className="mr-2 h-4 w-4" />
-            {isValidating ? "Validando..." : "Validar e Salvar"}
-          </Button>
-          
-          {warning && warning.includes("quota") && (
-            <Button 
-              onClick={handleForceValidation}
-              disabled={isValidating}
-              variant="outline"
-              className="w-full hover:bg-primary/10 transition-colors duration-300"
-            >
-              <Key className="mr-2 h-4 w-4" />
-              Verificar novamente
-            </Button>
-          )}
-        </div>
-      }
-    >
-      <ApiKeyInstructions />
-      
-      <div className="space-y-4">
-        <ApiKeyInput 
-          apiKey={apiKey}
-          isValidating={isValidating}
-          onChange={handleApiKeyChange}
-        />
-        
-        <ApiKeyAlerts error={error} warning={warning} />
-        
-        <div className="flex items-center justify-between">
-          <RememberKeyCheckbox 
-            checked={rememberKey}
-            onCheckedChange={setRememberKey}
-          />
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleForceNotNewToggle}
-            className={`text-xs ${forceNotNew ? 'bg-blue-50 text-blue-700 border-blue-300' : ''}`}
-          >
-            {forceNotNew ? 'Tratar como chave antiga' : 'Tratar como chave nova'}
-          </Button>
-        </div>
-      </div>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Configurar Chave API do YouTube</DialogTitle>
+          <DialogDescription>
+            Você precisa de uma chave API do YouTube para usar os recursos de análise de vídeos.
+          </DialogDescription>
+        </DialogHeader>
 
-      <div className="mt-6">
-        <Alert variant="destructive" className="rounded-xl shadow-md border-red-300 bg-red-50/50 backdrop-blur-sm text-red-800">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription className="text-xs">
-            <strong>Importante:</strong> Uma chave de API do YouTube válida é OBRIGATÓRIA para usar esta ferramenta. Não é possível prosseguir sem configurar uma chave válida.
-          </AlertDescription>
-        </Alert>
-      </div>
-    </BaseDialog>
+        <div className="space-y-4 py-4">
+          <ApiKeyAlerts />
+          <ApiKeyInput apiKey={apiKey} setApiKey={setApiKey} />
+          <RememberKeyCheckbox checked={rememberApiKey} onChange={setRememberApiKey} />
+          <ApiKeyInstructions />
+        </div>
+
+        <DialogFooter className="gap-2">
+          <Button 
+            variant="secondary" 
+            onClick={handleSkip}
+            className="sm:w-auto w-full"
+          >
+            Configurar depois
+          </Button>
+          <Button 
+            onClick={handleSaveApiKey} 
+            className="sm:w-auto w-full"
+            disabled={!apiKey.trim()}
+          >
+            Salvar chave API
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

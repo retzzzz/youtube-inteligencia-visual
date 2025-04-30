@@ -54,7 +54,7 @@ export const SignupForm: React.FC = () => {
         email: values.email,
         password: values.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
+          emailRedirectTo: `${window.location.origin}/login?type=signup`,
           data: {
             name: values.email.split('@')[0], // Use email part before @ as name
           }

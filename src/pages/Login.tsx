@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoginContainer } from "@/components/login/LoginContainer";
@@ -9,12 +9,34 @@ import { SignupForm } from "@/components/login/SignupForm";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CheckCircle } from "lucide-react";
 
 const Login = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
   const { isLoggedIn } = useAuth();
+  const [showEmailConfirmed, setShowEmailConfirmed] = useState(false);
+  
+  // Verificar se o usuário está vindo de uma confirmação de email
+  useEffect(() => {
+    const checkEmailConfirmation = () => {
+      // Verificar a URL para parâmetros específicos de confirmação
+      const urlParams = new URLSearchParams(location.search);
+      const type = urlParams.get('type');
+      
+      if (type === 'signup') {
+        setShowEmailConfirmed(true);
+        // Mostrar a mensagem de sucesso por 5 segundos
+        setTimeout(() => {
+          setShowEmailConfirmed(false);
+        }, 5000);
+      }
+    };
+    
+    checkEmailConfirmation();
+  }, [location]);
   
   // Redirect to dashboard if already logged in
   useEffect(() => {
@@ -61,6 +83,15 @@ const Login = () => {
         title={<>YT<span className="text-primary">AnalyzerPro</span></>}
         subtitle="Ferramenta de análise de vídeos"
       />
+
+      {showEmailConfirmed && (
+        <Alert className="mb-4 bg-green-50 border-green-300 text-green-700">
+          <CheckCircle className="h-4 w-4 text-green-600" />
+          <AlertDescription>
+            Email verificado com sucesso! Agora você pode fazer login.
+          </AlertDescription>
+        </Alert>
+      )}
 
       <Tabs defaultValue="login" className="w-full">
         <TabsList className="grid grid-cols-2 w-full mb-6">

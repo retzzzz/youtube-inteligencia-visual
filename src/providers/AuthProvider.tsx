@@ -65,13 +65,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const savedApiKey = localStorage.getItem("youtubeApiKey");
             if (savedApiKey) {
               setYoutubeApiKey(savedApiKey);
+              setNeedsApiKey(false);
             } else {
               setNeedsApiKey(true);
             }
 
             // Only redirect to dashboard from login page
             if (window.location.pathname === '/login' || window.location.pathname === '/') {
-              navigate('/dashboard');
+              if (savedApiKey) {
+                navigate('/dashboard');
+              }
+              // Se não tem API key salva, o ApiKeyDialog será mostrado
+              // e cuidará do redirecionamento após a definição da chave
             }
           } else if (event === 'SIGNED_OUT') {
             // User signed out
@@ -112,6 +117,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const savedApiKey = localStorage.getItem("youtubeApiKey");
           if (savedApiKey) {
             setYoutubeApiKey(savedApiKey);
+            setNeedsApiKey(false);
           } else {
             setNeedsApiKey(true);
           }
