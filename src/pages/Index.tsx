@@ -58,14 +58,6 @@ const Index = () => {
           <div className="mb-8">
             <TrendingTopicsSection />
           </div>
-          
-          <div className="text-center mb-8">
-            <Button variant="outline" size="lg" className="border-white/20 hover:bg-white/10">
-              <Link to="/landing" className="flex items-center gap-2">
-                Ver Nossa Página de Destaque
-              </Link>
-            </Button>
-          </div>
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 px-4 md:px-8 mt-4 w-full mb-8">
