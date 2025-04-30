@@ -14,7 +14,14 @@ serve(async (req) => {
   }
 
   try {
-    // Não precisamos de API key para este endpoint público do HuggingFace
+    const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
+    
+    if (!geminiApiKey) {
+      return new Response(
+        JSON.stringify({ error: 'Chave API do Gemini não configurada' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
     
     const { searchTerms, results } = await req.json();
 
@@ -45,37 +52,76 @@ serve(async (req) => {
       Responda em formato estruturado em português do Brasil.
     `;
 
-    // Call Hugging Face API usando seu endpoint público
-    console.log('Enviando requisição para HuggingFace Inference API');
+    // Call Gemini API
+    console.log('Enviando requisição para Gemini API');
     
-    // Endpoint público gratuito do HuggingFace Inference
-    const response = await fetch('https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3-8B-Instruct', {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        inputs: prompt,
-        parameters: {
-          max_new_tokens: 1024,
-          temperature: 0.3,
-          return_full_text: false
+        contents: [
+          {
+            parts: [
+              {
+                text: prompt
+              }
+            ],
+            role: "user"
+          }
+        ],
+        generationConfig: {
+          temperature: 0.2,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 1024,
         }
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('Erro na requisição HuggingFace:', errorData);
+      console.error('Erro na requisição Gemini:', errorData);
+      
+      // Verificar erros específicos do Gemini
+      if (errorData.error && errorData.error.status === 'PERMISSION_DENIED') {
+        return new Response(
+          JSON.stringify({ error: 'Erro de autenticação na API Gemini. Verifique sua chave API.' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      if (errorData.error && errorData.error.status === 'RESOURCE_EXHAUSTED') {
+        return new Response(
+          JSON.stringify({ error: 'Cota da API Gemini excedida. Verifique seu plano de uso.' }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
       
       return new Response(
-        JSON.stringify({ error: 'Erro ao processar análise de IA', details: errorData }),
+        JSON.stringify({ error: 'Erro ao processar análise de IA com Gemini', details: errorData }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const data = await response.json();
-    const analysis = data[0]?.generated_text || '';
+    let analysis = '';
+    
+    // Extrair o texto da resposta do Gemini (estrutura diferente da OpenAI)
+    if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+      const content = data.candidates[0].content;
+      if (content.parts && content.parts[0] && content.parts[0].text) {
+        analysis = content.parts[0].text;
+      }
+    }
+    
+    if (!analysis) {
+      return new Response(
+        JSON.stringify({ error: 'Resposta vazia da API Gemini' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     // Extract specific sections for structured return
     const patternMatch = analysis.match(/Padrões[\s\S]*?(?=Ganchos|$)/i);
@@ -93,7 +139,7 @@ serve(async (req) => {
       niches: nicheMatch ? nicheMatch[0] : '',
     };
 
-    console.log('Análise de IA concluída com sucesso');
+    console.log('Análise de IA com Gemini concluída com sucesso');
     
     return new Response(
       JSON.stringify(structured),
