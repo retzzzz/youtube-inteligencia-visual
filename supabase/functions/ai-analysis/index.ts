@@ -32,24 +32,35 @@ serve(async (req) => {
       );
     }
 
-    // Prepare context for AI analysis
+    // Prepare context for AI analysis with more focus on growth trends
     const titulos = results.map(v => v.title).slice(0, 10).join("\n- ");
+    const channels = results.map(v => v.channelTitle).slice(0, 10).join("\n- ");
     const termos = searchTerms;
     
-    // Create prompt for analysis
+    // Create improved prompt for analysis with focus on finding growing trends
     const prompt = `
-      Analise estes títulos de vídeos relacionados à busca por "${termos}":
+      Analise estes títulos de vídeos e canais relacionados à busca por "${termos}":
       
+      Títulos:
       - ${titulos}
+      
+      Canais:
+      - ${channels}
       
       Forneça:
       1. Padrões observados nestes títulos (palavras-chave comuns, estrutura)
       2. Ganchos emocionais presentes (curiosidade, medo, etc)
-      3. Estruturas de títulos mais eficazes
-      4. Sugestões para novos títulos baseados em padrões virais
-      5. Categorização de nichos e subnichos presentes
+      3. Estruturas de títulos mais eficazes e específicas para este nicho
+      4. Sugestões para novos títulos baseados em padrões virais, focando em temas em crescimento
+      5. Categorização de nichos e subnichos presentes com foco em identificar micronichos em crescimento
       
-      Responda em formato estruturado em português do Brasil.
+      IMPORTANTE: Foque especificamente em identificar oportunidades para novos criadores, destacando:
+      - Micronichos emergentes com pouca competição
+      - Temas em crescimento rápido mas ainda não saturados
+      - Ângulos diferentes para abordar temas populares
+      - Estruturas de título específicas que estão gerando mais engajamento
+      
+      Formate sua análise com subtítulos claramente definidos usando marcação ** em torno dos títulos de seção. Use estrutura de lista com marcadores para facilitar a leitura. Responda em português do Brasil.
     `;
 
     // Call Gemini API
