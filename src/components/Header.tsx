@@ -67,9 +67,6 @@ const Header = () => {
             <NavLink to="/dashboard" currentPath={location.pathname}>
               Início
             </NavLink>
-            <NavLink to="/tutorial" currentPath={location.pathname}>
-              Tutoriais
-            </NavLink>
             <NavLink to="/search" currentPath={location.pathname}>
               Pesquisar
             </NavLink>
