@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react';
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { subscriptionService } from '@/services/subscription';
 
 interface PrivateRouteProps {
   requireSubscription?: boolean;
@@ -25,11 +26,21 @@ export const PrivateRoute: React.FC<PrivateRouteProps> = ({ requireSubscription 
     return null;
   }
   
-  // Page requires subscription but user doesn't have an active one
-  if (requireSubscription && (!subscription || !subscription.isActive)) {
+  // Verificar se o usuário está no período de teste válido
+  const trialDaysLeft = subscription?.isTrialing && subscription?.trialEnd
+    ? subscriptionService.getDaysRemaining(subscription.trialEnd)
+    : 0;
+  
+  // Verificar se o usuário tem uma assinatura ativa ou está em período de teste
+  const hasActiveAccess = 
+    (subscription?.isActive && !subscription.isTrialing) || // Assinatura paga ativa
+    (subscription?.isTrialing && trialDaysLeft > 0); // Em período de teste válido
+  
+  // Page requires subscription but user doesn't have an active subscription or valid trial
+  if (requireSubscription && !hasActiveAccess) {
     return <Navigate to="/subscribe" replace />;
   }
   
-  // User is authenticated and has required subscription level
+  // User is authenticated and has required subscription level or valid trial
   return <Outlet />;
 };

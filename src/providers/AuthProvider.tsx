@@ -35,13 +35,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (subscriptionDetails.isTrialing && 
           subscriptionDetails.trialEnd && 
           new Date() > new Date(subscriptionDetails.trialEnd)) {
-        // Redirecionar para página de assinatura se o período de teste expirou
-        // e se o usuário não estiver na página de assinatura
-        if (window.location.pathname !== '/subscribe' &&
-            window.location.pathname !== '/login' &&
-            window.location.pathname !== '/') {
-          navigate('/subscribe');
-        }
+        
+        // Não redirecionar automaticamente para a página de assinatura
+        // Deixar o Header.tsx cuidar disso quando o usuário tentar acessar páginas restritas
+        console.log("Período de teste expirado");
       }
     }
   };
@@ -84,8 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
 
             // Se o usuário está na página de login ou na raiz, redirecionar para o dashboard
-            // Não redirecionar se o período de teste expirou (isso é tratado em checkSubscription)
-            if ((window.location.pathname === '/login' || window.location.pathname === '/') && savedApiKey) {
+            if (window.location.pathname === '/login' || window.location.pathname === '/') {
               navigate('/dashboard');
             }
           } else if (event === 'SIGNED_OUT') {

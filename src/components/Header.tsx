@@ -45,16 +45,12 @@ const Header = () => {
   
   // Redirecionar para a página de assinatura se necessário
   React.useEffect(() => {
+    // Apenas redirecionar se o usuário estiver em uma página que requer assinatura
+    // e não tiver acesso a ela
     if (shouldRedirectToSubscribe) {
       navigate('/subscribe');
     }
-    
-    // Se o período de teste expirou e o usuário não está na página de assinatura, 
-    // redirecionar para a página de assinatura
-    if (isLastDayOfTrial && location.pathname !== '/subscribe') {
-      navigate('/subscribe');
-    }
-  }, [shouldRedirectToSubscribe, isLastDayOfTrial, navigate, location.pathname]);
+  }, [shouldRedirectToSubscribe, navigate]);
   
   return (
     <header className="relative z-10 mb-6">
@@ -163,9 +159,9 @@ interface NavLinkProps {
 const NavLink = ({ to, currentPath, children, requiresSubscription, hasSubscription }: NavLinkProps) => {
   const isActive = to === '/dashboard' ? currentPath === '/dashboard' : currentPath.startsWith(to);
   
-  // Determinar para onde o link deve apontar
-  // Se a página requer assinatura e o usuário não tem uma assinatura ativa, redirecionar para /subscribe
-  const linkTo = (requiresSubscription && !hasSubscription) ? '/subscribe' : to;
+  // Corrigido: Não redirecionar automaticamente, deixar o componente Link fazer seu trabalho
+  // Se a rota requer assinatura e o usuário não tem, o efeito no componente Header lidará com o redirecionamento
+  const linkTo = to;
   
   return (
     <Button

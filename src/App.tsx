@@ -16,7 +16,7 @@ import ImportantLinks from './pages/ImportantLinks';
 import LandingPage from './pages/LandingPage';
 import Subscribe from './pages/Subscribe';
 import { PrivateRoute } from './components/auth/PrivateRoute';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider } from './providers/AuthProvider';
 import { Toaster } from './components/ui/toaster';
 import ApiKeyDialog from './components/ApiKeyDialog';
 import './App.css';
@@ -60,7 +60,7 @@ function App() {
               <Route path="/micro-subnicho-analyzer-tutorial" element={<MicroSubnicheAnalyzerTutorial />} />
             </Route>
             
-            {/* Routes that require subscription */}
+            {/* Routes that require subscription or valid trial */}
             <Route element={<PrivateRoute requireSubscription={true} />}>
               <Route path="/video-analyzer" element={<VideoAnalyzer />} />
               <Route path="/title-generator" element={<TitleGenerator />} />

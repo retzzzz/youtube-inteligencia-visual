@@ -24,6 +24,14 @@ export const SubscriptionBanner: React.FC = () => {
         <AlertTriangle className="h-4 w-4 text-red-500 mr-2" />
         <AlertDescription className="text-red-700">
           <span>Seu período de avaliação gratuita terminou. Assine agora para continuar tendo acesso completo a todas as funcionalidades.</span>
+          <Button 
+            className="ml-2"
+            variant="destructive" 
+            size="sm"
+            onClick={() => navigate('/subscribe')}
+          >
+            Assinar Agora
+          </Button>
         </AlertDescription>
       </Alert>
     );
