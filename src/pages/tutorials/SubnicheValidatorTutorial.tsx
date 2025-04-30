@@ -1,4 +1,3 @@
-
 import React from 'react';
 import TutorialPage from '@/components/tutorial/TutorialPage';
 
@@ -66,23 +65,23 @@ const SubnicheValidatorTutorial = () => {
           
           <div className="space-y-3 mt-3">
             <div className="p-2 bg-blue-50 rounded-md border-l-4 border-blue-400">
-              <strong>Etapa 1: Extração de Canais</strong>
-              <p className="text-sm">A ferramenta busca canais do YouTube relacionados ao seu nicho principal.</p>
+              <strong className="text-black">Etapa 1: Extração de Canais</strong>
+              <p className="text-sm text-black">A ferramenta busca canais do YouTube relacionados ao seu nicho principal.</p>
             </div>
             
             <div className="p-2 bg-purple-50 rounded-md border-l-4 border-purple-400">
-              <strong>Etapa 2: Identificação de Subnichos</strong>
-              <p className="text-sm">Ela analisa esses canais para encontrar subnichos específicos dentro do tema.</p>
+              <strong className="text-black">Etapa 2: Identificação de Subnichos</strong>
+              <p className="text-sm text-black">Ela analisa esses canais para encontrar subnichos específicos dentro do tema.</p>
             </div>
             
             <div className="p-2 bg-green-50 rounded-md border-l-4 border-green-400">
-              <strong>Etapa 3: Validação com Métricas</strong>
-              <p className="text-sm">Cada subnicho é avaliado com base em visualizações, crescimento e outros fatores.</p>
+              <strong className="text-black">Etapa 3: Validação com Métricas</strong>
+              <p className="text-sm text-black">Cada subnicho é avaliado com base em visualizações, crescimento e outros fatores.</p>
             </div>
             
             <div className="p-2 bg-amber-50 rounded-md border-l-4 border-amber-400">
-              <strong>Etapa 4: Classificação de Oportunidades</strong>
-              <p className="text-sm">Os subnichos são ordenados do mais promissor ao menos interessante.</p>
+              <strong className="text-black">Etapa 4: Classificação de Oportunidades</strong>
+              <p className="text-sm text-black">Os subnichos são ordenados do mais promissor ao menos interessante.</p>
             </div>
           </div>
           
