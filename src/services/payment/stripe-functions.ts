@@ -5,7 +5,7 @@ import Stripe from 'stripe';
 export const createCheckoutSession = async (userId: string, priceId: string) => {
   // Substitua pela sua chave secreta do Stripe
   const stripe = new Stripe('sk_test_your_stripe_secret_key', {
-    apiVersion: '2022-11-15',
+    apiVersion: '2025-03-31.basil',
   });
 
   try {
