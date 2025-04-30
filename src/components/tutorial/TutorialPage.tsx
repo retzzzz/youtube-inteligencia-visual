@@ -3,6 +3,9 @@ import React from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface TutorialStep {
   number: number;
@@ -24,6 +27,19 @@ const TutorialPage = ({ title, description, steps }: TutorialPageProps) => {
       
       <main className="flex-grow w-full px-4 md:px-8 py-6 mb-8">
         <div className="max-w-5xl mx-auto space-y-8 animate-fade-in">
+          <div className="flex items-center">
+            <Link to="/tutorial">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="mb-6 bg-gradient-to-r from-blue-600/20 to-purple-600/20 border-blue-500/30 hover:border-blue-400/50 text-blue-300 hover:text-blue-200"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Voltar aos tutoriais
+              </Button>
+            </Link>
+          </div>
+
           <div className="space-y-4 mb-8 text-left">
             <h1 className="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
               {title}
