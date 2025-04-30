@@ -1,3 +1,4 @@
+
 import Stripe from 'stripe';
 import { toast } from "@/hooks/use-toast";
 
@@ -18,7 +19,8 @@ export const createCheckoutSession = async (priceId: string, customerId?: string
     if (customerId) {
       sessionParams.customer = customerId;
     } else {
-      sessionParams.customer_creation = 'required';
+      // Alterado para o tipo correto aceito pelo Stripe
+      sessionParams.customer_creation = 'always' as Stripe.Checkout.SessionCreateParams.CustomerCreation;
     }
 
     const session = await stripe.checkout.sessions.create(sessionParams);
@@ -52,7 +54,8 @@ export const handleSubscriptionUpdateOrCancel = async (action: 'update' | 'cance
       toast({
         title: "Atualização não suportada",
         description: "A atualização da assinatura não está disponível no momento.",
-        variant: "warning",
+        // Alterado para um valor válido para o tipo
+        variant: "destructive",
       });
       return;
     } else {
