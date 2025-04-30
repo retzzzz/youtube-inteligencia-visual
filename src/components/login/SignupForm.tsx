@@ -1,6 +1,5 @@
-
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
@@ -29,6 +28,7 @@ export type SignupFormValues = z.infer<typeof signupSchema>;
 
 export const SignupForm: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -48,8 +48,8 @@ export const SignupForm: React.FC = () => {
     
     setIsSubmitting(true);
     try {
-      // Define redirect URL
-      const redirectUrl = "https://ytanalyzer.pro/dashboard";
+      // Define redirect URL using current origin
+      const redirectUrl = window.location.origin + "/dashboard";
 
       const { data, error } = await supabase.auth.signUp({
         email: values.email,
@@ -79,20 +79,26 @@ export const SignupForm: React.FC = () => {
       }
       
       if (data) {
-        toast({
-          title: "Cadastro realizado",
-          description: "Sua conta foi criada com sucesso! Verifique seu email para confirmação.",
-        });
-        
         // Store session data if auto-confirmed
         if (data.session) {
           localStorage.setItem("isLoggedIn", "true");
           localStorage.setItem("userId", data.user.id);
           localStorage.setItem("userName", data.user.user_metadata?.name || values.email.split('@')[0]);
           
+          toast({
+            title: "Cadastro realizado",
+            description: "Sua conta foi criada com sucesso! Bem-vindo ao YTAnalyzer!",
+          });
+          
           // Redirect to dashboard directly if auto-confirmed
-          navigate("/dashboard");
+          const from = location.state?.from || "/dashboard";
+          navigate(from);
         } else {
+          toast({
+            title: "Cadastro realizado",
+            description: "Sua conta foi criada com sucesso! Verifique seu email para confirmação.",
+          });
+          
           // Show success but keep on signup page
           form.reset();
         }

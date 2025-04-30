@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
@@ -30,6 +30,7 @@ interface LoginFormProps {
 
 export const LoginForm: React.FC<LoginFormProps> = ({ onGoogleLogin }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
@@ -57,6 +58,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onGoogleLogin }) => {
       });
       
       if (error) {
+        console.error("Login error:", error);
         toast({
           title: "Erro de login",
           description: error.message || "Nome de usuário ou senha incorretos.",
@@ -75,8 +77,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onGoogleLogin }) => {
           description: "Bem-vindo ao YTOptimizer!",
         });
         
-        // Redirect to dashboard
-        navigate("/dashboard");
+        // Redirect to dashboard or the page they were trying to access
+        const from = location.state?.from || "/dashboard";
+        navigate(from);
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -105,7 +108,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onGoogleLogin }) => {
     
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: "https://ytanalyzer.pro/login",
+        redirectTo: window.location.origin + "/login",
       });
       
       if (error) {

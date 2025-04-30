@@ -1,6 +1,6 @@
 
 import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoginContainer } from "@/components/login/LoginContainer";
 import { LoginHeader } from "@/components/login/LoginHeader";
@@ -13,14 +13,16 @@ import { useAuth } from "@/contexts/AuthContext";
 const Login = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
   const { isLoggedIn } = useAuth();
   
   // Redirect to dashboard if already logged in
   useEffect(() => {
     if (isLoggedIn) {
-      navigate("/dashboard");
+      const from = location.state?.from || "/dashboard";
+      navigate(from);
     }
-  }, [isLoggedIn, navigate]);
+  }, [isLoggedIn, navigate, location.state]);
 
   // Function to handle login with Google
   const handleGoogleLogin = async () => {
@@ -28,10 +30,7 @@ const Login = () => {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: "https://ytanalyzer.pro/dashboard",
-          queryParams: {
-            // Oauth query parameters managed by Supabase
-          }
+          redirectTo: window.location.origin + "/dashboard",
         }
       });
       

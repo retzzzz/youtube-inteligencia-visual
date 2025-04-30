@@ -49,14 +49,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Handle authentication changes
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, sessionData) => {
         console.log("Auth state changed:", event);
         
-        if (event === 'SIGNED_IN' && sessionData) {
-          // User signed in
+        if (sessionData) {
+          // User signed in or session updated
           const userId = sessionData.user.id;
           localStorage.setItem("userId", userId);
           localStorage.setItem("isLoggedIn", "true");
@@ -84,7 +85,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setNeedsApiKey(true);
           }
 
-          // Redirect to dashboard if on login page
+          // Only redirect to dashboard from login page
           if (window.location.pathname === '/login' || window.location.pathname === '/') {
             navigate('/dashboard');
           }
@@ -97,6 +98,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(null);
           setSession(null);
           setSubscription(null);
+          
+          // Redirect to login page when signed out
+          navigate("/login");
         }
       }
     );
@@ -126,23 +130,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
           // Check subscription
           await checkSubscription();
-
-          // Redirect to dashboard if on login page
-          if (window.location.pathname === '/login' || window.location.pathname === '/') {
-            navigate('/dashboard');
-          }
-        } else {
-          // Not logged in, check current route
-          const isPublicRoute = 
-            window.location.pathname === '/landing' || 
-            window.location.pathname === '/login' || 
-            window.location.pathname === '/' ||
-            window.location.pathname === '/subscribe';
-            
-          // Redirect to login if not on a public route and not logged in
-          if (!isPublicRoute) {
-            navigate('/login');
-          }
         }
       } catch (error) {
         console.error("Error initializing auth:", error);
