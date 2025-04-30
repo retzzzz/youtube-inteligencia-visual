@@ -49,13 +49,15 @@ export const SignupForm: React.FC = () => {
     
     setIsSubmitting(true);
     try {
-      // Due to captcha being enabled, we'll use email sign-in instead
-      // which doesn't require captcha verification
-      const { data, error } = await supabase.auth.signInWithOtp({
+      // Use signUp method instead of signInWithOtp
+      const { data, error } = await supabase.auth.signUp({
         email: values.email,
+        password: values.password,
         options: {
-          shouldCreateUser: true,
           emailRedirectTo: `${window.location.origin}/dashboard`,
+          data: {
+            name: values.email.split('@')[0], // Use email part before @ as name
+          }
         }
       });
 
@@ -76,7 +78,7 @@ export const SignupForm: React.FC = () => {
       }
       
       toast({
-        title: "Email enviado",
+        title: "Cadastro realizado",
         description: "Um link de confirmação foi enviado para o seu email. Por favor, verifique sua caixa de entrada para completar o cadastro.",
       });
       
