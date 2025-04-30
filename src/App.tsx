@@ -15,6 +15,7 @@ import ScriptTutorial from './pages/ScriptTutorial';
 import ImportantLinks from './pages/ImportantLinks';
 import LandingPage from './pages/LandingPage';
 import Subscribe from './pages/Subscribe';
+import PaymentSuccess from './pages/PaymentSuccess';
 import { PrivateRoute } from './components/auth/PrivateRoute';
 import { AuthProvider } from './providers/AuthProvider';
 import { Toaster } from './components/ui/toaster';
@@ -40,6 +41,7 @@ function App() {
             <Route path="/landing" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/subscribe" element={<Subscribe />} />
+            <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="*" element={<NotFound />} />
             
             {/* Routes that require login */}

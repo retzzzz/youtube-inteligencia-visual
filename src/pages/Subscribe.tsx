@@ -1,16 +1,18 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, CheckCircle, CreditCard, AlertTriangle } from 'lucide-react';
+import { Clock, CheckCircle, CreditCard, AlertTriangle, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { subscriptionService } from '@/services/subscription';
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "@/components/ui/use-toast";
 
 const Subscribe = () => {
   const { subscription, isLoggedIn } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
   
   // Verificar se o período de teste expirou
   const trialExpired = subscription?.isTrialing && 
@@ -19,10 +21,17 @@ const Subscribe = () => {
   
   const handleSubscribe = async () => {
     try {
-      const { url } = await subscriptionService.startSubscription();
-      window.location.href = url;
+      setIsLoading(true);
+      await subscriptionService.startSubscription();
+      // O redirecionamento será feito pelo Stripe, esta linha provavelmente nunca será executada
     } catch (error) {
       console.error("Erro ao iniciar assinatura:", error);
+      toast({
+        title: "Erro ao processar pagamento",
+        description: "Não foi possível iniciar o processo de assinatura. Por favor, tente novamente mais tarde.",
+        variant: "destructive"
+      });
+      setIsLoading(false);
     }
   };
   
@@ -100,14 +109,34 @@ const Subscribe = () => {
                 size="lg" 
                 onClick={handleSubscribe} 
                 className="w-full md:w-auto"
+                disabled={isLoading}
               >
-                <CreditCard className="mr-2 h-4 w-4" />
-                {trialExpired 
-                  ? "Iniciar Assinatura - R$ 69,99/mês"
-                  : "Assinar Agora - R$ 69,99/mês"}
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processando...
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="mr-2 h-4 w-4" />
+                    {trialExpired 
+                      ? "Iniciar Assinatura - R$ 69,99/mês"
+                      : "Assinar Agora - R$ 69,99/mês"}
+                  </>
+                )}
               </Button>
             </CardFooter>
           </Card>
+          
+          <div className="mt-8 bg-gray-50 p-6 rounded-lg border border-gray-200">
+            <h2 className="text-xl font-semibold mb-4">Informações de Pagamento</h2>
+            <p className="mb-2">• Aceitamos cartões de crédito e débito das principais bandeiras</p>
+            <p className="mb-2">• O pagamento é processado com segurança através do Stripe</p>
+            <p className="mb-2">• Você pode cancelar sua assinatura a qualquer momento pela sua conta</p>
+            <p className="text-sm text-muted-foreground mt-4">
+              Ao assinar, você concorda com nossos termos de serviço e política de privacidade.
+            </p>
+          </div>
           
           <p className="text-center text-muted-foreground mt-6">
             Cancele a qualquer momento. Sem compromisso.
