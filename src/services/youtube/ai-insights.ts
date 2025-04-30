@@ -38,9 +38,17 @@ export const analyzeSearchResults = async (
 
     if (error) {
       console.error('Erro ao chamar serviço de IA:', error);
+      
+      let errorMessage = "Não foi possível processar os insights de IA para esta pesquisa.";
+      
+      // Verificar se é um erro específico de cota
+      if (error.message && error.message.includes("402")) {
+        errorMessage = "Cota da API OpenAI excedida. Por favor, verifique sua assinatura ou use outra chave API.";
+      }
+      
       toast({
         title: "Erro na análise de IA",
-        description: "Não foi possível processar os insights de IA para esta pesquisa.",
+        description: errorMessage,
         variant: "destructive",
       });
       
@@ -51,7 +59,28 @@ export const analyzeSearchResults = async (
         titleStructures: '',
         titleSuggestions: '',
         niches: '',
-        error: error.message
+        error: errorMessage
+      };
+    }
+
+    // Verificar erro específico de cota no corpo da resposta
+    if (data && data.error === 'Erro de cota da OpenAI') {
+      const quotaErrorMsg = data.message || "Cota da API OpenAI excedida. Por favor, verifique sua assinatura ou use outra chave API.";
+      
+      toast({
+        title: "Erro na análise de IA",
+        description: quotaErrorMsg,
+        variant: "destructive",
+      });
+      
+      return {
+        fullAnalysis: '',
+        patterns: '',
+        emotionalHooks: '',
+        titleStructures: '',
+        titleSuggestions: '',
+        niches: '',
+        error: quotaErrorMsg
       };
     }
 

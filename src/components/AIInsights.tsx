@@ -5,8 +5,9 @@ import { analyzeSearchResults, AIAnalysis } from '@/services/youtube/ai-insights
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Lightbulb, TrendingUp, Sparkles, List, Grid3X3 } from 'lucide-react';
+import { Lightbulb, TrendingUp, Sparkles, List, Grid3X3, AlertCircle, RefreshCw } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface AIInsightsProps {
   results: VideoResult[];
@@ -53,9 +54,22 @@ const AIInsights = ({ results, searchTerms }: AIInsightsProps) => {
           <Skeleton className="h-4 w-[70%]" />
         </div>
       ) : insights?.error ? (
-        <div className="text-destructive py-4">
-          <p>Erro ao processar análise de IA: {insights.error}</p>
+        <div className="text-center py-4">
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-5 w-5" />
+            <AlertDescription className="ml-2">
+              {insights.error.includes("cota") || insights.error.includes("quota") ? (
+                <>
+                  <span className="font-medium">Erro de cota na OpenAI:</span> A cota da API foi excedida. 
+                  Verifique sua assinatura OpenAI ou atualize sua chave API nas configurações.
+                </>
+              ) : (
+                insights.error
+              )}
+            </AlertDescription>
+          </Alert>
           <Button variant="outline" size="sm" onClick={handleAnalyzeContent} className="mt-2">
+            <RefreshCw className="h-3 w-3 mr-2" />
             Tentar novamente
           </Button>
         </div>

@@ -61,7 +61,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-3.5-turbo', // Alterando para um modelo mais econômico
         messages: [
           { role: 'system', content: 'Você é um especialista em análise de conteúdo viral para YouTube. Seu trabalho é identificar padrões, tendências e ganchos emocionais em títulos de vídeos para ajudar criadores de conteúdo.' },
           { role: 'user', content: prompt }
@@ -73,6 +73,18 @@ serve(async (req) => {
     if (!response.ok) {
       const errorData = await response.json();
       console.error('Erro na requisição OpenAI:', errorData);
+      
+      // Verificar especificamente erros de cota
+      if (errorData.error && errorData.error.type === "insufficient_quota") {
+        return new Response(
+          JSON.stringify({ 
+            error: 'Erro de cota da OpenAI', 
+            message: 'A cota da sua conta OpenAI foi excedida. Por favor, verifique sua assinatura ou use outra chave API.'
+          }),
+          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
       return new Response(
         JSON.stringify({ error: 'Erro ao processar análise de IA', details: errorData }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
