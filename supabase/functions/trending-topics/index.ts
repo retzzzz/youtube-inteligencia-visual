@@ -52,12 +52,14 @@ serve(async (req) => {
       throw new Error("YouTube API key not configured");
     }
     
-    // For Brazil or US
+    // For Brazil, US, or Spain
     let geoParam = "";
     if (region === 'BR') {
       geoParam = "&regionCode=BR";
     } else if (region === 'US') {
       geoParam = "&regionCode=US";
+    } else if (region === 'ES') {
+      geoParam = "&regionCode=ES";
     }
     
     // Get trending videos from YouTube

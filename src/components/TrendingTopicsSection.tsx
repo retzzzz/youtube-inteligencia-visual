@@ -23,6 +23,7 @@ interface TrendingRegion {
 const regions: TrendingRegion[] = [
   { code: 'BR', name: 'Brasil' },
   { code: 'US', name: 'EUA' },
+  { code: 'ES', name: 'Espanha' },
   { code: 'GLOBAL', name: 'Global' }
 ];
 
