@@ -24,7 +24,7 @@ const TutorialPage = ({ title, description, steps }: TutorialPageProps) => {
       
       <main className="flex-grow w-full px-4 md:px-8 py-6 mb-8">
         <div className="max-w-5xl mx-auto space-y-8 animate-fade-in">
-          <div className="space-y-4 mb-8">
+          <div className="space-y-4 mb-8 text-left">
             <h1 className="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
               {title}
             </h1>
@@ -39,12 +39,9 @@ const TutorialPage = ({ title, description, steps }: TutorialPageProps) => {
                 key={step.number} 
                 className="p-6 transition-all hover:shadow-lg border border-slate-700/50 bg-slate-800/30 backdrop-blur-sm"
               >
-                <div className="space-y-4">
+                <div className="space-y-4 text-left">
                   <div className="border-b border-slate-700/50 pb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="text-xl font-semibold text-primary">
-                        {step.number}.
-                      </div>
+                    <div className="flex items-start gap-3">
                       <div>
                         <h3 className="text-xl font-semibold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-purple-300">
                           {step.title}
@@ -55,7 +52,7 @@ const TutorialPage = ({ title, description, steps }: TutorialPageProps) => {
                       </div>
                     </div>
                   </div>
-                  <div className="space-y-4 pl-6">
+                  <div className="space-y-4">
                     {step.content}
                   </div>
                 </div>

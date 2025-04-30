@@ -13,10 +13,10 @@ const ScriptGeneratorIntro: React.FC = () => {
         com base em técnicas profissionais de storytelling.
       </p>
       
-      <Alert className="mb-6">
-        <Info className="h-4 w-4" />
-        <AlertTitle>Como funciona</AlertTitle>
-        <AlertDescription>
+      <Alert className="mb-6 bg-gradient-to-br from-blue-900/40 to-purple-900/30 border border-blue-500/30">
+        <Info className="h-4 w-4 text-blue-300" />
+        <AlertTitle className="text-blue-200">Como funciona</AlertTitle>
+        <AlertDescription className="text-blue-100">
           Cole seu texto ou faça upload de um arquivo .txt, configure as opções do roteiro 
           e receba um roteiro estruturado com blocos otimizados e prompts para imagens.
         </AlertDescription>

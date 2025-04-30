@@ -68,7 +68,7 @@ const steps = [
 const ScriptTutorialSteps = () => {
   return (
     <div className="space-y-8 animate-fade-in">
-      <div className="space-y-4 mb-8">
+      <div className="space-y-4 mb-8 text-left">
         <h1 className="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
           Como Criar um Roteiro para seu Canal Dark
         </h1>
@@ -83,9 +83,9 @@ const ScriptTutorialSteps = () => {
             key={step.number} 
             className="p-6 transition-all hover:shadow-lg border border-slate-700/50 bg-slate-800/30 backdrop-blur-sm"
           >
-            <div className="space-y-4">
+            <div className="space-y-4 text-left">
               <div className="border-b border-slate-700/50 pb-3">
-                <div className="flex items-center gap-3">
+                <div className="flex items-start gap-3">
                   <div className="text-xl font-semibold text-primary">
                     {step.number}.
                   </div>
@@ -110,10 +110,10 @@ const ScriptTutorialSteps = () => {
               </div>
               
               {step.number === 3 && (
-                <div className="mt-2 p-4 rounded-lg bg-gradient-to-br from-blue-900/20 to-purple-900/10 border border-blue-500/30 ml-6">
+                <div className="mt-2 p-4 rounded-lg bg-gradient-to-br from-blue-900/40 to-purple-900/30 border border-blue-500/30">
                   <div className="flex items-start gap-2">
-                    <Info className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                    <p className="text-blue-300">
+                    <Info className="h-5 w-5 text-blue-300 flex-shrink-0 mt-0.5" />
+                    <p className="text-blue-100">
                       <strong>Dica:</strong> A introdução é crucial! Os primeiros 15 segundos decidem se o espectador continuará assistindo. Use um gatilho emocional forte relacionado ao tema.
                     </p>
                   </div>
@@ -121,10 +121,10 @@ const ScriptTutorialSteps = () => {
               )}
               
               {step.number === 6 && (
-                <div className="mt-2 p-4 rounded-lg bg-gradient-to-br from-green-900/20 to-blue-900/10 border border-green-500/30 ml-6">
+                <div className="mt-2 p-4 rounded-lg bg-gradient-to-br from-green-900/40 to-blue-900/30 border border-green-500/30">
                   <div className="flex items-start gap-2">
-                    <Info className="h-5 w-5 text-green-400 flex-shrink-0 mt-0.5" />
-                    <p className="text-green-300">
+                    <Info className="h-5 w-5 text-green-300 flex-shrink-0 mt-0.5" />
+                    <p className="text-green-100">
                       <strong>Conselho profissional:</strong> Antes de finalizar, sempre inclua uma call-to-action forte no fechamento do roteiro. Algo como "Se esse vídeo te ajudou, deixe seu like e se inscreva para mais conteúdo sobre [tema]".
                     </p>
                   </div>
