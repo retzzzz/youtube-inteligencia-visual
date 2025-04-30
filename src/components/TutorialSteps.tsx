@@ -1,5 +1,6 @@
 
 import { Card } from './ui/card';
+import { CheckCircle, Info } from 'lucide-react';
 
 const steps = [
   {
@@ -85,25 +86,57 @@ const TutorialSteps = () => {
   return (
     <div className="space-y-8">
       {steps.map((step) => (
-        <Card key={step.number} className="p-6 transition-all hover:shadow-md">
-          <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="text-xl font-bold text-primary">{step.number}</span>
-            </div>
-            <div className="flex-1 space-y-4">
-              <div>
-                <h3 className="text-xl font-semibold tracking-tight">{step.title}</h3>
-                <p className="text-muted-foreground mt-1">{step.description}</p>
+        <Card 
+          key={step.number} 
+          className="p-6 transition-all hover:shadow-lg border border-slate-700/50 bg-slate-800/30 backdrop-blur-sm"
+        >
+          <div className="space-y-4">
+            <div className="border-b border-slate-700/50 pb-3">
+              <div className="flex items-center gap-3">
+                <div className="text-xl font-semibold text-primary">
+                  {step.number}.
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-purple-300">
+                    {step.title}
+                  </h3>
+                  <p className="text-muted-foreground mt-1">
+                    {step.description}
+                  </p>
+                </div>
               </div>
-              <ul className="space-y-2">
-                {step.content.map((item, index) => (
-                  <li key={index} className="flex items-start gap-2">
-                    <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-primary/60 mt-2" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
             </div>
+            
+            <div className="space-y-3 pl-6">
+              {step.content.map((item, index) => (
+                <div key={index} className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-blue-400 flex-shrink-0 mt-1" />
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+            
+            {step.number === 1 && (
+              <div className="mt-2 p-4 rounded-lg bg-gradient-to-br from-purple-900/20 to-blue-900/10 border border-purple-500/30 ml-6">
+                <div className="flex items-start gap-2">
+                  <Info className="h-5 w-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                  <p className="text-purple-300">
+                    <strong>Dica de especialista:</strong> Ao escolher seu subnicho, procure temas com baixa concorrência mas alta demanda. Use o Validador de Subnichos para encontrar essas oportunidades!
+                  </p>
+                </div>
+              </div>
+            )}
+            
+            {step.number === 5 && (
+              <div className="mt-2 p-4 rounded-lg bg-gradient-to-br from-amber-900/20 to-red-900/10 border border-amber-500/30 ml-6">
+                <div className="flex items-start gap-2">
+                  <Info className="h-5 w-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                  <p className="text-amber-300">
+                    <strong>Importante:</strong> Seu título e miniatura são responsáveis por mais de 80% dos cliques! Invista tempo para criar combinações impactantes usando o Gerador de Títulos.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </Card>
       ))}

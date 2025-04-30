@@ -1,5 +1,6 @@
 
 import { Card } from './ui/card';
+import { CheckCircle, Info } from 'lucide-react';
 
 const steps = [
   {
@@ -67,36 +68,68 @@ const steps = [
 const ScriptTutorialSteps = () => {
   return (
     <div className="space-y-8 animate-fade-in">
-      <div className="text-center space-y-4 mb-12">
-        <h1 className="text-4xl font-bold tracking-tight">
+      <div className="space-y-4 mb-8">
+        <h1 className="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
           Como Criar um Roteiro para seu Canal Dark
         </h1>
-        <p className="text-muted-foreground max-w-3xl mx-auto text-lg">
+        <p className="text-muted-foreground text-lg">
           95% do sucesso vem de nicho, subnicho e títulos bem pensados; o roteiro é apenas 5%, mas bem feito garante mais vídeos entregues e mais engajamento.
         </p>
       </div>
 
       <div className="space-y-8">
         {steps.map((step) => (
-          <Card key={step.number} className="p-6 transition-all hover:shadow-md">
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="text-xl font-bold text-primary">{step.number}</span>
-              </div>
-              <div className="flex-1 space-y-4">
-                <div>
-                  <h3 className="text-xl font-semibold tracking-tight">{step.title}</h3>
-                  <p className="text-muted-foreground mt-1">{step.description}</p>
+          <Card 
+            key={step.number} 
+            className="p-6 transition-all hover:shadow-lg border border-slate-700/50 bg-slate-800/30 backdrop-blur-sm"
+          >
+            <div className="space-y-4">
+              <div className="border-b border-slate-700/50 pb-3">
+                <div className="flex items-center gap-3">
+                  <div className="text-xl font-semibold text-primary">
+                    {step.number}.
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-purple-300">
+                      {step.title}
+                    </h3>
+                    <p className="text-muted-foreground mt-1">
+                      {step.description}
+                    </p>
+                  </div>
                 </div>
-                <ul className="space-y-2">
-                  {step.content.map((item, index) => (
-                    <li key={index} className="flex items-start gap-2">
-                      <span className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-primary/60 mt-2" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
               </div>
+              
+              <div className="space-y-3 pl-6">
+                {step.content.map((item, index) => (
+                  <div key={index} className="flex items-start gap-2">
+                    <CheckCircle className="h-4 w-4 text-blue-400 flex-shrink-0 mt-1" />
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
+              
+              {step.number === 3 && (
+                <div className="mt-2 p-4 rounded-lg bg-gradient-to-br from-blue-900/20 to-purple-900/10 border border-blue-500/30 ml-6">
+                  <div className="flex items-start gap-2">
+                    <Info className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                    <p className="text-blue-300">
+                      <strong>Dica:</strong> A introdução é crucial! Os primeiros 15 segundos decidem se o espectador continuará assistindo. Use um gatilho emocional forte relacionado ao tema.
+                    </p>
+                  </div>
+                </div>
+              )}
+              
+              {step.number === 6 && (
+                <div className="mt-2 p-4 rounded-lg bg-gradient-to-br from-green-900/20 to-blue-900/10 border border-green-500/30 ml-6">
+                  <div className="flex items-start gap-2">
+                    <Info className="h-5 w-5 text-green-400 flex-shrink-0 mt-0.5" />
+                    <p className="text-green-300">
+                      <strong>Conselho profissional:</strong> Antes de finalizar, sempre inclua uma call-to-action forte no fechamento do roteiro. Algo como "Se esse vídeo te ajudou, deixe seu like e se inscreva para mais conteúdo sobre [tema]".
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           </Card>
         ))}
