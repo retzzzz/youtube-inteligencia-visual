@@ -1,14 +1,42 @@
 
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { LogOut, Youtube } from 'lucide-react';
+import { SubscriptionBanner } from './subscription/SubscriptionBanner';
 
 const Header = () => {
   const location = useLocation();
-  const { logout, user } = useAuth();
+  const navigate = useNavigate();
+  const { logout, user, subscription } = useAuth();
+  
+  const requiresSubscription = [
+    '/video-analyzer',
+    '/title-generator',
+    '/script-generator',
+    '/subnicho-validator',
+    '/micro-subnicho-analyzer'
+  ];
+  
+  // Verificar se a rota atual requer assinatura
+  const currentPathRequiresSubscription = requiresSubscription.some(path => 
+    location.pathname.startsWith(path)
+  );
+  
+  // Verificar se o usuário não tem uma assinatura ativa e está tentando acessar uma rota que requer assinatura
+  const shouldRedirectToSubscribe = currentPathRequiresSubscription && 
+    subscription && 
+    !subscription.isActive && 
+    !subscription.isTrialing;
+  
+  // Redirecionar para a página de assinatura se necessário
+  React.useEffect(() => {
+    if (shouldRedirectToSubscribe) {
+      navigate('/subscribe');
+    }
+  }, [shouldRedirectToSubscribe, navigate]);
   
   return (
     <header className="relative z-10 mb-6">
@@ -16,7 +44,7 @@ const Header = () => {
         <div className="px-4 md:px-8 w-full">
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold tracking-tight flex items-center">
-              <Link to="/" className="flex items-center gap-2">
+              <Link to="/dashboard" className="flex items-center gap-2">
                 <div className="p-2 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg shadow-lg">
                   <Youtube className="h-6 w-6 text-white" />
                 </div>
@@ -43,30 +71,32 @@ const Header = () => {
           </div>
           
           <nav className="flex gap-2 flex-wrap mt-4">
-            <NavLink to="/" currentPath={location.pathname}>
+            <NavLink to="/dashboard" currentPath={location.pathname}>
               Início
             </NavLink>
             <NavLink to="/search" currentPath={location.pathname}>
               Pesquisar
             </NavLink>
-            <NavLink to="/video-analyzer" currentPath={location.pathname}>
+            <NavLink to="/video-analyzer" currentPath={location.pathname} requiresSubscription>
               Analisar Vídeo
             </NavLink>
-            <NavLink to="/title-generator" currentPath={location.pathname}>
+            <NavLink to="/title-generator" currentPath={location.pathname} requiresSubscription>
               Títulos
             </NavLink>
-            <NavLink to="/script-generator" currentPath={location.pathname}>
+            <NavLink to="/script-generator" currentPath={location.pathname} requiresSubscription>
               Roteirizador
             </NavLink>
-            <NavLink to="/subnicho-validator" currentPath={location.pathname}>
+            <NavLink to="/subnicho-validator" currentPath={location.pathname} requiresSubscription>
               Validador
             </NavLink>
-            <NavLink to="/micro-subnicho-analyzer" currentPath={location.pathname}>
+            <NavLink to="/micro-subnicho-analyzer" currentPath={location.pathname} requiresSubscription>
               Micro Subnichos
             </NavLink>
           </nav>
         </div>
       </div>
+      
+      {user && subscription && <div className="px-4 md:px-8 mt-4"><SubscriptionBanner /></div>}
     </header>
   );
 };
@@ -75,10 +105,18 @@ interface NavLinkProps {
   to: string;
   currentPath: string;
   children: React.ReactNode;
+  requiresSubscription?: boolean;
 }
 
-const NavLink = ({ to, currentPath, children }: NavLinkProps) => {
-  const isActive = to === '/' ? currentPath === '/' : currentPath.startsWith(to);
+const NavLink = ({ to, currentPath, children, requiresSubscription }: NavLinkProps) => {
+  const isActive = to === '/dashboard' ? currentPath === '/dashboard' : currentPath.startsWith(to);
+  const { subscription } = useAuth();
+  
+  // Verificação simplificada do status da assinatura
+  const hasActiveSubscription = subscription?.isActive || subscription?.isTrialing;
+  
+  // Se requer assinatura e o usuário não tem, redirecionar para a página de assinatura
+  const actualTo = (requiresSubscription && !hasActiveSubscription) ? '/subscribe' : to;
   
   return (
     <Button
@@ -91,7 +129,7 @@ const NavLink = ({ to, currentPath, children }: NavLinkProps) => {
           : "hover:bg-black/5 dark:hover:bg-white/5 backdrop-blur-sm bg-black/5 dark:bg-white/5 border-white/10"
       )}
     >
-      <Link to={to}>{children}</Link>
+      <Link to={actualTo}>{children}</Link>
     </Button>
   );
 };

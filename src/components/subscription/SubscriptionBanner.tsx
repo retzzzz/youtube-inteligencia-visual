@@ -20,7 +20,12 @@ export const SubscriptionBanner: React.FC = () => {
         <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
         <AlertDescription className="text-green-700 flex items-center justify-between w-full">
           <span>Sua assinatura está ativa</span>
-          <Button variant="outline" size="sm" className="border-green-500 text-green-700">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="border-green-500 text-green-700"
+            onClick={() => window.open('/subscribe', '_blank')}
+          >
             Gerenciar Assinatura
           </Button>
         </AlertDescription>
@@ -39,7 +44,10 @@ export const SubscriptionBanner: React.FC = () => {
             Seu período de avaliação gratuita termina em {daysLeft} {daysLeft === 1 ? 'dia' : 'dias'} 
             ({subscriptionService.formatEndDate(subscription.trialEnd)})
           </span>
-          <Button className="ml-2" onClick={() => window.location.href = '/subscribe'}>
+          <Button 
+            className="ml-2" 
+            onClick={() => window.location.href = '/subscribe'}
+          >
             <CreditCard className="h-4 w-4 mr-2" />
             Assinar Agora
           </Button>
@@ -53,7 +61,10 @@ export const SubscriptionBanner: React.FC = () => {
     <Alert className="bg-amber-50 border-amber-200 mb-4">
       <AlertDescription className="text-amber-700 flex items-center justify-between w-full">
         <span>Seu período de avaliação terminou. Assine para continuar utilizando todos os recursos.</span>
-        <Button className="ml-2" onClick={() => window.location.href = '/subscribe'}>
+        <Button 
+          className="ml-2" 
+          onClick={() => window.location.href = '/subscribe'}
+        >
           <CreditCard className="h-4 w-4 mr-2" />
           Assinar por R$ 69,99/mês
         </Button>
