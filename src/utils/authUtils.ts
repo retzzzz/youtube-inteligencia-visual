@@ -54,7 +54,7 @@ export const fetchSubscriptionDetails = async () => {
 export const createUserFromSession = (session: Session | null): User | null => {
   if (!session) return null;
 
-  const userName = session.user.user_metadata?.name || "Usuário";
+  const userName = session.user?.user_metadata?.name || "Usuário";
   return {
     name: userName,
     id: session.user.id

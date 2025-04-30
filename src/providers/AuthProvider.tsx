@@ -35,66 +35,78 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Handle authentication changes
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, sessionData) => {
-        console.log("Auth state changed:", event);
-        
-        if (sessionData) {
-          // User signed in or session updated
-          const userId = sessionData.user.id;
-          const userName = sessionData.user.user_metadata?.name || "Usuário";
-          
-          saveUserToLocalStorage(userId, userName);
-          
-          setUser({
-            name: userName,
-            id: userId
-          });
-          
-          setSession(sessionData);
-          setIsLoggedIn(true);
-          
-          // Check subscription status after login
-          await checkSubscription().catch(console.error);
-          
-          // Get API key from local storage if available
-          const savedApiKey = localStorage.getItem("youtubeApiKey");
-          if (savedApiKey) {
-            setYoutubeApiKey(savedApiKey);
-          } else {
-            setNeedsApiKey(true);
-          }
+    let authSubscription: { unsubscribe: () => void } = { unsubscribe: () => {} };
 
-          // Only redirect to dashboard from login page
-          if (window.location.pathname === '/login' || window.location.pathname === '/') {
-            navigate('/dashboard');
-          }
-        } else if (event === 'SIGNED_OUT') {
-          // User signed out
-          clearUserFromLocalStorage();
-          setIsLoggedIn(false);
-          setUser(null);
-          setSession(null);
-          setSubscription(null);
+    // Set up auth state listener FIRST
+    try {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (event, sessionData) => {
+          console.log("Auth state changed:", event);
           
-          // Redirect to login page when signed out
-          navigate("/login");
+          if (sessionData) {
+            // User signed in or session updated
+            const userId = sessionData.user.id;
+            const userName = sessionData.user.user_metadata?.name || "Usuário";
+            
+            saveUserToLocalStorage(userId, userName);
+            
+            setUser({
+              name: userName,
+              id: userId
+            });
+            
+            setSession(sessionData);
+            setIsLoggedIn(true);
+            
+            // Check subscription status after login
+            await checkSubscription().catch(console.error);
+            
+            // Get API key from local storage if available
+            const savedApiKey = localStorage.getItem("youtubeApiKey");
+            if (savedApiKey) {
+              setYoutubeApiKey(savedApiKey);
+            } else {
+              setNeedsApiKey(true);
+            }
+
+            // Only redirect to dashboard from login page
+            if (window.location.pathname === '/login' || window.location.pathname === '/') {
+              navigate('/dashboard');
+            }
+          } else if (event === 'SIGNED_OUT') {
+            // User signed out
+            clearUserFromLocalStorage();
+            setIsLoggedIn(false);
+            setUser(null);
+            setSession(null);
+            setSubscription(null);
+            
+            // Redirect to login page when signed out
+            navigate("/login");
+          }
         }
-      }
-    );
+      );
+      authSubscription = subscription;
+    } catch (error) {
+      console.error("Error setting up auth state change listener:", error);
+    }
 
     // THEN check for existing session
     const initializeAuth = async () => {
       try {
         // Check if user has an existing session
-        const { data: { session: existingSession } } = await supabase.auth.getSession();
+        const { data, error } = await supabase.auth.getSession();
         
-        if (existingSession) {
-          setSession(existingSession);
+        if (error) {
+          console.error("Error getting session:", error);
+          return;
+        }
+        
+        if (data.session) {
+          setSession(data.session);
           setIsLoggedIn(true);
           
-          setUser(createUserFromSession(existingSession));
+          setUser(createUserFromSession(data.session));
           
           // Check for API key in local storage
           const savedApiKey = localStorage.getItem("youtubeApiKey");
@@ -115,9 +127,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initializeAuth();
 
     return () => {
-      subscription.unsubscribe();
+      if (authSubscription) {
+        authSubscription.unsubscribe();
+      }
     };
-  }, [navigate]);
+  }, [navigate, setIsLoggedIn, setNeedsApiKey, setSession, setSubscription, setUser, setYoutubeApiKey]);
 
   const handleSetYoutubeApiKey = (key: string) => {
     setYoutubeApiKey(key);
