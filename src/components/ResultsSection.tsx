@@ -1,4 +1,3 @@
-
 import { VideoResult, YoutubeSearchParams } from "@/types/youtube-types";
 import KPISection from "@/components/KPISection";
 import ChartSection from "@/components/ChartSection";
@@ -9,7 +8,8 @@ import ResultsTable from "@/components/ResultsTable";
 import RemodelingIdeas from "@/components/RemodelingIdeas";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SavedSearchDialog from "@/components/SavedSearchDialog";
-import { BarChart3, Table, Lightbulb } from "lucide-react";
+import AIInsights from "@/components/AIInsights";
+import { BarChart3, Table, Lightbulb, Sparkles } from "lucide-react";
 
 interface ResultsSectionProps {
   results: VideoResult[];
@@ -61,6 +61,10 @@ const ResultsSection = ({ results, selectedVideo, onSelectVideo, searchParams }:
             <Lightbulb className="h-4 w-4" />
             Sugestões de Remodelagem
           </TabsTrigger>
+          <TabsTrigger value="insights" className="data-[state=active]:shadow-md flex items-center gap-2">
+            <Sparkles className="h-4 w-4" />
+            Insights de IA
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="resultados" className="mt-6 animate-fade-in w-full">
@@ -103,6 +107,15 @@ const ResultsSection = ({ results, selectedVideo, onSelectVideo, searchParams }:
             <div className="text-center py-12 glass-panel w-full">
               <p className="text-muted-foreground">Selecione um vídeo para ver sugestões de remodelagem.</p>
             </div>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="insights" className="mt-6 animate-fade-in w-full">
+          {searchParams && (
+            <AIInsights 
+              results={results} 
+              searchTerms={searchParams.keywords} 
+            />
           )}
         </TabsContent>
       </Tabs>
