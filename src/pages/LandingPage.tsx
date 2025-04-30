@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import TrendingTopicsSection from '@/components/TrendingTopicsSection';
 
 const LandingPage = () => {
   return (
@@ -26,7 +27,7 @@ const LandingPage = () => {
         {/* Background Effects */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(29,58,180,0.3),rgba(0,0,0,0))]" />
         
-        <div className="container mx-auto px-4 py-20 lg:py-32 relative z-10">
+        <div className="container mx-auto px-4 py-10 lg:py-20 relative z-10">
           <div className="flex flex-col lg:flex-row items-center gap-12">
             <div className="flex-1 text-center lg:text-left">
               <div className="inline-flex items-center px-3 py-1 rounded-full bg-indigo-900/30 border border-indigo-700/30 mb-6">
@@ -57,52 +58,7 @@ const LandingPage = () => {
             </div>
             
             <div className="flex-1 relative">
-              <div className="relative w-full h-[400px] lg:h-[500px] perspective-1000">
-                <div className="absolute w-full h-full">
-                  <div className="w-[300px] h-[300px] md:w-[400px] md:h-[400px] mx-auto rotate-[-15deg] relative animate-float shadow-2xl rounded-xl overflow-hidden border border-white/10">
-                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/90 via-blue-900/80 to-purple-900/90"></div>
-                    <div className="relative p-4 h-full">
-                      <div className="bg-white/5 rounded-lg p-3 backdrop-blur-sm border border-white/10 mb-4">
-                        <div className="flex items-center gap-2">
-                          <Youtube className="h-5 w-5 text-red-500" />
-                          <div className="h-2 w-28 bg-white/30 rounded-full"></div>
-                        </div>
-                      </div>
-                      
-                      <div className="bg-white/5 rounded-lg p-3 backdrop-blur-sm border border-white/10 mb-4">
-                        <div className="h-2 w-32 bg-white/30 rounded-full mb-2"></div>
-                        <div className="h-2 w-full bg-white/20 rounded-full mb-2"></div>
-                        <div className="h-2 w-24 bg-white/20 rounded-full"></div>
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="bg-white/5 rounded-lg p-3 backdrop-blur-sm border border-white/10 h-24">
-                          <div className="h-12 w-12 rounded-md bg-gradient-to-br from-blue-600/80 to-indigo-600/80 mb-2 flex items-center justify-center">
-                            <TrendingUp className="h-6 w-6 text-white" />
-                          </div>
-                          <div className="h-2 w-3/4 bg-white/30 rounded-full"></div>
-                        </div>
-                        
-                        <div className="bg-white/5 rounded-lg p-3 backdrop-blur-sm border border-white/10 h-24">
-                          <div className="h-12 w-12 rounded-md bg-gradient-to-br from-purple-600/80 to-pink-600/80 mb-2 flex items-center justify-center">
-                            <Users className="h-6 w-6 text-white" />
-                          </div>
-                          <div className="h-2 w-3/4 bg-white/30 rounded-full"></div>
-                        </div>
-                      </div>
-
-                      <div className="absolute bottom-4 right-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full h-10 w-10 flex items-center justify-center shadow-lg">
-                        <ArrowRight className="h-5 w-5 text-white" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Floating elements */}
-                <div className="absolute top-[20%] left-[10%] w-16 h-16 bg-blue-500/10 rounded-full animate-pulse"></div>
-                <div className="absolute bottom-[20%] right-[15%] w-20 h-20 bg-purple-500/10 rounded-full animate-pulse"></div>
-                <div className="absolute top-[40%] right-[5%] w-12 h-12 bg-indigo-500/10 rounded-full animate-pulse"></div>
-              </div>
+              <TrendingTopicsSection />
             </div>
           </div>
         </div>
