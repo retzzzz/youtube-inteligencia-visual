@@ -20,17 +20,18 @@ const Login = () => {
   useEffect(() => {
     if (isLoggedIn) {
       const from = location.state?.from || "/dashboard";
-      navigate(from);
+      navigate(from, { replace: true });
     }
   }, [isLoggedIn, navigate, location.state]);
 
   // Function to handle login with Google
   const handleGoogleLogin = async () => {
     try {
+      // Make sure to include redirectTo with the correct origin
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: window.location.origin + "/dashboard",
+          redirectTo: `${window.location.origin}/dashboard`
         }
       });
       

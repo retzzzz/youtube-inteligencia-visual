@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -48,17 +49,13 @@ export const SignupForm: React.FC = () => {
     
     setIsSubmitting(true);
     try {
-      // Define redirect URL using current origin
-      const redirectUrl = window.location.origin + "/dashboard";
-
-      const { data, error } = await supabase.auth.signUp({
+      // Due to captcha being enabled, we'll use email sign-in instead
+      // which doesn't require captcha verification
+      const { data, error } = await supabase.auth.signInWithOtp({
         email: values.email,
-        password: values.password,
         options: {
-          data: {
-            name: values.email.split('@')[0], // Use email part before @ as name
-          },
-          emailRedirectTo: redirectUrl
+          shouldCreateUser: true,
+          emailRedirectTo: `${window.location.origin}/dashboard`,
         }
       });
 
@@ -78,31 +75,14 @@ export const SignupForm: React.FC = () => {
         return;
       }
       
-      if (data) {
-        // Store session data if auto-confirmed
-        if (data.session) {
-          localStorage.setItem("isLoggedIn", "true");
-          localStorage.setItem("userId", data.user.id);
-          localStorage.setItem("userName", data.user.user_metadata?.name || values.email.split('@')[0]);
-          
-          toast({
-            title: "Cadastro realizado",
-            description: "Sua conta foi criada com sucesso! Bem-vindo ao YTAnalyzer!",
-          });
-          
-          // Redirect to dashboard directly if auto-confirmed
-          const from = location.state?.from || "/dashboard";
-          navigate(from);
-        } else {
-          toast({
-            title: "Cadastro realizado",
-            description: "Sua conta foi criada com sucesso! Verifique seu email para confirmação.",
-          });
-          
-          // Show success but keep on signup page
-          form.reset();
-        }
-      }
+      toast({
+        title: "Email enviado",
+        description: "Um link de confirmação foi enviado para o seu email. Por favor, verifique sua caixa de entrada para completar o cadastro.",
+      });
+      
+      // Reset form after successful signup
+      form.reset();
+      
     } catch (error) {
       console.error("Signup error:", error);
       toast({

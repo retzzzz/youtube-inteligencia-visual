@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface PrivateRouteProps {
@@ -10,11 +10,19 @@ interface PrivateRouteProps {
 export const PrivateRoute: React.FC<PrivateRouteProps> = ({ requireSubscription = false }) => {
   const { isLoggedIn, subscription } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   
+  useEffect(() => {
+    // If we're not logged in, immediately redirect to login
+    if (!isLoggedIn) {
+      navigate('/login', { state: { from: location.pathname }, replace: true });
+    }
+  }, [isLoggedIn, navigate, location.pathname]);
+
   // Not logged in
   if (!isLoggedIn) {
-    // Redirect to login page, but remember where they were trying to go
-    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+    // Return null while the redirect effect takes place
+    return null;
   }
   
   // Page requires subscription but user doesn't have an active one
