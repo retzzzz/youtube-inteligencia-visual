@@ -26,27 +26,25 @@ export const PrivateRoute: React.FC<PrivateRouteProps> = ({ requireSubscription 
     return null;
   }
   
-  // Se não precisar de assinatura, permitir acesso
-  if (!requireSubscription) {
+  // Os tutoriais e todas as ferramentas são acessíveis durante o período de teste
+  // ou se o usuário tem assinatura ativa.
+  // Durante o período de avaliação gratuita, todas as ferramentas são disponíveis.
+  const hasTrialAccess = subscription?.isTrialing === true;
+  const hasActiveSubscription = subscription?.isActive && !subscription.isTrialing;
+  const hasAccess = hasTrialAccess || hasActiveSubscription;
+
+  // Se o usuário está tentando acessar uma página de tutorial, sempre permitir acesso
+  const isTutorialPage = location.pathname.includes('-tutorial');
+  if (isTutorialPage) {
     return <Outlet />;
   }
-  
-  // Verificar se o usuário tem assinatura ou está em período de teste
-  const trialDaysLeft = subscription?.isTrialing && subscription?.trialEnd
-    ? subscriptionService.getDaysRemaining(subscription.trialEnd)
-    : null;
-  
-  // Qualquer usuário em período de teste (independente dos dias restantes) 
-  // ou com assinatura ativa deve ter acesso
-  const hasActiveAccess = 
-    (subscription?.isActive && !subscription.isTrialing) || // Assinatura paga ativa
-    (subscription?.isTrialing === true); // Em período de teste (mesmo que seja 0 dias)
 
-  // Página requer assinatura/teste mas usuário não tem acesso ativo
-  if (requireSubscription && !hasActiveAccess) {
+  // Se o usuário não tem acesso e está tentando acessar uma ferramenta (não um tutorial),
+  // redirecionar para a página de assinatura
+  if (requireSubscription && !hasAccess) {
     return <Navigate to="/subscribe" replace />;
   }
   
-  // Usuário está autenticado e tem o nível de assinatura necessário ou teste válido
+  // Usuário está autenticado e tem acesso
   return <Outlet />;
 };

@@ -4,7 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, Youtube, Clock } from 'lucide-react';
+import { LogOut, Youtube, Clock, BookOpen } from 'lucide-react';
 import { SubscriptionBanner } from './subscription/SubscriptionBanner';
 import { subscriptionService } from '@/services/subscription';
 
@@ -44,6 +44,10 @@ const Header = () => {
                   </span>
                 </div>
               )}
+              <Link to="/tutorial" className="hidden md:flex items-center gap-1 px-2 py-1 bg-purple-500/10 rounded-md text-purple-300">
+                <BookOpen className="h-3.5 w-3.5" />
+                <span className="text-xs">Tutoriais</span>
+              </Link>
               <span className="text-blue-100/70 text-sm hidden md:inline">
                 Bem vindo, {user?.name || 'Usuário'}
               </span>
@@ -62,6 +66,9 @@ const Header = () => {
           <nav className="flex gap-2 flex-wrap mt-4">
             <NavLink to="/dashboard" currentPath={location.pathname}>
               Início
+            </NavLink>
+            <NavLink to="/tutorial" currentPath={location.pathname}>
+              Tutoriais
             </NavLink>
             <NavLink to="/search" currentPath={location.pathname}>
               Pesquisar

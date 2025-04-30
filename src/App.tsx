@@ -21,7 +21,7 @@ import { Toaster } from './components/ui/toaster';
 import ApiKeyDialog from './components/ApiKeyDialog';
 import './App.css';
 
-// Importar os novos tutoriais
+// Import tutorial pages
 import VideoAnalyzerTutorial from './pages/tutorials/VideoAnalyzerTutorial';
 import TitleGeneratorTutorial from './pages/tutorials/TitleGeneratorTutorial';
 import ScriptGeneratorTutorial from './pages/tutorials/ScriptGeneratorTutorial';
@@ -58,7 +58,7 @@ function App() {
               <Route path="/subnicho-validator" element={<SubnicheValidator />} />
               <Route path="/micro-subnicho-analyzer" element={<MicroSubnicheAnalyzer />} />
               
-              {/* Tutoriais detalhados */}
+              {/* Tutorial pages - fixing the path to match the actual routes */}
               <Route path="/video-analyzer-tutorial" element={<VideoAnalyzerTutorial />} />
               <Route path="/title-generator-tutorial" element={<TitleGeneratorTutorial />} />
               <Route path="/script-generator-tutorial" element={<ScriptGeneratorTutorial />} />
