@@ -14,7 +14,7 @@ export const PrivateRoute: React.FC<PrivateRouteProps> = ({ requireSubscription 
   // Not logged in
   if (!isLoggedIn) {
     // Redirect to login page, but remember where they were trying to go
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
   
   // Page requires subscription but user doesn't have an active one

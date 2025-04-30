@@ -83,6 +83,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           } else {
             setNeedsApiKey(true);
           }
+
+          // Redirect to dashboard if on login page
+          if (window.location.pathname === '/login' || window.location.pathname === '/') {
+            navigate('/dashboard');
+          }
         } else if (event === 'SIGNED_OUT') {
           // User signed out
           localStorage.removeItem("isLoggedIn");
@@ -121,6 +126,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
           // Check subscription
           await checkSubscription();
+
+          // Redirect to dashboard if on login page
+          if (window.location.pathname === '/login' || window.location.pathname === '/') {
+            navigate('/dashboard');
+          }
         } else {
           // Not logged in, check current route
           const isPublicRoute = 
