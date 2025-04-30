@@ -25,8 +25,8 @@ const Login = () => {
   // Function to handle login with Google
   const handleGoogleLogin = async () => {
     try {
-      // Get the production domain or current origin
-      const redirectUrl = "https://ytanalyzer.pro" || window.location.origin;
+      // Use production domain for redirect
+      const redirectUrl = "https://ytanalyzer.pro";
       console.log("Redirecionando para:", redirectUrl);
       
       const { data, error } = await supabase.auth.signInWithOAuth({
