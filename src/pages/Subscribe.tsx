@@ -4,12 +4,18 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, CheckCircle, CreditCard } from 'lucide-react';
+import { Clock, CheckCircle, CreditCard, AlertTriangle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { subscriptionService } from '@/services/subscription';
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Subscribe = () => {
   const { subscription, isLoggedIn } = useAuth();
+  
+  // Verificar se o período de teste expirou
+  const trialExpired = subscription?.isTrialing && 
+    subscription?.trialEnd && 
+    subscriptionService.getDaysRemaining(subscription.trialEnd) === 0;
   
   const handleSubscribe = async () => {
     try {
@@ -26,9 +32,23 @@ const Subscribe = () => {
       
       <main className="flex-grow w-full px-4 md:px-8 py-6 mb-8">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8 text-center">Plano de Assinatura</h1>
+          <h1 className="text-3xl font-bold mb-4 text-center">Plano de Assinatura</h1>
           
-          {isLoggedIn && subscription?.isTrialing && (
+          {trialExpired && (
+            <Alert className="mb-8 border-red-300 bg-red-50">
+              <div className="flex items-center">
+                <AlertTriangle className="h-6 w-6 text-red-500 mr-3" />
+                <div>
+                  <h3 className="font-bold text-red-700">Seu período de avaliação gratuita terminou</h3>
+                  <AlertDescription className="text-red-600">
+                    Assine agora para continuar tendo acesso completo a todas as funcionalidades do YTAnalyzerPro.
+                  </AlertDescription>
+                </div>
+              </div>
+            </Alert>
+          )}
+          
+          {isLoggedIn && subscription?.isTrialing && !trialExpired && (
             <Card className="mb-8 border-blue-200 bg-blue-50">
               <CardHeader>
                 <CardTitle className="flex items-center text-blue-700">
@@ -82,9 +102,11 @@ const Subscribe = () => {
                 className="w-full md:w-auto"
               >
                 <CreditCard className="mr-2 h-4 w-4" />
-                {subscription?.isTrialing 
+                {subscription?.isTrialing && !trialExpired
                   ? "Assinar Agora" 
-                  : "Iniciar Assinatura - R$ 69,99/mês"}
+                  : trialExpired 
+                    ? "Iniciar Assinatura - R$ 69,99/mês"
+                    : "Iniciar Assinatura - R$ 69,99/mês"}
               </Button>
             </CardFooter>
           </Card>

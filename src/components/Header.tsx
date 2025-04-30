@@ -4,8 +4,9 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, Youtube } from 'lucide-react';
+import { LogOut, Youtube, Clock } from 'lucide-react';
 import { SubscriptionBanner } from './subscription/SubscriptionBanner';
+import { subscriptionService } from '@/services/subscription';
 
 const Header = () => {
   const location = useLocation();
@@ -25,11 +26,21 @@ const Header = () => {
     location.pathname.startsWith(path)
   );
   
+  // Calcular dias restantes de teste
+  const trialDaysLeft = subscription?.isTrialing && subscription?.trialEnd
+    ? subscriptionService.getDaysRemaining(subscription.trialEnd)
+    : 0;
+  
+  // Verificar se o usuário está no último dia de teste
+  const isLastDayOfTrial = trialDaysLeft === 0 && subscription?.isTrialing;
+  
   // Verificar se o usuário não tem uma assinatura ativa e está tentando acessar uma rota que requer assinatura
-  const shouldRedirectToSubscribe = currentPathRequiresSubscription && 
+  // Ou se está no último dia de teste
+  const shouldRedirectToSubscribe = (currentPathRequiresSubscription && 
     subscription && 
     !subscription.isActive && 
-    !subscription.isTrialing;
+    !subscription.isTrialing) || 
+    (isLastDayOfTrial && location.pathname !== '/subscribe');
   
   // Redirecionar para a página de assinatura se necessário
   React.useEffect(() => {
@@ -55,6 +66,14 @@ const Header = () => {
             </h1>
             
             <div className="flex items-center gap-3">
+              {subscription?.isTrialing && trialDaysLeft > 0 && (
+                <div className="hidden md:flex items-center gap-1 px-2 py-1 bg-blue-500/10 rounded-md text-blue-300">
+                  <Clock className="h-3.5 w-3.5" />
+                  <span className="text-xs">
+                    {trialDaysLeft} {trialDaysLeft === 1 ? 'dia' : 'dias'} restantes
+                  </span>
+                </div>
+              )}
               <span className="text-blue-100/70 text-sm hidden md:inline">
                 Bem vindo, {user?.name || 'Usuário'}
               </span>

@@ -30,6 +30,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const subscriptionDetails = await fetchSubscriptionDetails();
     if (subscriptionDetails) {
       setSubscription(subscriptionDetails);
+      
+      // Verificar se o período de teste expirou
+      if (subscriptionDetails.isTrialing && 
+          subscriptionDetails.trialEnd && 
+          new Date() > new Date(subscriptionDetails.trialEnd)) {
+        // Redirecionar para página de assinatura se o período de teste expirou
+        navigate('/subscribe');
+      }
     }
   };
 
@@ -70,13 +78,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               setNeedsApiKey(true);
             }
 
-            // Only redirect to dashboard from login page
-            if (window.location.pathname === '/login' || window.location.pathname === '/') {
-              if (savedApiKey) {
-                navigate('/dashboard');
-              }
-              // Se não tem API key salva, o ApiKeyDialog será mostrado
-              // e cuidará do redirecionamento após a definição da chave
+            // Only redirect to dashboard from login page if trial has not expired
+            if ((window.location.pathname === '/login' || window.location.pathname === '/') && savedApiKey) {
+              // Essa redireção será condicional à validade do período de teste,
+              // pois checkSubscription já redireciona para /subscribe se o trial expirou
+              navigate('/dashboard');
             }
           } else if (event === 'SIGNED_OUT') {
             // User signed out

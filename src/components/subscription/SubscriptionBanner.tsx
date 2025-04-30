@@ -2,15 +2,32 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Clock, CreditCard, CheckCircle } from 'lucide-react';
+import { Clock, CreditCard, CheckCircle, AlertTriangle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { subscriptionService } from '@/services/subscription';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export const SubscriptionBanner: React.FC = () => {
   const { isLoggedIn, subscription } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
   
   if (!isLoggedIn || !subscription) {
     return null;
+  }
+  
+  // Trial expired - show banner only on /subscribe page to avoid duplicate alerts
+  if (subscription.isTrialing && subscription.trialEnd && 
+      subscriptionService.getDaysRemaining(subscription.trialEnd) === 0 && 
+      location.pathname === '/subscribe') {
+    return (
+      <Alert className="bg-red-50 border-red-200 mb-4">
+        <AlertTriangle className="h-4 w-4 text-red-500 mr-2" />
+        <AlertDescription className="text-red-700">
+          <span>Seu período de avaliação gratuita terminou. Assine agora para continuar tendo acesso completo a todas as funcionalidades.</span>
+        </AlertDescription>
+      </Alert>
+    );
   }
   
   // User has an active paid subscription
@@ -24,7 +41,7 @@ export const SubscriptionBanner: React.FC = () => {
             variant="outline" 
             size="sm" 
             className="border-green-500 text-green-700"
-            onClick={() => window.location.href = '/subscribe'}
+            onClick={() => navigate('/subscribe')}
           >
             Gerenciar Assinatura
           </Button>
@@ -33,42 +50,49 @@ export const SubscriptionBanner: React.FC = () => {
     );
   }
   
-  // User is in trial period
+  // User is in trial period with days remaining
   if (subscription.isTrialing && subscription.trialEnd) {
     const daysLeft = subscriptionService.getDaysRemaining(subscription.trialEnd);
+    
+    if (daysLeft > 0) {
+      return (
+        <Alert className="bg-blue-50 border-blue-200 mb-4">
+          <Clock className="h-4 w-4 text-blue-500 mr-2" />
+          <AlertDescription className="text-blue-700 flex items-center justify-between w-full">
+            <span>
+              Seu período de avaliação gratuita termina em {daysLeft} {daysLeft === 1 ? 'dia' : 'dias'} 
+              ({subscriptionService.formatEndDate(subscription.trialEnd)})
+            </span>
+            <Button 
+              className="ml-2" 
+              onClick={() => navigate('/subscribe')}
+            >
+              <CreditCard className="h-4 w-4 mr-2" />
+              Assinar Agora
+            </Button>
+          </AlertDescription>
+        </Alert>
+      );
+    }
+  }
+  
+  // Trial expired or no subscription (for pages other than /subscribe)
+  if (location.pathname !== '/subscribe') {
     return (
-      <Alert className="bg-blue-50 border-blue-200 mb-4">
-        <Clock className="h-4 w-4 text-blue-500 mr-2" />
-        <AlertDescription className="text-blue-700 flex items-center justify-between w-full">
-          <span>
-            Seu período de avaliação gratuita termina em {daysLeft} {daysLeft === 1 ? 'dia' : 'dias'} 
-            ({subscriptionService.formatEndDate(subscription.trialEnd)})
-          </span>
+      <Alert className="bg-amber-50 border-amber-200 mb-4">
+        <AlertDescription className="text-amber-700 flex items-center justify-between w-full">
+          <span>Seu período de avaliação terminou. Assine para continuar utilizando todos os recursos.</span>
           <Button 
             className="ml-2" 
-            onClick={() => window.location.href = '/subscribe'}
+            onClick={() => navigate('/subscribe')}
           >
             <CreditCard className="h-4 w-4 mr-2" />
-            Assinar Agora
+            Assinar por R$ 69,99/mês
           </Button>
         </AlertDescription>
       </Alert>
     );
   }
   
-  // Trial expired or no subscription
-  return (
-    <Alert className="bg-amber-50 border-amber-200 mb-4">
-      <AlertDescription className="text-amber-700 flex items-center justify-between w-full">
-        <span>Seu período de avaliação terminou. Assine para continuar utilizando todos os recursos.</span>
-        <Button 
-          className="ml-2" 
-          onClick={() => window.location.href = '/subscribe'}
-        >
-          <CreditCard className="h-4 w-4 mr-2" />
-          Assinar por R$ 69,99/mês
-        </Button>
-      </AlertDescription>
-    </Alert>
-  );
+  return null;
 };
