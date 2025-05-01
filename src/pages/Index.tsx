@@ -2,10 +2,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Search, BarChart2, FileText, Compass, Target, Youtube } from 'lucide-react'; 
-import WelcomeMessage from '@/components/WelcomeMessage';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { Button } from '@/components/ui/button';
 import TrendingTopicsSection from '@/components/TrendingTopicsSection';
 
 const Index = () => {
@@ -48,23 +46,13 @@ const Index = () => {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#0E122D] relative">
+    <div className="flex flex-col min-h-screen bg-[#0E122D] relative" style={{ pointerEvents: 'auto' }}>
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(29,58,180,0.15),rgba(0,0,0,0))]" />
       <Header />
-      <main className="flex-grow w-full">
-        <WelcomeMessage />
-        
+      <main className="flex-grow w-full" style={{ pointerEvents: 'auto' }}>
         <div className="container mx-auto px-4 my-6">
           <div className="mb-8">
             <TrendingTopicsSection />
-          </div>
-          
-          <div className="text-center mb-8">
-            <Button variant="outline" size="lg" className="border-white/20 hover:bg-white/10">
-              <Link to="/landing" className="flex items-center gap-2">
-                Ver Nossa Página de Destaque
-              </Link>
-            </Button>
           </div>
         </div>
         
@@ -74,6 +62,7 @@ const Index = () => {
               to={tool.path} 
               key={index} 
               className="group relative"
+              style={{ pointerEvents: 'auto' }}
             >
               <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 opacity-20 blur transition duration-1000 group-hover:opacity-30" />
               <div className="relative h-full backdrop-blur-xl bg-white/5 rounded-xl p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-blue-500/10">
