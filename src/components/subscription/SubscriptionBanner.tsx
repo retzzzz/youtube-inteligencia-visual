@@ -12,6 +12,9 @@ export const SubscriptionBanner: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
+  // Log all parameters from location to debug
+  console.log("Full location object:", location);
+  
   // Ensure we have subscription data
   useEffect(() => {
     console.log("SubscriptionBanner mounted, current subscription:", subscription);
@@ -22,11 +25,16 @@ export const SubscriptionBanner: React.FC = () => {
     }
   }, [isLoggedIn, subscription, checkSubscription]);
   
-  // Forced debug log to see what's happening
+  // Always log the current subscription state for debugging
   console.log("SubscriptionBanner rendering with:", { 
     isLoggedIn, 
     subscription,
-    path: location.pathname
+    subscriptionDetails: subscription ? {
+      isActive: subscription.isActive,
+      isTrialing: subscription.isTrialing,
+      trialEnd: subscription.trialEnd,
+      daysLeft: subscription.trialEnd ? subscriptionService.getDaysRemaining(subscription.trialEnd) : 'N/A'
+    } : 'No subscription'
   });
   
   if (!isLoggedIn) {
@@ -35,7 +43,6 @@ export const SubscriptionBanner: React.FC = () => {
   }
   
   // Default trial information when subscription data is missing or loading
-  // Always show something to the user when they're logged in
   if (!subscription) {
     console.log("No subscription data yet, showing default trial banner");
     
@@ -72,7 +79,7 @@ export const SubscriptionBanner: React.FC = () => {
       ? subscriptionService.formatEndDate(subscription.trialEnd) 
       : '';
     
-    console.log("Trial info:", { daysLeft, formattedDate });
+    console.log("Trial info:", { daysLeft, formattedDate, trialEnd: subscription.trialEnd });
     
     // Show trial banner with days remaining
     return (
@@ -96,7 +103,7 @@ export const SubscriptionBanner: React.FC = () => {
     );
   }
   
-  // Trial expired
+  // Trial expired but still showing as trial
   if (subscription.isTrialing && subscription.trialEnd && 
       subscriptionService.getDaysRemaining(subscription.trialEnd) <= 0) {
     return (

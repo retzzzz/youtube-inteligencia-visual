@@ -2,10 +2,10 @@
 import { supabase } from '../lib/supabase';
 import { loadStripe } from '@stripe/stripe-js';
 
-// Chave pública do Stripe (deve ser substituída pela sua chave real)
+// Stripe public key (should be replaced with your real key)
 const STRIPE_PUBLIC_KEY = 'pk_test_TYooMQauvdEDq54NiTphI7jx';
 
-// Inicialização do Stripe
+// Stripe initialization
 let stripePromise: ReturnType<typeof loadStripe> | null = null;
 
 const getStripe = () => {
@@ -22,7 +22,7 @@ export interface SubscriptionDetails {
   subscriptionEnd: Date | null;
   planName: string;
   price: number;
-  trialStartDate: Date | null; // Adicionando data de início do trial
+  trialStartDate: Date | null; // Adding trial start date
 }
 
 export const subscriptionService = {
@@ -166,20 +166,30 @@ export const subscriptionService = {
   
   /**
    * Calculate days remaining in trial or subscription
+   * Improved to handle timezone differences better
    */
   getDaysRemaining(endDate: Date | null): number {
     if (!endDate) return 0;
     
     const now = new Date();
     
-    // Resetar horas, minutos e segundos para comparar apenas datas
-    now.setHours(0, 0, 0, 0);
-    const endDateCopy = new Date(endDate);
-    endDateCopy.setHours(0, 0, 0, 0);
+    // Get dates in YYYY-MM-DD format to ensure proper day comparison regardless of time
+    const todayStr = now.toISOString().split('T')[0];
+    const endDateStr = endDate.toISOString().split('T')[0];
     
-    // Calcular a diferença em dias
-    const diffTime = endDateCopy.getTime() - now.getTime();
+    // Convert back to Date objects at midnight UTC
+    const todayDate = new Date(todayStr);
+    const endDateObj = new Date(endDateStr);
+    
+    // Calculate the difference in days
+    const diffTime = endDateObj.getTime() - todayDate.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    console.log("Days calculation:", { 
+      today: todayStr, 
+      endDate: endDateStr, 
+      diffDays: diffDays 
+    });
     
     return Math.max(0, diffDays);
   },
