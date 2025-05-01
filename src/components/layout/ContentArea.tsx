@@ -16,7 +16,7 @@ const ContentArea: React.FC<ContentAreaProps> = ({ children, title, description 
           {description && <p className="text-muted-foreground mt-1">{description}</p>}
         </div>
       )}
-      <div className="space-y-6">
+      <div className="space-y-6" style={{ pointerEvents: 'auto' }}>
         {children}
       </div>
     </main>
