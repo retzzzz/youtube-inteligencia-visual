@@ -11,13 +11,15 @@ const RelatedVideos: React.FC<RelatedVideosProps> = ({ topic }) => {
     return null;
   }
 
-  const handleVideoClick = (videoId: string, videoTitle: string) => {
+  const handleVideoClick = (e: React.MouseEvent, videoId: string, videoTitle: string) => {
+    e.stopPropagation();
     console.log("Video clicked:", videoId, videoTitle);
-    // Implementação de rastreamento ou lógica adicional se necessário
+    // Tracking implementation or additional logic if needed
+    // Allow the default anchor behavior to navigate
   };
 
   return (
-    <div className="pt-2">
+    <div className="pt-2 z-10">
       <h3 className="text-sm font-medium mb-2">Vídeos populares sobre "{topic.title}"</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         {topic.relatedVideos.slice(0, 2).map((video, idx) => (
@@ -26,8 +28,8 @@ const RelatedVideos: React.FC<RelatedVideosProps> = ({ topic }) => {
             href={`https://youtube.com/watch?v=${video.id}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-start gap-2 p-2 rounded-md hover:bg-white/5 transition-colors"
-            onClick={() => handleVideoClick(video.id, video.title)}
+            className="flex items-start gap-2 p-2 rounded-md hover:bg-white/5 transition-colors cursor-pointer z-10"
+            onClick={(e) => handleVideoClick(e, video.id, video.title)}
           >
             <div className="flex-shrink-0 w-16 h-10 bg-gray-800 rounded overflow-hidden">
               {video.thumbnail && (

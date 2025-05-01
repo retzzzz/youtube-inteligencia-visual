@@ -10,10 +10,19 @@ interface MainLayoutProps {
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+  // Add click event logging to help debug
+  const handleMainLayoutClick = (e: React.MouseEvent) => {
+    console.log("MainLayout clicked:", e.target);
+  };
+
   return (
-    <div className="flex flex-col min-h-screen relative">
+    <div 
+      className="flex flex-col min-h-screen w-full"
+      onClick={handleMainLayoutClick}
+      style={{ isolation: "isolate" }} // Creates a stacking context
+    >
       <Header />
-      <div className="flex-grow w-full px-4 md:px-8 py-6 mb-8 relative z-0">
+      <div className="flex-grow w-full px-4 md:px-8 py-6 mb-8 z-0">
         {children}
       </div>
       <Footer />

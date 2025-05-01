@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { TrendingTopic } from './trending/types';
 
-// Import the new components
+// Import the components
 import RegionSelector from './trending/RegionSelector';
 import TopicsList from './trending/TopicsList';
 import RelatedVideos from './trending/RelatedVideos';
@@ -95,20 +95,30 @@ const TrendingTopicsSection = () => {
     setSelectedTopic(index);
   };
 
+  // Add debug click handler
+  const handleCardClick = (e: React.MouseEvent) => {
+    console.log("Card clicked:", e.target);
+  };
+
   return (
-    <Card className="bg-gradient-to-b from-[#141b41]/50 to-[#1a1f40]/50 border-none shadow-lg">
+    <Card 
+      className="bg-gradient-to-b from-[#141b41]/50 to-[#1a1f40]/50 border-none shadow-lg"
+      onClick={handleCardClick}
+    >
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <TrendingUp className="h-6 w-6 text-blue-400" />
             <CardTitle className="text-xl text-white">Tópicos em Alta</CardTitle>
           </div>
-          <RegionSelector 
-            selectedRegion={selectedRegion}
-            onRegionChange={handleRegionChange}
-            onRefresh={handleRefresh}
-            isLoading={isLoading}
-          />
+          <div className="z-10">
+            <RegionSelector 
+              selectedRegion={selectedRegion}
+              onRegionChange={handleRegionChange}
+              onRefresh={handleRefresh}
+              isLoading={isLoading}
+            />
+          </div>
         </div>
       </CardHeader>
       
@@ -119,11 +129,13 @@ const TrendingTopicsSection = () => {
           <ErrorState error={error} onRetry={() => fetchTrendingTopics(selectedRegion)} />
         ) : (
           <div className="space-y-4">
-            <TopicsList 
-              topics={trendingTopics} 
-              selectedTopic={selectedTopic} 
-              onSelectTopic={handleTopicSelect} 
-            />
+            <div className="z-10 relative">
+              <TopicsList 
+                topics={trendingTopics} 
+                selectedTopic={selectedTopic} 
+                onSelectTopic={handleTopicSelect} 
+              />
+            </div>
             
             {trendingTopics.length > 0 && <CreatorTip />}
             
@@ -132,10 +144,12 @@ const TrendingTopicsSection = () => {
             )}
 
             {trendingTopics.length > 0 && (
-              <SearchTopicButton 
-                topic={trendingTopics[selectedTopic]?.title || ""} 
-                onSearch={handleSearchTopic}
-              />
+              <div className="z-10 relative">
+                <SearchTopicButton 
+                  topic={trendingTopics[selectedTopic]?.title || ""} 
+                  onSearch={handleSearchTopic}
+                />
+              </div>
             )}
           </div>
         )}

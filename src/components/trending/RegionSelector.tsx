@@ -17,25 +17,29 @@ const RegionSelector: React.FC<RegionSelectorProps> = ({
   onRefresh, 
   isLoading 
 }) => {
-  const handleRegionClick = (regionCode: string) => {
+  const handleRegionClick = (e: React.MouseEvent, regionCode: string) => {
+    e.preventDefault();
+    e.stopPropagation();
     console.log("Region button clicked:", regionCode);
     onRegionChange(regionCode);
   };
 
-  const handleRefreshClick = () => {
+  const handleRefreshClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     console.log("Refresh button clicked");
     onRefresh();
   };
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-1 z-20">
       {regions.map(region => (
         <Button 
           key={region.code}
           size="sm"
           variant={selectedRegion === region.code ? "secondary" : "ghost"}
-          className="flex items-center gap-1 text-xs"
-          onClick={() => handleRegionClick(region.code)}
+          className="flex items-center gap-1 text-xs cursor-pointer"
+          onClick={(e) => handleRegionClick(e, region.code)}
           type="button"
         >
           <Globe className="h-3.5 w-3.5" />
@@ -45,7 +49,7 @@ const RegionSelector: React.FC<RegionSelectorProps> = ({
       <Button
         size="sm"
         variant="ghost"
-        className="text-xs"
+        className="text-xs cursor-pointer"
         onClick={handleRefreshClick}
         disabled={isLoading}
         type="button"

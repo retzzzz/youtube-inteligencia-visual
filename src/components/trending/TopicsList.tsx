@@ -14,13 +14,15 @@ const TopicsList: React.FC<TopicsListProps> = ({
   selectedTopic, 
   onSelectTopic 
 }) => {
-  const handleTopicClick = (index: number) => {
+  const handleTopicClick = (e: React.MouseEvent, index: number) => {
+    e.preventDefault();
+    e.stopPropagation();
     console.log("Topic badge clicked:", index);
     onSelectTopic(index);
   };
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-2 z-10">
       {topics.slice(0, 10).map((topic, index) => (
         <Badge 
           key={index} 
@@ -28,10 +30,15 @@ const TopicsList: React.FC<TopicsListProps> = ({
             selectedTopic === index 
               ? 'bg-blue-500/40 text-blue-100 border-blue-400' 
               : 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border-blue-500/30'
-          } cursor-pointer flex items-center gap-1 transition-colors`}
-          onClick={() => handleTopicClick(index)}
+          } cursor-pointer flex items-center gap-1 transition-colors z-10`}
+          onClick={(e) => handleTopicClick(e, index)}
           role="button"
           tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              handleTopicClick(e as unknown as React.MouseEvent, index);
+            }
+          }}
         >
           <span className="text-xs font-normal">{index + 1}</span>
           <span>{topic.title}</span>

@@ -9,7 +9,7 @@ interface ContentAreaProps {
 
 const ContentArea: React.FC<ContentAreaProps> = ({ children, title, description }) => {
   return (
-    <main className="w-full max-w-7xl mx-auto">
+    <main className="w-full max-w-7xl mx-auto" style={{ isolation: "isolate" }}>
       {title && (
         <div className="mb-6">
           <h2 className="text-2xl font-bold">{title}</h2>

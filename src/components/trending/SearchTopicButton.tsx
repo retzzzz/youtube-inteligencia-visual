@@ -9,7 +9,9 @@ interface SearchTopicButtonProps {
 }
 
 const SearchTopicButton: React.FC<SearchTopicButtonProps> = ({ topic, onSearch }) => {
-  const handleSearchClick = () => {
+  const handleSearchClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     console.log("Search button clicked for topic:", topic);
     if (topic) {
       onSearch(topic);
@@ -17,11 +19,11 @@ const SearchTopicButton: React.FC<SearchTopicButtonProps> = ({ topic, onSearch }
   };
 
   return (
-    <div className="flex items-center justify-center pt-2">
+    <div className="flex items-center justify-center pt-2 z-10">
       <Button 
         variant="outline" 
         size="sm" 
-        className="bg-blue-900/20 border-blue-700/30 hover:bg-blue-900/40"
+        className="bg-blue-900/20 border-blue-700/30 hover:bg-blue-900/40 cursor-pointer z-10"
         onClick={handleSearchClick}
         type="button"
       >
