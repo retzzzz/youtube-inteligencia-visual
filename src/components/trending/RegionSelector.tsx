@@ -26,7 +26,6 @@ const RegionSelector: React.FC<RegionSelectorProps> = ({
           variant={selectedRegion === region.code ? "secondary" : "ghost"}
           className="flex items-center gap-1 text-xs"
           onClick={() => onRegionChange(region.code)}
-          style={{ pointerEvents: 'auto' }}
         >
           <Globe className="h-3.5 w-3.5" />
           {region.name}
@@ -38,7 +37,6 @@ const RegionSelector: React.FC<RegionSelectorProps> = ({
         className="text-xs"
         onClick={onRefresh}
         disabled={isLoading}
-        style={{ pointerEvents: 'auto' }}
       >
         <RefreshCw className={`h-3.5 w-3.5 ${isLoading ? 'animate-spin' : ''}`} />
       </Button>

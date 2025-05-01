@@ -35,7 +35,7 @@ function App() {
   return (
     <AuthProvider>
       <LayoutProvider>
-        <div className="flex flex-col min-h-screen w-screen max-w-none" style={{ pointerEvents: 'auto' }}>
+        <div className="flex flex-col min-h-screen w-screen max-w-none">
           <div className="flex-grow">
             <Routes>
               {/* Public routes */}

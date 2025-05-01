@@ -16,7 +16,6 @@ const SearchTopicButton: React.FC<SearchTopicButtonProps> = ({ topic, onSearch }
         size="sm" 
         className="bg-blue-900/20 border-blue-700/30 hover:bg-blue-900/40"
         onClick={() => onSearch(topic)}
-        style={{ pointerEvents: 'auto' }}
       >
         <Search className="h-3.5 w-3.5 mr-1" />
         Pesquisar "{topic || "YouTube"}"

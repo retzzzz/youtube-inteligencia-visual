@@ -22,7 +22,6 @@ const RelatedVideos: React.FC<RelatedVideosProps> = ({ topic }) => {
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-start gap-2 p-2 rounded-md hover:bg-white/5 transition-colors"
-            style={{ pointerEvents: 'auto' }}
           >
             <div className="flex-shrink-0 w-16 h-10 bg-gray-800 rounded overflow-hidden">
               {video.thumbnail && (

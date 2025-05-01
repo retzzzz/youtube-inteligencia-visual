@@ -25,7 +25,7 @@ const TopicsList: React.FC<TopicsListProps> = ({
               : 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border-blue-500/30'
           } cursor-pointer flex items-center gap-1 transition-colors`}
           onClick={() => onSelectTopic(index)}
-          style={{ pointerEvents: 'auto' }}
+          role="button"
         >
           <span className="text-xs font-normal">{index + 1}</span>
           <span>{topic.title}</span>

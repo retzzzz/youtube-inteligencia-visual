@@ -15,7 +15,6 @@ const ErrorState: React.FC<ErrorStateProps> = ({ error, onRetry }) => {
         variant="outline" 
         size="sm"
         onClick={onRetry}
-        style={{ pointerEvents: 'auto' }}
       >
         Tentar Novamente
       </Button>
