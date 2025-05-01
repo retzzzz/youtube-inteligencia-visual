@@ -8,7 +8,6 @@ const corsHeaders = {
 };
 
 const YOUTUBE_API_BASE_URL = "https://www.googleapis.com/youtube/v3/search";
-const YOUTUBE_MOST_POPULAR_URL = "https://www.googleapis.com/youtube/v3/videos";
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -21,19 +20,19 @@ serve(async (req) => {
     
     console.log(`Fetching trending topics for region: ${region}`);
     
-    // For demonstration - Mock trending topics if region is GLOBAL
+    // For demonstration - Mock trending topics if region is GLOBAL (since Google Trends API doesn't have a global endpoint)
     if (region === 'GLOBAL') {
       const mockGlobalTopics = [
-        { title: "Inteligência Artificial", value: 450000, category: "Tecnologia" },
-        { title: "Criptomoedas", value: 380000, category: "Finanças" },
-        { title: "Desenvolvimento Web", value: 320000, category: "Tecnologia" },
-        { title: "Marketing Digital", value: 290000, category: "Negócios" },
-        { title: "Produção de Vídeos", value: 275000, category: "Mídia" },
-        { title: "Monetização YouTube", value: 265000, category: "Conteúdo" },
-        { title: "Edição de Vídeo", value: 245000, category: "Produção" },
-        { title: "Growth Hacking", value: 220000, category: "Marketing" },
-        { title: "Análise de Dados", value: 210000, category: "Tecnologia" },
-        { title: "SEO YouTube", value: 190000, category: "Otimização" },
+        { title: "Tecnologia Emergente", value: 450000, category: "Tecnologia" },
+        { title: "Inteligência Artificial", value: 380000, category: "Tecnologia" },
+        { title: "Mudanças Climáticas", value: 320000, category: "Ciência" },
+        { title: "Finanças Pessoais", value: 290000, category: "Finanças" },
+        { title: "Desenvolvimento Web", value: 275000, category: "Tecnologia" },
+        { title: "Saúde Mental", value: 265000, category: "Saúde" },
+        { title: "Marketing Digital", value: 245000, category: "Negócios" },
+        { title: "Produtividade", value: 220000, category: "Estilo de Vida" },
+        { title: "Investimentos", value: 210000, category: "Finanças" },
+        { title: "Design UX", value: 190000, category: "Tecnologia" },
       ];
       
       return new Response(
@@ -46,26 +45,23 @@ serve(async (req) => {
       );
     }
 
-    // Use the YouTube Data API to get trending videos
-    const youtubeApiKey = Deno.env.get('GEMINI_API_KEY') || Deno.env.get('YOUTUBE_API_KEY'); 
+    // Use the YouTube Data API to get trending videos - simpler than Google Trends API
+    const youtubeApiKey = Deno.env.get('GEMINI_API_KEY'); // Reusing the Gemini API key slot
     
     if (!youtubeApiKey) {
-      console.log("API key not configured, returning fallback data");
       throw new Error("YouTube API key not configured");
     }
     
-    // Set up region code parameter
+    // For Brazil or US
     let geoParam = "";
     if (region === 'BR') {
       geoParam = "&regionCode=BR";
     } else if (region === 'US') {
       geoParam = "&regionCode=US";
-    } else if (region === 'ES') {
-      geoParam = "&regionCode=ES";
     }
     
-    // Get trending videos from YouTube using most popular endpoint
-    const youtubeUrl = `${YOUTUBE_MOST_POPULAR_URL}?part=snippet,statistics&chart=mostPopular&maxResults=15${geoParam}&key=${youtubeApiKey}`;
+    // Get trending videos from YouTube
+    const youtubeUrl = `${YOUTUBE_API_BASE_URL}?part=snippet&maxResults=10&type=video&videoCategoryId=0&chart=mostPopular${geoParam}&key=${youtubeApiKey}`;
     
     console.log("Fetching data from YouTube API...");
     const response = await fetch(youtubeUrl);
@@ -82,84 +78,56 @@ serve(async (req) => {
       throw new Error("No trending videos found");
     }
     
-    // Extract topics from video titles and categories
-    const titleWords = data.items.flatMap(item => {
-      const title = item.snippet.title || "";
-      // Extract words with at least 4 characters that don't start with numbers
-      return title.split(/\s+/)
-        .filter(word => word.length > 4 && !/^\d/.test(word))
-        .map(word => word.replace(/[,.;:!?()[\]{}'"]/g, ''))
-        .filter(word => /^[A-Za-zÀ-ÿ]+$/.test(word));
+    // Transform YouTube response into our trending topics format
+    const trendingTopics = data.items.map((item, index) => {
+      // Extract useful information from each video
+      return {
+        title: item.snippet.title.split('|')[0].split('-')[0].split('(')[0].trim(),
+        value: 10000 - (index * 1000), // Fake value for sorting/display
+        category: item.snippet.categoryId,
+        videoId: item.id.videoId || item.id,
+        channelTitle: item.snippet.channelTitle,
+        thumbnails: item.snippet.thumbnails,
+        publishedAt: item.snippet.publishedAt
+      };
     });
     
-    // Count word frequency
-    const wordCount = {};
-    titleWords.forEach(word => {
-      const lowerWord = word.toLowerCase();
-      wordCount[lowerWord] = (wordCount[lowerWord] || 0) + 1;
+    // Sometimes YouTube titles can be very specific, so let's try to extract keywords as topics
+    const topicsFromTitles = new Set();
+    trendingTopics.forEach((video) => {
+      const words = video.title.split(' ');
+      
+      // Extract potential topics (words with 4+ characters, max 3 words)
+      if (words.length > 2) {
+        const potentialTopic = words.slice(0, 3).join(' ');
+        if (potentialTopic.length > 10) {
+          topicsFromTitles.add(potentialTopic);
+        }
+      }
+      
+      // Look for important words
+      words.forEach((word) => {
+        if (word.length > 5 && /^[A-Za-zÀ-ú]+$/.test(word)) {
+          topicsFromTitles.add(word);
+        }
+      });
     });
     
-    // Extract top topics
-    const topTopics = Object.entries(wordCount)
-      .filter(([word, count]) => count > 1 && word.length > 4)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 15)
-      .map(([word, count], index) => {
-        // Find videos related to this topic
-        const relatedVideos = data.items
-          .filter(item => item.snippet.title.toLowerCase().includes(word.toLowerCase()))
-          .slice(0, 3)
-          .map(item => ({
-            id: item.id,
-            title: item.snippet.title,
-            thumbnail: item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default?.url,
-            channelTitle: item.snippet.channelTitle,
-            views: parseInt(item.statistics?.viewCount || "0"),
-            publishedAt: item.snippet.publishedAt
-          }));
-        
-        return {
-          title: word.charAt(0).toUpperCase() + word.slice(1),
-          value: 10000 - (index * 500),
-          category: "Trending",
-          relatedVideos
-        };
-      });
-      
-    // If we couldn't extract good topics from titles, use videos directly
-    if (topTopics.length < 5) {
-      const videoTopics = data.items.slice(0, 10).map((item, index) => {
-        const topic = {
-          title: item.snippet.title.split(/[|\-:]/)[0].trim().slice(0, 30),
-          value: 10000 - (index * 500),
-          category: item.snippet.categoryId,
-          relatedVideos: [{
-            id: item.id,
-            title: item.snippet.title,
-            thumbnail: item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default?.url,
-            channelTitle: item.snippet.channelTitle,
-            views: parseInt(item.statistics?.viewCount || "0"),
-            publishedAt: item.snippet.publishedAt
-          }]
-        };
-        return topic;
-      });
-      
-      return new Response(
-        JSON.stringify({ 
-          topics: videoTopics,
-          region,
-          source: "videos"
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    // Combine extracted topics with trending videos
+    const topics = Array.from(topicsFromTitles).slice(0, 10).map((topic, i) => {
+      return {
+        title: topic,
+        value: 10000 - (i * 800),
+        relatedVideos: trendingTopics.filter((video) => 
+          video.title.toLowerCase().includes(topic.toLowerCase())
+        ).slice(0, 3)
+      };
+    });
     
     return new Response(
       JSON.stringify({ 
-        topics: topTopics,
-        region,
-        source: "keywords" 
+        topics: topics.length > 0 ? topics : trendingTopics,
+        region 
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
@@ -167,27 +135,13 @@ serve(async (req) => {
   } catch (error) {
     console.error("Error in trending-topics function:", error);
     
-    // Provide fallback data when API fails
-    const fallbackTopics = [
-      { title: "YouTube Shorts", value: 9500, category: "Conteúdo" },
-      { title: "Monetização", value: 9000, category: "Negócios" },
-      { title: "Tutorial", value: 8500, category: "Educação" },
-      { title: "Análise", value: 8000, category: "Opinião" },
-      { title: "Reação", value: 7500, category: "Entretenimento" },
-      { title: "Algoritmo", value: 7000, category: "Tecnologia" },
-      { title: "Nicho", value: 6500, category: "Estratégia" },
-      { title: "Crescimento", value: 6000, category: "Marketing" },
-      { title: "Engajamento", value: 5500, category: "Métricas" },
-      { title: "Thumbnail", value: 5000, category: "Design" }
-    ];
-    
     return new Response(
       JSON.stringify({ 
-        topics: fallbackTopics,
-        region: "fallback",
-        error: error.message
+        error: "Falha ao buscar tópicos em alta",
+        details: error.message 
       }),
       { 
+        status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     );

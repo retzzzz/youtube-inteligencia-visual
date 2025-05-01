@@ -1,19 +1,19 @@
 
-import React, { useEffect, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
+import Header from '@/components/Header';
 import SearchForm from '@/components/SearchForm';
 import { useYouTubeSearch } from '@/hooks/useYouTubeSearch';
 import ResultsSection from '@/components/ResultsSection';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { useEffect, useState } from 'react';
 import ApiKeyHeader from '@/components/search/ApiKeyHeader';
 import ErrorDisplay from '@/components/search/ErrorDisplay';
 import LoadingAndEmptyStates from '@/components/search/LoadingAndEmptyStates';
 import NewKeyNotice from '@/components/search/NewKeyNotice';
 import { markKeyAsNotNew } from '@/services/youtube/validators/key-validator';
-import MainLayout from '@/components/layout/MainLayout';
-import ContentArea from '@/components/layout/ContentArea';
+import Footer from '@/components/Footer';
 
 const Search = () => {
   const { 
@@ -67,8 +67,9 @@ const Search = () => {
 
   if (!youtubeApiKey) {
     return (
-      <MainLayout>
-        <ContentArea title="Pesquisa Avançada">
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-grow w-full px-4 md:px-8 py-6 mb-8">
           <Alert variant="destructive" className="mt-8 shadow-lg">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
@@ -82,14 +83,18 @@ const Search = () => {
               </Button>
             </AlertDescription>
           </Alert>
-        </ContentArea>
-      </MainLayout>
+        </main>
+        <Footer />
+      </div>
     );
   }
 
   return (
-    <MainLayout>
-      <ContentArea title="Pesquisa Avançada">
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      
+      <main className="flex-grow w-full px-4 md:px-8 py-6 mb-8">
+        <h2 className="text-2xl font-bold mb-6">Pesquisa Avançada</h2>
         <SearchForm onSearch={(params) => handleSearch(params, forceNotNew)} isLoading={isLoading} />
         
         <NewKeyNotice 
@@ -121,8 +126,10 @@ const Search = () => {
           hasSearchParams={!!searchParams}
           error={error}
         />
-      </ContentArea>
-    </MainLayout>
+      </main>
+      
+      <Footer />
+    </div>
   );
 };
 
