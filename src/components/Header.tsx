@@ -5,7 +5,6 @@ import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { LogOut, Youtube, Clock, BookOpen } from 'lucide-react';
-import { SubscriptionBanner } from './subscription/SubscriptionBanner';
 import { subscriptionService } from '@/services/subscription';
 
 const Header = () => {
@@ -88,8 +87,6 @@ const Header = () => {
           </nav>
         </div>
       </div>
-      
-      {user && subscription && <div className="px-4 md:px-8 mt-4"><SubscriptionBanner /></div>}
     </header>
   );
 };

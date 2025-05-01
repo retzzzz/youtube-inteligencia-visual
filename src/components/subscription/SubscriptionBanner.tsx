@@ -10,8 +10,18 @@ import { useLocation, useNavigate } from 'react-router-dom';
 export const SubscriptionBanner: React.FC = () => {
   const { isLoggedIn, subscription } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Check if we should hide the banner based on URL parameter
+  if (location.search.includes('forceHideBadge=true')) {
+    console.log("Banner hidden due to forceHideBadge parameter");
+    return null;
+  }
+  
+  console.log("SubscriptionBanner rendering with:", { isLoggedIn, subscription });
   
   if (!isLoggedIn || !subscription) {
+    console.log("No login or subscription, not showing banner");
     return null;
   }
   
@@ -62,6 +72,12 @@ export const SubscriptionBanner: React.FC = () => {
       ? subscriptionService.getDaysRemaining(subscription.trialEnd)
       : 0;
     
+    const formattedDate = subscription.trialEnd 
+      ? subscriptionService.formatEndDate(subscription.trialEnd) 
+      : '';
+    
+    console.log("Trial info:", { daysLeft, formattedDate });
+    
     // Sempre mostrar o banner do trial, independente dos dias restantes
     return (
       <Alert className="bg-blue-50 border-blue-200 mb-4">
@@ -69,7 +85,7 @@ export const SubscriptionBanner: React.FC = () => {
         <AlertDescription className="text-blue-700 flex items-center justify-between w-full">
           <span>
             {daysLeft > 0 
-              ? `Seu período de avaliação gratuita termina em ${daysLeft} ${daysLeft === 1 ? 'dia' : 'dias'} (${subscription.trialEnd ? subscriptionService.formatEndDate(subscription.trialEnd) : ''})`
+              ? `Seu período de avaliação gratuita termina em ${daysLeft} ${daysLeft === 1 ? 'dia' : 'dias'} (${formattedDate})`
               : 'Seu período de avaliação gratuita terminou hoje'}
           </span>
           <Button 
