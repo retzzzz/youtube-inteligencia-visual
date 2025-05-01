@@ -12,7 +12,7 @@ interface MainLayoutProps {
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
-  const { isLoggedIn, subscription } = useAuth();
+  const { isLoggedIn } = useAuth();
   
   // Add click event logging to help debug
   const handleMainLayoutClick = (e: React.MouseEvent) => {
@@ -26,12 +26,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       style={{ isolation: "isolate" }} // Creates a stacking context
     >
       <Header />
+      {isLoggedIn && (
+        <div className="w-full px-4 md:px-8">
+          <SubscriptionBanner />
+        </div>
+      )}
       <div className="flex-grow w-full px-4 md:px-8 py-6 mb-8 z-0">
-        {isLoggedIn && subscription && (
-          <div className="mb-6">
-            <SubscriptionBanner />
-          </div>
-        )}
         {children}
       </div>
       <Footer />

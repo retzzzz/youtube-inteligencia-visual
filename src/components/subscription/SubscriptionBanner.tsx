@@ -12,17 +12,45 @@ export const SubscriptionBanner: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Check if we should hide the banner based on URL parameter
-  if (location.search.includes('forceHideBadge=true')) {
-    console.log("Banner hidden due to forceHideBadge parameter");
+  console.log("SubscriptionBanner rendering with:", { isLoggedIn, subscription });
+  
+  if (!isLoggedIn) {
+    console.log("Not logged in, not showing banner");
     return null;
   }
   
-  console.log("SubscriptionBanner rendering with:", { isLoggedIn, subscription });
-  
-  if (!isLoggedIn || !subscription) {
-    console.log("No login or subscription, not showing banner");
-    return null;
+  // Always show trial banner, even if subscription is null
+  // This ensures users always see their trial status
+  if (!subscription || subscription.isTrialing) {
+    const daysLeft = subscription?.trialEnd 
+      ? subscriptionService.getDaysRemaining(subscription.trialEnd)
+      : 7; // Default to 7 days if no subscription data yet
+    
+    const formattedDate = subscription?.trialEnd 
+      ? subscriptionService.formatEndDate(subscription.trialEnd) 
+      : '';
+    
+    console.log("Trial info:", { daysLeft, formattedDate });
+    
+    return (
+      <Alert className="bg-blue-50 border-blue-200 mb-4">
+        <Clock className="h-4 w-4 text-blue-500 mr-2" />
+        <AlertDescription className="text-blue-700 flex items-center justify-between w-full">
+          <span>
+            {daysLeft > 0 
+              ? `Seu período de avaliação gratuita termina em ${daysLeft} ${daysLeft === 1 ? 'dia' : 'dias'} (${formattedDate})`
+              : 'Seu período de avaliação gratuita terminou hoje'}
+          </span>
+          <Button 
+            className="ml-2" 
+            onClick={() => navigate('/subscribe')}
+          >
+            <CreditCard className="h-4 w-4 mr-2" />
+            Assinar Agora
+          </Button>
+        </AlertDescription>
+      </Alert>
+    );
   }
   
   // Trial expirado - mostrar banner
@@ -60,40 +88,6 @@ export const SubscriptionBanner: React.FC = () => {
             onClick={() => navigate('/subscribe')}
           >
             Gerenciar Assinatura
-          </Button>
-        </AlertDescription>
-      </Alert>
-    );
-  }
-  
-  // Usuário está em período de teste
-  if (subscription.isTrialing) {
-    const daysLeft = subscription.trialEnd 
-      ? subscriptionService.getDaysRemaining(subscription.trialEnd)
-      : 0;
-    
-    const formattedDate = subscription.trialEnd 
-      ? subscriptionService.formatEndDate(subscription.trialEnd) 
-      : '';
-    
-    console.log("Trial info:", { daysLeft, formattedDate });
-    
-    // Sempre mostrar o banner do trial, independente dos dias restantes
-    return (
-      <Alert className="bg-blue-50 border-blue-200 mb-4">
-        <Clock className="h-4 w-4 text-blue-500 mr-2" />
-        <AlertDescription className="text-blue-700 flex items-center justify-between w-full">
-          <span>
-            {daysLeft > 0 
-              ? `Seu período de avaliação gratuita termina em ${daysLeft} ${daysLeft === 1 ? 'dia' : 'dias'} (${formattedDate})`
-              : 'Seu período de avaliação gratuita terminou hoje'}
-          </span>
-          <Button 
-            className="ml-2" 
-            onClick={() => navigate('/subscribe')}
-          >
-            <CreditCard className="h-4 w-4 mr-2" />
-            Assinar Agora
           </Button>
         </AlertDescription>
       </Alert>
