@@ -11,6 +11,11 @@ const RelatedVideos: React.FC<RelatedVideosProps> = ({ topic }) => {
     return null;
   }
 
+  const handleVideoClick = (videoId: string, videoTitle: string) => {
+    console.log("Video clicked:", videoId, videoTitle);
+    // Implementação de rastreamento ou lógica adicional se necessário
+  };
+
   return (
     <div className="pt-2">
       <h3 className="text-sm font-medium mb-2">Vídeos populares sobre "{topic.title}"</h3>
@@ -22,6 +27,7 @@ const RelatedVideos: React.FC<RelatedVideosProps> = ({ topic }) => {
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-start gap-2 p-2 rounded-md hover:bg-white/5 transition-colors"
+            onClick={() => handleVideoClick(video.id, video.title)}
           >
             <div className="flex-shrink-0 w-16 h-10 bg-gray-800 rounded overflow-hidden">
               {video.thumbnail && (

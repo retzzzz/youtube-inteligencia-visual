@@ -35,7 +35,7 @@ function App() {
   return (
     <AuthProvider>
       <LayoutProvider>
-        <div className="flex flex-col min-h-screen w-screen max-w-none">
+        <div className="flex flex-col min-h-screen max-w-none">
           <div className="flex-grow">
             <Routes>
               {/* Public routes */}
@@ -72,8 +72,8 @@ function App() {
               </Route>
             </Routes>
           </div>
+          <Toaster />
         </div>
-        <Toaster />
       </LayoutProvider>
     </AuthProvider>
   );

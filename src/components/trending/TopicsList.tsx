@@ -14,6 +14,11 @@ const TopicsList: React.FC<TopicsListProps> = ({
   selectedTopic, 
   onSelectTopic 
 }) => {
+  const handleTopicClick = (index: number) => {
+    console.log("Topic badge clicked:", index);
+    onSelectTopic(index);
+  };
+
   return (
     <div className="flex flex-wrap gap-2">
       {topics.slice(0, 10).map((topic, index) => (
@@ -24,8 +29,9 @@ const TopicsList: React.FC<TopicsListProps> = ({
               ? 'bg-blue-500/40 text-blue-100 border-blue-400' 
               : 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border-blue-500/30'
           } cursor-pointer flex items-center gap-1 transition-colors`}
-          onClick={() => onSelectTopic(index)}
+          onClick={() => handleTopicClick(index)}
           role="button"
+          tabIndex={0}
         >
           <span className="text-xs font-normal">{index + 1}</span>
           <span>{topic.title}</span>

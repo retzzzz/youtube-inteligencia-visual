@@ -9,13 +9,21 @@ interface SearchTopicButtonProps {
 }
 
 const SearchTopicButton: React.FC<SearchTopicButtonProps> = ({ topic, onSearch }) => {
+  const handleSearchClick = () => {
+    console.log("Search button clicked for topic:", topic);
+    if (topic) {
+      onSearch(topic);
+    }
+  };
+
   return (
     <div className="flex items-center justify-center pt-2">
       <Button 
         variant="outline" 
         size="sm" 
         className="bg-blue-900/20 border-blue-700/30 hover:bg-blue-900/40"
-        onClick={() => onSearch(topic)}
+        onClick={handleSearchClick}
+        type="button"
       >
         <Search className="h-3.5 w-3.5 mr-1" />
         Pesquisar "{topic || "YouTube"}"

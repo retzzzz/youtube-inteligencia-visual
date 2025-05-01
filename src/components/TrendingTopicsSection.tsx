@@ -80,7 +80,6 @@ const TrendingTopicsSection = () => {
   };
 
   const handleSearchTopic = (topic: string) => {
-    // Adiciona console.log para debugar
     console.log("Searching topic:", topic);
     // Navigate to the search page with the topic pre-filled
     window.location.href = `/search?keywords=${encodeURIComponent(topic)}`;
@@ -97,7 +96,7 @@ const TrendingTopicsSection = () => {
   };
 
   return (
-    <Card className="bg-gradient-to-b from-[#141b41]/50 to-[#1a1f40]/50 border-none shadow-lg overflow-hidden">
+    <Card className="bg-gradient-to-b from-[#141b41]/50 to-[#1a1f40]/50 border-none shadow-lg">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
