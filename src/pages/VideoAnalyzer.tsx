@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import MainLayout from "@/components/layout/MainLayout";
+import SidebarLayout from "@/components/layout/SidebarLayout";
 import ContentArea from "@/components/layout/ContentArea";
 import YoutubeAnalyzerForm from "@/components/YoutubeAnalyzerForm";
 import VideoAnalysisResults from "@/components/VideoAnalysisResults";
@@ -49,7 +49,7 @@ const VideoAnalyzer = () => {
   };
 
   return (
-    <MainLayout>
+    <SidebarLayout>
       <ContentArea>
         <Card className="p-6">
           <h1 className="text-2xl font-bold mb-4">Analisador de Vídeos do YouTube</h1>
@@ -66,7 +66,7 @@ const VideoAnalyzer = () => {
           <VideoAnalysisResults analysis={analysis} />
         )}
       </ContentArea>
-    </MainLayout>
+    </SidebarLayout>
   );
 };
 
