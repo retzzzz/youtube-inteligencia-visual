@@ -28,11 +28,9 @@ export const LayoutProvider: React.FC<LayoutProviderProps> = ({ children }) => {
   };
 
   return (
-    <div style={{ pointerEvents: 'auto' }}>
-      <LayoutContext.Provider value={{ sidebarOpen, toggleSidebar }}>
-        {children}
-      </LayoutContext.Provider>
-    </div>
+    <LayoutContext.Provider value={{ sidebarOpen, toggleSidebar }}>
+      {children}
+    </LayoutContext.Provider>
   );
 };
 

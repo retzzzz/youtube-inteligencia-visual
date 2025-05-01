@@ -1,6 +1,7 @@
 
 import React, { useState } from "react";
-import Header from "@/components/Header";
+import MainLayout from "@/components/layout/MainLayout";
+import ContentArea from "@/components/layout/ContentArea";
 import YoutubeAnalyzerForm from "@/components/YoutubeAnalyzerForm";
 import VideoAnalysisResults from "@/components/VideoAnalysisResults";
 import { Card } from "@/components/ui/card";
@@ -8,8 +9,6 @@ import { VideoAnalysis } from "@/types/youtube-types";
 import { analyzeYoutubeVideo } from "@/services/youtube-analyzer";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import ApiKeyDialog from "@/components/ApiKeyDialog";
-import Footer from "@/components/Footer";
 
 const VideoAnalyzer = () => {
   const [analysis, setAnalysis] = useState<VideoAnalysis | null>(null);
@@ -50,11 +49,8 @@ const VideoAnalyzer = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <ApiKeyDialog />
-      <Header />
-      
-      <main className="flex-grow w-full px-4 md:px-8 py-6 mb-8">
+    <MainLayout>
+      <ContentArea>
         <Card className="p-6">
           <h1 className="text-2xl font-bold mb-4">Analisador de Vídeos do YouTube</h1>
           
@@ -69,10 +65,8 @@ const VideoAnalyzer = () => {
         {analysis && (
           <VideoAnalysisResults analysis={analysis} />
         )}
-      </main>
-      
-      <Footer />
-    </div>
+      </ContentArea>
+    </MainLayout>
   );
 };
 
