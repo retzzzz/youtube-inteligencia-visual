@@ -60,7 +60,7 @@ export const SubscriptionBanner: React.FC = () => {
   if (subscription.isTrialing) {
     const daysLeft = subscription.trialEnd 
       ? subscriptionService.getDaysRemaining(subscription.trialEnd)
-      : 7;
+      : 0;
     
     // Sempre mostrar o banner do trial, independente dos dias restantes
     return (

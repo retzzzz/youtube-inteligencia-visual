@@ -30,35 +30,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const subscriptionDetails = await fetchSubscriptionDetails();
       console.log("Dados da assinatura obtidos:", subscriptionDetails);
+      
       if (subscriptionDetails) {
-        // Garantir que todo usuário novo tenha o período de trial (7 dias)
-        // Se não houver dados de assinatura, assume-se que é um usuário em trial
-        if (!subscriptionDetails.isTrialing && !subscriptionDetails.isActive) {
-          // Definir como usuário em trial por padrão
-          subscriptionDetails.isTrialing = true;
-          
-          // Adicionar 7 dias à data atual para o fim do trial
-          const trialEndDate = new Date();
-          trialEndDate.setDate(trialEndDate.getDate() + 7);
-          subscriptionDetails.trialEnd = trialEndDate;
-          
-          console.log("Período de trial configurado automaticamente:", subscriptionDetails);
-        }
-        
         setSubscription(subscriptionDetails);
       } else {
-        // Se não tiver dados de assinatura, criar um período de trial por padrão
-        const defaultTrial = {
-          isActive: false,
-          isTrialing: true,
-          trialEnd: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 dias a partir de agora
-          subscriptionEnd: null,
-          planName: "Trial",
-          price: 0
-        };
-        
-        console.log("Criando período de trial padrão:", defaultTrial);
-        setSubscription(defaultTrial);
+        console.log("Nenhum dado de assinatura encontrado para o usuário.");
       }
     } catch (error) {
       console.error("Erro ao verificar assinatura:", error);

@@ -22,6 +22,7 @@ export interface SubscriptionDetails {
   subscriptionEnd: Date | null;
   planName: string;
   price: number;
+  trialStartDate: Date | null; // Adicionando data de início do trial
 }
 
 export const subscriptionService = {
@@ -54,12 +55,40 @@ export const subscriptionService = {
       }
       
       if (!data) {
-        return null;
+        // Se não existirem dados na tabela de assinaturas, verificamos a data de criação do usuário
+        const { data: userData, error: userError } = await supabase
+          .from('auth.users')
+          .select('created_at')
+          .eq('id', userId)
+          .single();
+          
+        if (userError || !userData) {
+          console.error("Error fetching user data:", userError);
+          return null;
+        }
+        
+        // Definir o trial baseado na data de criação do usuário
+        const createdAt = new Date(userData.created_at);
+        const trialEndDate = new Date(createdAt);
+        trialEndDate.setDate(createdAt.getDate() + 7); // Adiciona 7 dias à data de criação
+        
+        console.log("Criando assinatura de trial baseada na data de criação:", createdAt);
+        
+        return {
+          isActive: true,
+          isTrialing: true,
+          trialEnd: trialEndDate,
+          subscriptionEnd: null,
+          planName: "Trial",
+          price: 0,
+          trialStartDate: createdAt
+        };
       }
       
       const now = new Date();
       const trialEnd = data.trial_end ? new Date(data.trial_end) : null;
       const subscriptionEnd = data.subscription_end ? new Date(data.subscription_end) : null;
+      const trialStart = data.trial_start ? new Date(data.trial_start) : null;
       
       // Check if in trial period
       const isTrialing = trialEnd ? now < trialEnd : false;
@@ -73,7 +102,8 @@ export const subscriptionService = {
         trialEnd,
         subscriptionEnd,
         planName: data.plan_name,
-        price: data.price
+        price: data.price,
+        trialStartDate: trialStart
       };
     } catch (error) {
       console.error("Error in getCurrentSubscription:", error);
@@ -141,7 +171,14 @@ export const subscriptionService = {
     if (!endDate) return 0;
     
     const now = new Date();
-    const diffTime = endDate.getTime() - now.getTime();
+    
+    // Resetar horas, minutos e segundos para comparar apenas datas
+    now.setHours(0, 0, 0, 0);
+    const endDateCopy = new Date(endDate);
+    endDateCopy.setHours(0, 0, 0, 0);
+    
+    // Calcular a diferença em dias
+    const diffTime = endDateCopy.getTime() - now.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
     return Math.max(0, diffDays);
