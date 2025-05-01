@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Clock, CreditCard, CheckCircle, AlertTriangle } from 'lucide-react';
@@ -8,30 +8,73 @@ import { subscriptionService } from '@/services/subscription';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 export const SubscriptionBanner: React.FC = () => {
-  const { isLoggedIn, subscription } = useAuth();
+  const { isLoggedIn, subscription, checkSubscription } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
-  console.log("SubscriptionBanner rendering with:", { isLoggedIn, subscription });
+  // Ensure we have subscription data
+  useEffect(() => {
+    console.log("SubscriptionBanner mounted, current subscription:", subscription);
+    
+    if (isLoggedIn && !subscription) {
+      console.log("No subscription data, checking subscription...");
+      checkSubscription();
+    }
+  }, [isLoggedIn, subscription, checkSubscription]);
+  
+  // Forced debug log to see what's happening
+  console.log("SubscriptionBanner rendering with:", { 
+    isLoggedIn, 
+    subscription,
+    path: location.pathname
+  });
   
   if (!isLoggedIn) {
     console.log("Not logged in, not showing banner");
     return null;
   }
   
-  // Always show trial banner, even if subscription is null
-  // This ensures users always see their trial status
-  if (!subscription || subscription.isTrialing) {
-    const daysLeft = subscription?.trialEnd 
-      ? subscriptionService.getDaysRemaining(subscription.trialEnd)
-      : 7; // Default to 7 days if no subscription data yet
+  // Default trial information when subscription data is missing or loading
+  // Always show something to the user when they're logged in
+  if (!subscription) {
+    console.log("No subscription data yet, showing default trial banner");
     
-    const formattedDate = subscription?.trialEnd 
+    const now = new Date();
+    const defaultTrialEnd = new Date(now);
+    defaultTrialEnd.setDate(now.getDate() + 7); // Default 7-day trial
+    
+    return (
+      <Alert className="bg-blue-50 border-blue-200 mb-4">
+        <Clock className="h-4 w-4 text-blue-500 mr-2" />
+        <AlertDescription className="text-blue-700 flex items-center justify-between w-full">
+          <span>
+            Seu período de avaliação gratuita está ativo
+          </span>
+          <Button 
+            className="ml-2" 
+            onClick={() => navigate('/subscribe')}
+          >
+            <CreditCard className="h-4 w-4 mr-2" />
+            Assinar Agora
+          </Button>
+        </AlertDescription>
+      </Alert>
+    );
+  }
+  
+  // User is in trial period
+  if (subscription.isTrialing) {
+    const daysLeft = subscription.trialEnd 
+      ? subscriptionService.getDaysRemaining(subscription.trialEnd)
+      : 7; // Default value if trialEnd is missing
+    
+    const formattedDate = subscription.trialEnd 
       ? subscriptionService.formatEndDate(subscription.trialEnd) 
       : '';
     
     console.log("Trial info:", { daysLeft, formattedDate });
     
+    // Show trial banner with days remaining
     return (
       <Alert className="bg-blue-50 border-blue-200 mb-4">
         <Clock className="h-4 w-4 text-blue-500 mr-2" />
@@ -53,14 +96,14 @@ export const SubscriptionBanner: React.FC = () => {
     );
   }
   
-  // Trial expirado - mostrar banner
+  // Trial expired
   if (subscription.isTrialing && subscription.trialEnd && 
       subscriptionService.getDaysRemaining(subscription.trialEnd) <= 0) {
     return (
       <Alert className="bg-red-50 border-red-200 mb-4">
         <AlertTriangle className="h-4 w-4 text-red-500 mr-2" />
-        <AlertDescription className="text-red-700">
-          <span>Seu período de avaliação gratuita terminou. Assine agora para continuar tendo acesso completo a todas as funcionalidades.</span>
+        <AlertDescription className="text-red-700 flex items-center justify-between w-full">
+          <span>Seu período de avaliação gratuita terminou. Assine agora para continuar tendo acesso.</span>
           <Button 
             className="ml-2"
             variant="destructive" 
@@ -74,7 +117,7 @@ export const SubscriptionBanner: React.FC = () => {
     );
   }
   
-  // Usuário tem assinatura paga ativa
+  // User has active paid subscription
   if (subscription.isActive && !subscription.isTrialing) {
     return (
       <Alert className="bg-green-50 border-green-200 mb-4">

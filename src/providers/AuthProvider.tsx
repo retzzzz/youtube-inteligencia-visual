@@ -28,16 +28,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!isLoggedIn) return;
     
     try {
+      console.log("Checking subscription status...");
       const subscriptionDetails = await fetchSubscriptionDetails();
-      console.log("Dados da assinatura obtidos:", subscriptionDetails);
+      console.log("Subscription details retrieved:", subscriptionDetails);
       
-      if (subscriptionDetails) {
-        setSubscription(subscriptionDetails);
-      } else {
-        console.log("Nenhum dado de assinatura encontrado para o usuário.");
+      setSubscription(subscriptionDetails);
+      
+      // Se não houver dados de assinatura, criar um trial padrão
+      if (!subscriptionDetails) {
+        console.log("No subscription found, creating default trial");
+        const now = new Date();
+        const trialEnd = new Date(now);
+        trialEnd.setDate(now.getDate() + 7); // 7 dias de trial
+        
+        setSubscription({
+          isActive: true,
+          isTrialing: true,
+          trialEnd: trialEnd,
+          subscriptionEnd: null,
+          planName: "Trial",
+          price: 0,
+          trialStartDate: now
+        });
       }
     } catch (error) {
       console.error("Erro ao verificar assinatura:", error);
+      
+      // Definir um estado padrão de trial mesmo em caso de erro
+      console.log("Setting default trial subscription due to error");
+      const now = new Date();
+      const trialEnd = new Date(now);
+      trialEnd.setDate(now.getDate() + 7);
+      
+      setSubscription({
+        isActive: true,
+        isTrialing: true,
+        trialEnd: trialEnd,
+        subscriptionEnd: null,
+        planName: "Trial",
+        price: 0,
+        trialStartDate: now
+      });
     }
   };
 
@@ -128,6 +159,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
           // Verificar assinatura
           await checkSubscription();
+        } else {
+          console.log("No active session found");
         }
       } catch (error) {
         console.error("Erro ao inicializar autenticação:", error);
