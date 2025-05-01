@@ -75,16 +75,25 @@ const TrendingTopicsSection = () => {
   }, [selectedRegion]);
 
   const handleRegionChange = (region: string) => {
+    console.log("Changing region to:", region);
     setSelectedRegion(region);
   };
 
   const handleSearchTopic = (topic: string) => {
+    // Adiciona console.log para debugar
+    console.log("Searching topic:", topic);
     // Navigate to the search page with the topic pre-filled
     window.location.href = `/search?keywords=${encodeURIComponent(topic)}`;
   };
 
   const handleRefresh = () => {
+    console.log("Refreshing topics");
     fetchTrendingTopics(selectedRegion);
+  };
+
+  const handleTopicSelect = (index: number) => {
+    console.log("Selected topic index:", index);
+    setSelectedTopic(index);
   };
 
   return (
@@ -114,7 +123,7 @@ const TrendingTopicsSection = () => {
             <TopicsList 
               topics={trendingTopics} 
               selectedTopic={selectedTopic} 
-              onSelectTopic={setSelectedTopic} 
+              onSelectTopic={handleTopicSelect} 
             />
             
             {trendingTopics.length > 0 && <CreatorTip />}

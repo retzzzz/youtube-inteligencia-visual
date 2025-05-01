@@ -11,9 +11,9 @@ interface MainLayoutProps {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
-    <div className="flex flex-col min-h-screen" style={{ pointerEvents: 'auto' }}>
+    <div className="flex flex-col min-h-screen">
       <Header />
-      <div className="flex-grow w-full px-4 md:px-8 py-6 mb-8" style={{ pointerEvents: 'auto' }}>
+      <div className="flex-grow w-full px-4 md:px-8 py-6 mb-8">
         {children}
       </div>
       <Footer />

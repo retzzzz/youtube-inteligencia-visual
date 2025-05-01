@@ -24,7 +24,7 @@ interface SidebarLayoutProps {
 const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="flex w-full min-h-screen" style={{ pointerEvents: 'auto' }}>
+      <div className="flex w-full min-h-screen">
         <Sidebar>
           <SidebarHeader className="flex items-center justify-between px-4 py-2">
             <h2 className="text-lg font-semibold">YTAnalyzerPro</h2>
@@ -37,7 +37,7 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
                 <SidebarMenu>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                      <Link to="/dashboard" style={{ pointerEvents: 'auto' }}>
+                      <Link to="/dashboard">
                         <Home className="mr-2" />
                         <span>Início</span>
                       </Link>
@@ -45,7 +45,7 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
                   </SidebarMenuItem>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                      <Link to="/search" style={{ pointerEvents: 'auto' }}>
+                      <Link to="/search">
                         <Search className="mr-2" />
                         <span>Pesquisar</span>
                       </Link>
@@ -53,7 +53,7 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
                   </SidebarMenuItem>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                      <Link to="/video-analyzer" style={{ pointerEvents: 'auto' }}>
+                      <Link to="/video-analyzer">
                         <Film className="mr-2" />
                         <span>Analisar Vídeo</span>
                       </Link>
@@ -61,7 +61,7 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
                   </SidebarMenuItem>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                      <Link to="/title-generator" style={{ pointerEvents: 'auto' }}>
+                      <Link to="/title-generator">
                         <Type className="mr-2" />
                         <span>Títulos</span>
                       </Link>
@@ -69,7 +69,7 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
                   </SidebarMenuItem>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                      <Link to="/script-generator" style={{ pointerEvents: 'auto' }}>
+                      <Link to="/script-generator">
                         <ScrollText className="mr-2" />
                         <span>Roteirizador</span>
                       </Link>
@@ -77,7 +77,7 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
                   </SidebarMenuItem>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                      <Link to="/subnicho-validator" style={{ pointerEvents: 'auto' }}>
+                      <Link to="/subnicho-validator">
                         <FileCheck className="mr-2" />
                         <span>Validador</span>
                       </Link>
@@ -85,7 +85,7 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
                   </SidebarMenuItem>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                      <Link to="/micro-subnicho-analyzer" style={{ pointerEvents: 'auto' }}>
+                      <Link to="/micro-subnicho-analyzer">
                         <Activity className="mr-2" />
                         <span>Micro Subnichos</span>
                       </Link>
@@ -96,7 +96,7 @@ const SidebarLayout: React.FC<SidebarLayoutProps> = ({ children }) => {
             </SidebarGroup>
           </SidebarContent>
         </Sidebar>
-        <SidebarInset style={{ pointerEvents: 'auto' }}>
+        <SidebarInset>
           {children}
         </SidebarInset>
       </div>
