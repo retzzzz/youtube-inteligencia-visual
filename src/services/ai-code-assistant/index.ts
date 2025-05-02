@@ -29,20 +29,28 @@ export const analyzeAndFixCode = async (request: CodeAnalysisRequest): Promise<C
       };
     }
 
-    // Chamar a função edge do Supabase
-    const { data, error } = await supabase.functions.invoke('code-assistant', {
-      body: request
+    // Usando fetch diretamente para chamar a edge function
+    const response = await fetch(`${process.env.VITE_SUPABASE_URL || 'https://idhtutcjkniszcsoyyrj.supabase.co'}/functions/v1/code-assistant`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabase.auth.session()?.access_token || ''}`,
+      },
+      body: JSON.stringify(request)
     });
 
-    if (error) {
-      console.error('Erro ao chamar serviço de IA para correção de código:', error);
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Erro ao chamar serviço de IA para correção de código:', errorData);
       
       return {
         success: false,
         explanation: 'Não foi possível processar a análise do código',
-        error: error.message
+        error: errorData.message || 'Erro na requisição'
       };
     }
+
+    const data = await response.json();
 
     if (data.error) {
       return {

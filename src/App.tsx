@@ -1,41 +1,30 @@
+
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { Auth } from '@supabase/auth-ui-react';
-import { ThemeSupa } from '@supabase/auth-ui-shared';
-import { useUser, useSupabaseClient } from '@supabase/auth-helpers-react';
-import { Account } from './pages/Account';
-import { Home } from './pages/Home';
-import { Pricing } from './pages/Pricing';
-import { Contact } from './pages/Contact';
-import { MainLayout } from './components/layout/MainLayout';
-import { AuthLayout } from './components/layout/AuthLayout';
+import { supabase } from '@/lib/supabase';
+import MainLayout from './components/layout/MainLayout';
 import { fetchSubscriptionDetails } from './utils/authUtils';
 import { SubscriptionDetails } from './services/subscription';
 import { AuthContext } from './contexts/AuthContext';
 import { saveApiKeyToLocalStorage, clearUserFromLocalStorage, createUserFromSession } from './utils/authUtils';
-import { YoutubeSearchPage } from './pages/YoutubeSearchPage';
-import { ScriptGeneratorPage } from './pages/ScriptGeneratorPage';
-import { ApiKeySetup } from './pages/ApiKeySetup';
 import CodeAssistantPage from "./pages/CodeAssistant";
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
-  const user = useUser();
+  const user = supabase.auth.user();
   return user ? children : <Navigate to="/login" />;
 };
 
 function App() {
-  const [supabaseClient] = useSupabaseClient();
-  const user = useUser();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [youtubeApiKey, setYoutubeApiKey] = useState<string | null>(localStorage.getItem('youtubeApiKey'));
   const [needsApiKey, setNeedsApiKey] = useState(false);
-  const [session, setSession] = useState(null);
+  const [session, setSession] = useState<any>(null);
   const [userDetails, setUserDetails] = useState(createUserFromSession(null));
   const [subscription, setSubscription] = useState<SubscriptionDetails | null>(null);
 
   useEffect(() => {
     const initializeAuth = async () => {
-      const { data: { session } } = await supabaseClient.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
       setSession(session);
       setIsLoggedIn(!!session);
       setUserDetails(createUserFromSession(session));
@@ -48,12 +37,16 @@ function App() {
 
     initializeAuth();
 
-    supabaseClient.auth.onAuthStateChange((event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       setIsLoggedIn(event === 'SIGNED_IN');
       setUserDetails(createUserFromSession(session));
     });
-  }, [supabaseClient]);
+
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
+  }, []);
 
   const handleSetYoutubeApiKey = (key: string) => {
     setYoutubeApiKey(key);
@@ -61,7 +54,7 @@ function App() {
   };
 
   const handleLogout = async () => {
-    await supabaseClient.auth.signOut();
+    await supabase.auth.signOut();
     setIsLoggedIn(false);
     clearUserFromLocalStorage();
     setSubscription(null);
@@ -87,62 +80,47 @@ function App() {
       checkSubscription
     }}>
       <Routes>
-        <Route path="/" element={<MainLayout><Home /></MainLayout>} />
-        <Route path="/pricing" element={<MainLayout><Pricing /></MainLayout>} />
-        <Route path="/contact" element={<MainLayout><Contact /></MainLayout>} />
-        <Route path="/youtube-search" element={
-          <PrivateRoute>
-            <MainLayout>
-              <YoutubeSearchPage />
-            </MainLayout>
-          </PrivateRoute>
-        } />
-        <Route path="/script-generator" element={
-          <PrivateRoute>
-            <MainLayout>
-              <ScriptGeneratorPage />
-            </MainLayout>
-          </PrivateRoute>
-        } />
+        <Route path="/" element={<MainLayout><div>Home Page</div></MainLayout>} />
+        <Route path="/pricing" element={<MainLayout><div>Pricing Page</div></MainLayout>} />
+        <Route path="/contact" element={<MainLayout><div>Contact Page</div></MainLayout>} />
         <Route path="/account" element={
           <PrivateRoute>
             <MainLayout>
-              <Account />
+              <div>Account Page</div>
             </MainLayout>
           </PrivateRoute>
         } />
         <Route path="/apikey" element={
           <PrivateRoute>
             <MainLayout>
-              <ApiKeySetup />
+              <div>API Key Setup</div>
             </MainLayout>
           </PrivateRoute>
         } />
         <Route
           path="/login"
           element={
-            <AuthLayout>
-              <Auth
-                supabaseClient={supabaseClient}
-                appearance={{ theme: ThemeSupa }}
-                providers={['google']}
-                redirectTo={`${window.location.origin}/account`}
-              />
-            </AuthLayout>
+            <div className="flex items-center justify-center min-h-screen bg-gray-100">
+              <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow">
+                <h2 className="text-2xl font-bold text-center">Login</h2>
+                <p className="text-center text-gray-600">
+                  Please use the Supabase authentication to log in
+                </p>
+              </div>
+            </div>
           }
         />
         <Route
           path="/register"
           element={
-            <AuthLayout>
-              <Auth
-                supabaseClient={supabaseClient}
-                appearance={{ theme: ThemeSupa }}
-                providers={['google']}
-                redirectTo={`${window.location.origin}/account`}
-                onlyThirdPartyProviders={true}
-              />
-            </AuthLayout>
+            <div className="flex items-center justify-center min-h-screen bg-gray-100">
+              <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow">
+                <h2 className="text-2xl font-bold text-center">Register</h2>
+                <p className="text-center text-gray-600">
+                  Please use the Supabase authentication to register
+                </p>
+              </div>
+            </div>
           }
         />
         {/* Rota para o Assistente de Código */}
