@@ -10,7 +10,17 @@ import { saveApiKeyToLocalStorage, clearUserFromLocalStorage, createUserFromSess
 import CodeAssistantPage from "./pages/CodeAssistant";
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
-  const user = supabase.auth.user();
+  // Fix: Replace deprecated supabase.auth.user() with session check
+  const [user, setUser] = useState(null);
+  
+  useEffect(() => {
+    async function checkUser() {
+      const { data } = await supabase.auth.getSession();
+      setUser(data.session?.user || null);
+    }
+    checkUser();
+  }, []);
+  
   return user ? children : <Navigate to="/login" />;
 };
 

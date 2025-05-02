@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 
 export interface CodeAnalysisRequest {
@@ -29,12 +28,16 @@ export const analyzeAndFixCode = async (request: CodeAnalysisRequest): Promise<C
       };
     }
 
+    // Get the current session using the updated method
+    const { data } = await supabase.auth.getSession();
+    const sessionToken = data.session?.access_token || '';
+
     // Usando fetch diretamente para chamar a edge function
     const response = await fetch(`${process.env.VITE_SUPABASE_URL || 'https://idhtutcjkniszcsoyyrj.supabase.co'}/functions/v1/code-assistant`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${supabase.auth.session()?.access_token || ''}`,
+        'Authorization': `Bearer ${sessionToken}`,
       },
       body: JSON.stringify(request)
     });
