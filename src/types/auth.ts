@@ -18,5 +18,5 @@ export type AuthContextType = {
   user: User | null;
   session: Session | null;
   subscription: SubscriptionDetails | null;
-  checkSubscription: () => Promise<void>;
+  checkSubscription: () => Promise<SubscriptionDetails | null>;
 };
