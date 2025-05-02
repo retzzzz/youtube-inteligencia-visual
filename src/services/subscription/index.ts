@@ -12,5 +12,5 @@ export const subscriptionService = {
 };
 
 // Export types and individual functions for direct imports
-export { SubscriptionDetails } from './types';
+export type { SubscriptionDetails } from './types';
 export { getDaysRemaining, formatEndDate } from './date-utils';
