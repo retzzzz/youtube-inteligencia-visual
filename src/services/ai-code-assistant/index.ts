@@ -1,3 +1,4 @@
+
 import { supabase } from '@/lib/supabase';
 
 export interface CodeAnalysisRequest {
@@ -29,8 +30,8 @@ export const analyzeAndFixCode = async (request: CodeAnalysisRequest): Promise<C
     }
 
     // Get the current session using the updated method
-    const { data } = await supabase.auth.getSession();
-    const sessionToken = data.session?.access_token || '';
+    const { data: sessionData } = await supabase.auth.getSession();
+    const sessionToken = sessionData.session?.access_token || '';
 
     // Usando fetch diretamente para chamar a edge function
     const response = await fetch(`${process.env.VITE_SUPABASE_URL || 'https://idhtutcjkniszcsoyyrj.supabase.co'}/functions/v1/code-assistant`, {
@@ -53,20 +54,20 @@ export const analyzeAndFixCode = async (request: CodeAnalysisRequest): Promise<C
       };
     }
 
-    const data = await response.json();
+    const responseData = await response.json();
 
-    if (data.error) {
+    if (responseData.error) {
       return {
         success: false,
         explanation: 'Erro ao analisar código',
-        error: data.error
+        error: responseData.error
       };
     }
 
     return {
       success: true,
-      correctedCode: data.correctedCode,
-      explanation: data.explanation
+      correctedCode: responseData.correctedCode,
+      explanation: responseData.explanation
     };
   } catch (error) {
     console.error('Erro na análise de código:', error);
