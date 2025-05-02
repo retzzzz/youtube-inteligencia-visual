@@ -38,9 +38,8 @@ function App() {
         <div className="flex flex-col min-h-screen max-w-none">
           <div className="flex-grow">
             <Routes>
-              {/* Public routes */}
-              <Route path="/" element={<Login />} />
-              <Route path="/landing" element={<LandingPage />} />
+              {/* Public routes - Landing page is now the main route */}
+              <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/subscribe" element={<Subscribe />} />
               <Route path="/payment-success" element={<PaymentSuccess />} />
